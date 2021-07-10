@@ -1,1 +1,2 @@
-secret.env filter=ageencrypt
+data/fin/fin.prototext  filter=ageencrypt
+secret.env              filter=ageencrypt
