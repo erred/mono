@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: singlepage
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`singlepage.seankhliao.com`)
+    kind: Rule
+    services:
+    - name: singlepage
+      port: 80
+  tls:
+    certResolver: default

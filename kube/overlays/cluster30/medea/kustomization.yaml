@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+nameSuffix: -medea
+namespace: medea
+bases:
+  - ../../../base/singlepage
+resources:
+  - namespace.k8s.yaml
+patches:
+  - target:
+      kind: IngressRoute
+      name: singlepage
+    patch: |
+      - op: replace
+        path: /spec/routes/0/match
+        value: Host(`medea.seankhliao.com`)
+      - op: replace
+        path: /spec/routes/0/services/0/name
+        value: singlepage-medea
+  - target:
+      kind: Deployment
+      name: singlepage
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/args/0
+        value: "-canonical=https://medea.seankhliao.com"
+configMapGenerator:
+  - name: singlepage
+    files:
+      - index.md
+images:
+  - name: docker.seankhliao.com/singlepage
+    newName: europe-north1-docker.pkg.dev/com-seankhliao/kluster/singlepage

@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package seankhliao.fin.v1alpha1;
+
+option go_package = "go.seankhliao.com/mono/proto/seankhliao/fin/v1alpha1;fin";
+
+message Transaction {
+  enum Category {
+    UNKNOWN = 0;
+
+    CASH = 10;
+    ING = 11;
+    TRANSFERWISE = 12;
+    REVOLUT = 13;
+    DEGIRO = 14;
+    BITTREX = 15;
+
+    SALARY = 20;
+    ALLOWANCE = 21;
+    CREDIT = 23;
+    IN_OTHER = 24;
+
+    FOOD = 30;
+    TRANSPORT = 31;
+    HOUSING = 32;
+    TECH = 33;
+    FINANCE = 34;
+    HEALTH = 35;
+    CLOTHING = 36;
+    ENTERTAINMENT = 37;
+    PERSONAL = 38;
+    TRAVEL = 39;
+    SOCIAL = 40;
+    EDUCATION = 41;
+  }
+
+  int64 amount = 1;
+  Category src = 2;
+  Category dst = 3;
+  string note = 4;
+}
+
+message Month {
+  int32 year = 1;
+  int32 month = 2;
+  repeated Transaction transactions = 3;
+  // Summary summary = 4;
+}
+
+message All {
+  string name = 1;
+  string currency = 2;
+  repeated Month months = 3;
+}

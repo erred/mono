@@ -1,0 +1,6 @@
+*
+!blog/
+!go.mod
+!go.sum
+!go/
+!proto/

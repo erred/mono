@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vanity
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  template:
+    spec:
+      containers:
+        - args:
+            - -otlp.endpoint=otelcol.otelcol.svc.cluster.local:4317
+          name: vanity
+          image: docker.seankhliao.com/vanity:latest
+          env:
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: http
+              containerPort: 8080
+      enableServiceLinks: false
+      serviceAccountName: vanity
+      terminationGracePeriodSeconds: 10

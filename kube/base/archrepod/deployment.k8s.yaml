@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: archrepod
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  template:
+    spec:
+      containers:
+        - args:
+            - -otlp.endpoint=otelcol.otelcol.svc.cluster.local:4317
+            - -data=/data
+          name: archrepod
+          image: docker.seankhliao.com/archrepod:latest
+          env:
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          envFrom:
+            - secretRef:
+                name: archrepod
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: grpc
+              containerPort: 8081
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      enableServiceLinks: false
+      serviceAccountName: archrepod
+      terminationGracePeriodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: archrepod

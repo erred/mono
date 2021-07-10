@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vanity
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`vanity.seankhliao.com`)
+    kind: Rule
+    services:
+    - name: vanity
+      port: 80
+  tls:
+    certResolver: default
