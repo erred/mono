@@ -1,0 +1,33 @@
+substitutions:
+  _IMG: vanity
+  _REG: us-central1-docker.pkg.dev/com-seankhliao/run
+
+steps:
+  - id: build-push
+    name: gcr.io/kaniko-project/executor:latest
+    args:
+      - -c=.
+      - -f=Dockerfile
+      - -d=$_REG/$_IMG:latest
+      - --cache=true
+      - --reproducible
+      - --single-snapshot
+      - --skip-unused-stages
+      - --target=vanity
+      - --use-new-run
+
+  - id: deploy
+    name: gcr.io/cloud-builders/gcloud:latest
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - vanity
+      - --image=$_REG/$_IMG:latest
+      - --region=us-central1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --cpu=1
+      - --memory=128Mi
+      - --timeout=10s
+      - --async
