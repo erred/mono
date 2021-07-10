@@ -8,7 +8,3 @@ resources:
   - persistentvolumeclaim.k8s.yaml
   - service.k8s.yaml
   - serviceaccount.k8s.yaml
-secretGenerator:
-  - name: archrepod
-    envs:
-      - secret.env

@@ -5,6 +5,20 @@ bases:
   - ../../../base/archrepod
 resources:
   - namespace.k8s.yaml
+patches:
+  - target:
+      kind: Deployment
+      name: archrepod
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom
+        value:
+          - secretRef:
+              name: archrepod
+secretGenerator:
+  - name: archrepod
+    envs:
+      - secret.env
 images:
   - name: docker.seankhliao.com/archrepod
     newName: europe-north1-docker.pkg.dev/com-seankhliao/kluster/archrepod
