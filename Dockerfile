@@ -17,6 +17,10 @@ FROM gcr.io/distroless/static AS feed-agg
 COPY --from=build /bin/feed-agg /bin/feed-agg
 ENTRYPOINT ["/bin/feed-agg"]
 
+FROM gcr.io/distroless/static AS ghdefaults
+COPY --from=build /bin/ghdefaults /bin/ghdefaults
+ENTRYPOINT ["/bin/ghdefaults"]
+
 FROM gcr.io/distroless/static AS paste
 COPY --from=build /bin/paste /bin/paste
 ENTRYPOINT ["/bin/paste"]

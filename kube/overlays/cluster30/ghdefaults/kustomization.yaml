@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ghdefaults
+bases:
+  - ../../../base/ghdefaults
+resources:
+  - namespace.k8s.yaml
+patches:
+  - target:
+      kind: Deployment
+      name: ghdefaults
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/args/0
+        value: "-app-id=126001"
+secretGenerator:
+  - name: ghdefaults
+    files:
+      - private-key
+      - webhook-secret
+images:
+  - name: docker.seankhliao.com/ghdefaults
+    newName: europe-north1-docker.pkg.dev/com-seankhliao/kluster/ghdefaults

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ghdefaults
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  template:
+    spec:
+      containers:
+        - name: ghdefaults
+          image: docker.seankhliao.com/ghdefaults:latest
+          args:
+            - -otlp.endpoint=otelcol.otelcol.svc.cluster.local:4317
+          env:
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - mountPath: /var/run/secrets/github
+              name: github
+      enableServiceLinks: false
+      serviceAccountName: ghdefaults
+      terminationGracePeriodSeconds: 10
+      volumes:
+        - name: github
+          secret:
+            secretName: ghdefaults
