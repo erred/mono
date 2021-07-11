@@ -11,13 +11,8 @@ spec:
         - name: paste
           image: docker.seankhliao.com/paste:latest
           args:
-            - -otlp.endpoint=otelcol.otelcol.svc.cluster.local:4317
             - -data=/data
-          env:
-            - name: OTEL_SERVICE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
+          env: []
           ports:
             - name: http
               containerPort: 8080

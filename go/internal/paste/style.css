@@ -1,0 +1,51 @@
+#text,
+#buttons {
+  grid-column: 1 / span 5;
+  margin: 1vmin 2vmin 0;
+}
+textarea {
+  width: 100%;
+  height: 60vh;
+  margin: 1vh 0 2vh 0;
+  font-size: 16px;
+  background-color: #303030;
+  color: #eceff1;
+  border: none;
+}
+textarea:focus {
+  outline: 3px solid #404040;
+}
+
+#upload {
+  opacity: 0;
+  width: 0.1px;
+  height: 0.1px;
+  position: absolute;
+}
+#uploadlabel {
+  float: left;
+  display: block;
+  position: relative;
+  cursor: pointer;
+  border: 2px solid #303030;
+  padding: 0.25em 1em;
+}
+#uploadlabel:hover {
+  background-color: #303030;
+  transition: 0.4s;
+}
+input[type="submit"] {
+  background-color: #000;
+  float: right;
+  font: 18px "Inconsolata", monospace;
+  font-weight: 700;
+  padding: 0.25em 1em;
+  color: #a06be0;
+  border: 2px solid #a06be0;
+}
+input[type="submit"]:focus,
+input[type="submit"]:hover {
+  outline: none;
+  background-color: #303030;
+  transition: 0.4s;
+}

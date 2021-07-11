@@ -10,13 +10,8 @@ spec:
       containers:
         - name: ghdefaults
           image: docker.seankhliao.com/ghdefaults:latest
-          args:
-            - -otlp.endpoint=otelcol.otelcol.svc.cluster.local:4317
-          env:
-            - name: OTEL_SERVICE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
+          args: []
+          env: []
           ports:
             - name: http
               containerPort: 8080

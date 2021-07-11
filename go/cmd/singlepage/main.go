@@ -10,6 +10,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel"
 	"go.seankhliao.com/mono/go/render"
 	"go.seankhliao.com/mono/go/webserver"
 	"k8s.io/klog/v2/klogr"
@@ -43,7 +45,7 @@ func main() {
 	webserver.New(ctx, wo).Run(ctx)
 }
 
-func newHttp(ro *render.Options, fn string) (*http.ServeMux, error) {
+func newHttp(ro *render.Options, fn string) (http.Handler, error) {
 	fin, err := os.Open(fn)
 	if err != nil {
 		return nil, fmt.Errorf("open %s: %w", fn, err)
@@ -56,9 +58,24 @@ func newHttp(ro *render.Options, fn string) (*http.ServeMux, error) {
 	}
 	b := buf.Bytes()
 
+	tracer := otel.Tracer("singlepage")
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		ctx, span := tracer.Start(ctx, "handle")
+		defer span.End()
+		l := logr.FromContextOrDiscard(ctx).WithName("singlepage")
+		l = l.WithValues("method", r.Method, "path", r.URL.Path, "user-agent", r.UserAgent())
+
+		if r.URL.Path != "/" {
+			l.Info("redirected")
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
 		w.Write(b)
+		l.Info("served")
 	})
 	return mux, nil
 }

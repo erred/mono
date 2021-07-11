@@ -149,6 +149,6 @@ type errhandler struct {
 
 func (e *errhandler) Handle(err error) {
 	if err != nil {
-		e.l.Error(err, "")
+		e.l.Error(err, "otel error")
 	}
 }

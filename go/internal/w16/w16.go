@@ -1,6 +1,7 @@
-package main
+package w16
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -11,35 +12,34 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
+	"go.seankhliao.com/mono/go/static"
 )
 
-type Http struct {
-	l        logr.Logger
-	f        fs.FS
-	notfound http.Handler
+type server struct {
+	mux *http.ServeMux
+	fs  fs.FS
+	t   trace.Tracer
 }
 
-type HttpMux interface {
-	HandleFunc(string, func(http.ResponseWriter, *http.Request))
-}
-
-func newHttp(l logr.Logger, sitedata fs.FS) (*http.ServeMux, error) {
-	h := &Http{
-		l: l,
-		f: sitedata,
+func New(ctx context.Context) (http.Handler, error) {
+	s := &server{
+		mux: http.NewServeMux(),
+		fs:  static.S,
+		t:   otel.Tracer("w16"),
 	}
-	h.notfound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if regexp.MustCompile(`/blog/\d{4}-\d{2}-\d{2}-.*/`).MatchString(r.URL.Path) {
-			http.Redirect(w, r, "/blog/1"+r.URL.Path[6:], http.StatusMovedPermanently)
-			return
-		}
 
-		w.WriteHeader(http.StatusNotFound)
-		h.serveFile(w, "404.html")
-	})
+	ctx, span := s.t.Start(ctx, "walk-dir")
+	defer span.End()
+	err := fs.WalkDir(s.fs, ".", func(op string, d fs.DirEntry, err error) error {
+		_, span := s.t.Start(ctx, "walk-content", trace.WithAttributes(
+			attribute.String("path", op),
+			attribute.Bool("dir", d.IsDir()),
+		))
+		defer span.End()
 
-	mux := http.NewServeMux()
-	err := fs.WalkDir(h.f, ".", func(op string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
 			return nil
 		}
@@ -47,35 +47,69 @@ func newHttp(l logr.Logger, sitedata fs.FS) (*http.ServeMux, error) {
 		p := canonicalPath(op)
 
 		// l.Info("registering", "path", p)
-		mux.HandleFunc(p, func(w http.ResponseWriter, r *http.Request) {
+		s.mux.HandleFunc(p, func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			ctx, span := s.t.Start(ctx, "serve")
+			defer span.End()
+			l := logr.FromContextOrDiscard(ctx).WithName("servefile")
+			l = l.WithValues("method", r.Method, "path", r.URL.Path, "user-agent", r.UserAgent())
+
 			// handle unknown paths
 			if r.URL.Path != p {
 				l.Error(errors.New("path mismatch"), "not found", "expected", p, "got", r.URL.Path)
-				h.notfound.ServeHTTP(w, r)
+				s.notFoundHandler(w, r)
 				return
 			}
 
 			setHeaders(w, op)
-			h.serveFile(w, op)
+			s.serveFile(ctx, w, op)
+			l.Info("served")
 		})
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("newHttp: walk fs: %w", err)
+		return nil, fmt.Errorf("walk embedded fs: %w", err)
 	}
-	return mux, nil
+
+	return s, nil
 }
 
-func (h Http) serveFile(w http.ResponseWriter, p string) {
-	file, err := h.f.Open(p)
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	corsAllowAll(s.mux).ServeHTTP(w, r)
+}
+
+func (s *server) notFoundHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	ctx, span := s.t.Start(ctx, "not-found")
+	defer span.End()
+	l := logr.FromContextOrDiscard(ctx).WithName("notfound")
+	l = l.WithValues("path", r.URL.Path)
+
+	if regexp.MustCompile(`/blog/\d{4}-\d{2}-\d{2}-.*/`).MatchString(r.URL.Path) {
+		l.Info("redirected")
+		http.Redirect(w, r, "/blog/1"+r.URL.Path[6:], http.StatusMovedPermanently)
+		return
+	}
+
+	w.WriteHeader(http.StatusNotFound)
+	s.serveFile(ctx, w, "404.html")
+	l.Info("not found")
+}
+
+func (s *server) serveFile(ctx context.Context, w http.ResponseWriter, p string) {
+	ctx, span := s.t.Start(ctx, "serve-file")
+	defer span.End()
+	l := logr.FromContextOrDiscard(ctx)
+
+	file, err := s.fs.Open(p)
 	if err != nil {
-		h.l.Error(err, "open", "file", p)
-		http.Error(w, "not found", http.StatusNotFound)
+		l.Error(err, "open", "file", p)
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 	_, err = io.Copy(w, file)
 	if err != nil {
-		h.l.Error(err, "copy", "file", p)
+		l.Error(err, "copy", "file", p)
 	}
 }
 

@@ -9,15 +9,10 @@ spec:
     spec:
       containers:
         - args:
-            - -otlp.endpoint=otelcol.otelcol.svc.cluster.local:4317
             - -data=/data
           name: feed-agg
           image: docker.seankhliao.com/feed-agg:latest
-          env:
-            - name: OTEL_SERVICE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
+          env: []
           ports:
             - name: http
               containerPort: 8080

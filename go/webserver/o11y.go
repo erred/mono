@@ -3,7 +3,6 @@ package webserver
 import (
 	"context"
 	"fmt"
-	"path"
 	"runtime/debug"
 	"time"
 
@@ -55,7 +54,6 @@ func o11y(ctx context.Context, endpoint string) (*shutdown, error) {
 	var attrs []attribute.KeyValue
 	bi, ok := debug.ReadBuildInfo()
 	if ok {
-		attrs = append(attrs, semconv.ServiceNameKey.String(path.Base(bi.Main.Path)))
 		attrs = append(attrs, semconv.ServiceVersionKey.String(bi.Main.Version))
 	}
 
