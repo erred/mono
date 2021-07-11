@@ -62,6 +62,17 @@ profiles:
       - op: replace
         path: /deploy/kustomize/paths/0
         value: kube/overlays/cluster30/feed-agg
+  - name: ghdefaults
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/ghdefaults
+      - op: replace
+        path: /build/artifacts/0/kaniko/target
+        value: ghdefaults
+      - op: replace
+        path: /deploy/kustomize/paths/0
+        value: kube/overlays/cluster30/ghdefaults
   - name: medea
     patches:
       - op: replace
