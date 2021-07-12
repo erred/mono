@@ -2,19 +2,15 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel"
 	"go.seankhliao.com/mono/go/render"
 	"go.seankhliao.com/mono/go/webserver"
-	"k8s.io/klog/v2/klogr"
 )
 
 func main() {
@@ -28,21 +24,16 @@ func main() {
 	wo := webserver.NewOptions(flag.CommandLine)
 	flag.Parse()
 
-	ctx := context.Background()
-	ctx, _ = signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	ctx, l := webserver.BaseContext()
 
-	l := klogr.New()
-
-	m, err := newHttp(&ro, fn)
+	var err error
+	wo.Handler, err = newHttp(&ro, fn)
 	if err != nil {
 		l.Error(err, "setup")
 		os.Exit(1)
 	}
 
-	wo.Logger = l
-	wo.Handler = m
-
-	webserver.New(ctx, wo).Run(ctx)
+	webserver.Run(ctx, wo)
 }
 
 func newHttp(ro *render.Options, fn string) (http.Handler, error) {

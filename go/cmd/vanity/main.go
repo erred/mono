@@ -1,20 +1,16 @@
 package main
 
 import (
-	"context"
 	_ "embed"
 	"flag"
 	"net/http"
-	"os/signal"
 	"strings"
-	"syscall"
 	"text/template"
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/go/webserver"
-	"k8s.io/klog/v2/klogr"
 )
 
 const (
@@ -26,17 +22,11 @@ func main() {
 	wo := webserver.NewOptions(flag.CommandLine)
 	flag.Parse()
 
-	ctx := context.Background()
-	ctx, _ = signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	ctx, _ := webserver.BaseContext()
 
-	l := klogr.New()
+	wo.Handler = New()
 
-	s := New()
-
-	wo.Logger = l
-	wo.Handler = s
-
-	webserver.New(ctx, wo).Run(ctx)
+	webserver.Run(ctx, wo)
 }
 
 //go:embed index.gohtml

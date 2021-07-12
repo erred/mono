@@ -1,15 +1,19 @@
-package main
+package feedagg
 
 import (
 	"context"
 	"errors"
-	"log"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/gorilla/feeds"
 	"github.com/mmcdole/gofeed"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type FeedUpdater struct {
@@ -20,14 +24,24 @@ type FeedUpdater struct {
 
 	etag   string
 	etagmu sync.Mutex
+
+	l logr.Logger
+	t trace.Tracer
 }
 
-func RunFeedUpdater(id, u string, interval time.Duration, store Storer) {
+func RunFeedUpdater(ctx context.Context, id, u string, interval time.Duration, store Storer) {
+	l := logr.FromContextOrDiscard(ctx).WithName("feedupdater")
+	l = l.WithValues("feed_id", id)
+
+	http.DefaultClient.Transport = otelhttp.NewTransport(http.DefaultTransport)
 	fu := &FeedUpdater{
 		id:     id,
 		u:      u,
 		client: http.DefaultClient,
 		ch:     make(chan *feeds.Feed),
+
+		l: l,
+		t: otel.Tracer("updater"),
 	}
 
 	go func() {
@@ -35,9 +49,12 @@ func RunFeedUpdater(id, u string, interval time.Duration, store Storer) {
 			ctx := context.Background()
 			ctx, cancel := context.WithTimeout(ctx, interval)
 			defer cancel()
+			ctx, span := fu.t.Start(ctx, "updater-get")
+			defer span.End()
+
 			err := fu.get(ctx)
 			if err != nil {
-				log.Println(id, err)
+				l.Error(err, "updater get")
 			}
 		}
 
@@ -49,15 +66,20 @@ func RunFeedUpdater(id, u string, interval time.Duration, store Storer) {
 	}()
 
 	go func() {
-		ctx := context.TODO()
+		ctx := context.Background()
 		for f := range fu.ch {
-			if f == nil {
-				continue
-			}
-			err := store.UpdateUpstream(ctx, id, f)
-			if err != nil {
-				log.Println(id, err)
-			}
+			func() {
+				ctx, span := fu.t.Start(ctx, "updater-upstream")
+				defer span.End()
+
+				if f == nil {
+					return
+				}
+				err := store.UpdateUpstream(ctx, id, f)
+				if err != nil {
+					l.Error(err, "upstream update")
+				}
+			}()
 		}
 	}()
 }
@@ -65,7 +87,7 @@ func RunFeedUpdater(id, u string, interval time.Duration, store Storer) {
 func (f *FeedUpdater) get(ctx context.Context) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, f.u, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("create request: %w", err)
 	}
 
 	f.etagmu.Lock()
@@ -87,6 +109,8 @@ func (f *FeedUpdater) get(ctx context.Context) error {
 	}
 	defer res.Body.Close()
 
+	_, span := f.t.Start(ctx, "parse-feed")
+	defer span.End()
 	parser := gofeed.NewParser()
 	feed, err := parser.Parse(res.Body)
 	if err != nil {

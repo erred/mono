@@ -13,9 +13,9 @@ FROM archlinux:base AS archrepod
 COPY --from=build /bin/archrepod /bin/archrepod
 ENTRYPOINT ["/bin/archrepod"]
 
-FROM gcr.io/distroless/static AS feed-agg
-COPY --from=build /bin/feed-agg /bin/feed-agg
-ENTRYPOINT ["/bin/feed-agg"]
+FROM gcr.io/distroless/static AS feedagg
+COPY --from=build /bin/feedagg /bin/feedagg
+ENTRYPOINT ["/bin/feedagg"]
 
 FROM gcr.io/distroless/static AS ghdefaults
 COPY --from=build /bin/ghdefaults /bin/ghdefaults

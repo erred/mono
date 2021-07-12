@@ -1,15 +1,15 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: feed-agg
+  name: feedagg
 spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`feed-agg.seankhliao.com`)
+  - match: Host(`feedagg.seankhliao.com`)
     kind: Rule
     services:
-    - name: feed-agg
+    - name: feedagg
       port: 80
   tls:
     certResolver: default

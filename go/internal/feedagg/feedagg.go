@@ -1,8 +1,9 @@
-package main
+package feedagg
 
 import (
 	"bytes"
 	"context"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,24 +13,44 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/gorilla/feeds"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/go/render"
 )
 
-type App struct {
-	l     logr.Logger
-	feeds map[string]struct{}
-	store Storer
+type Options struct {
+	ConfigPath string
+	Dir        string
 }
 
-func NewApp(c Config, dataDir string) (*App, error) {
-	store, err := NewSQLite(context.Background(), dataDir, c.Feeds)
+func NewOptions(fs *flag.FlagSet) *Options {
+	var o Options
+	fs.StringVar(&o.Dir, "data", "/data", "path to data dir")
+	fs.StringVar(&o.ConfigPath, "config", "/etc/feedagg.yaml", "path to config file")
+	return &o
+}
+
+type server struct {
+	feeds map[string]struct{}
+	store Storer
+	t     trace.Tracer
+}
+
+func New(ctx context.Context, o *Options) (*server, error) {
+	config, err := newConfig(o.ConfigPath)
 	if err != nil {
 		return nil, err
 	}
 
-	a := &App{
+	store, err := NewSQLite(ctx, o.Dir, config.Feeds)
+	if err != nil {
+		return nil, err
+	}
+
+	s := &server{
 		feeds: make(map[string]struct{}),
 		store: store,
+		t:     otel.Tracer("feedagg"),
 	}
 
 	type UP struct {
@@ -39,8 +60,8 @@ func NewApp(c Config, dataDir string) (*App, error) {
 	// url: refresh
 	upstreams := make(map[string]UP)
 
-	for feedID, feedConf := range c.Feeds {
-		a.feeds[feedID] = struct{}{}
+	for feedID, feedConf := range config.Feeds {
+		s.feeds[feedID] = struct{}{}
 		for id, u := range feedConf.URLs {
 			up, ok := upstreams[id]
 			if ok {
@@ -53,30 +74,36 @@ func NewApp(c Config, dataDir string) (*App, error) {
 	}
 
 	for id, up := range upstreams {
-		RunFeedUpdater(id, up.u, up.r, a.store)
+		RunFeedUpdater(ctx, id, up.u, up.r, s.store)
 	}
 
-	return a, nil
+	return s, nil
 }
 
-func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx, span := s.t.Start(ctx, "dispatch")
+	defer span.End()
+	l := logr.FromContextOrDiscard(ctx).WithName("dispatch")
+	l = l.WithValues("method", r.Method, "path", r.URL.Path, "user_agent", r.UserAgent())
 
 	if r.URL.Path == "/" {
 		ro := &render.Options{
 			MarkdownSkip: true,
 			Data: render.PageData{
-				Title:       "feed-agg",
+				Title:       "feedagg",
 				Description: "index of aggregated feeds",
-				H1:          "feed-agg",
+				H1:          "feedagg",
 				H2:          "index",
 				Style:       style,
 				Compact:     true,
 			},
 		}
-		err := render.Render(ro, w, renderFeeds(a.feeds))
+		_, span = s.t.Start(ctx, "render")
+		err := render.Render(ro, w, renderFeeds(s.feeds))
+		span.End()
 		if err != nil {
-			a.l.Error(err, "render index")
+			l.Error(err, "render index")
 		}
 		return
 	}
@@ -84,20 +111,22 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	segs := strings.Split(r.URL.Path[1:], ".")
 	if len(segs) != 2 {
 		w.WriteHeader(http.StatusBadRequest)
+		l.Info("expected 2 segments")
 		return
 	}
 	feedID, format := segs[0], segs[1]
 
-	_, ok := a.feeds[feedID]
+	_, ok := s.feeds[feedID]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
+		l.Info("feed not found", "feed_id", feedID)
 		return
 	}
 
-	feed, err := a.store.GetFeed(ctx, feedID)
+	feed, err := s.store.GetFeed(ctx, feedID)
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		l.Error(err, "get feed", "feed_id", feedID)
 		return
 	}
 
@@ -113,19 +142,23 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			MarkdownSkip: true,
 			Data: render.PageData{
 				Compact:      true,
-				URLCanonical: "https://feed-agg.seankhliao.com/" + feedID + ".html",
+				URLCanonical: "https://feedagg.seankhliao.com/" + feedID + ".html",
 				Title:        feedID,
 				Description:  "aggregated " + feedID,
-				H1:           "feed-agg",
+				H1:           "feedagg",
 				H2:           feedID,
 			},
 		}
+		_, span = s.t.Start(ctx, "render")
 		err := render.Render(ro, w, renderFeed(feed))
+		span.End()
 		if err != nil {
-			a.l.Error(err, "render feed", "feed", feedID)
+			l.Error(err, "render feed", "feed_id", feedID)
+			return
 		}
 	default:
 		w.WriteHeader(http.StatusBadRequest)
+		l.Info("unknown format", "format", format)
 	}
 }
 

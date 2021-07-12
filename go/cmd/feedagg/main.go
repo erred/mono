@@ -4,19 +4,19 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/go/internal/archrepo/server"
+	"go.seankhliao.com/mono/go/internal/feedagg"
 	"go.seankhliao.com/mono/go/webserver"
 )
 
 func main() {
-	so := server.NewOptions(flag.CommandLine)
+	so := feedagg.NewOptions(flag.CommandLine)
 	wo := webserver.NewOptions(flag.CommandLine)
 	flag.Parse()
 
 	ctx, l := webserver.BaseContext()
 
 	var err error
-	wo.Handler, err = server.New(ctx, so)
+	wo.Handler, err = feedagg.New(ctx, so)
 	if err != nil {
 		l.Error(err, "setup")
 		os.Exit(1)

@@ -1,4 +1,4 @@
-package main
+package feedagg
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func NewConfig(fp string) (Config, error) {
+func newConfig(fp string) (Config, error) {
 	b, err := os.ReadFile(fp)
 	if err != nil {
 		return Config{}, fmt.Errorf("read config: %w", err)

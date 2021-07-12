@@ -51,17 +51,17 @@ profiles:
       - op: replace
         path: /deploy/kustomize/paths/0
         value: kube/overlays/cluster30/archrepod
-  - name: feed-agg
+  - name: feedagg
     patches:
       - op: replace
         path: /build/artifacts/0/image
-        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feed-agg
+        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feedagg
       - op: replace
         path: /build/artifacts/0/kaniko/target
-        value: feed-agg
+        value: feedagg
       - op: replace
         path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster30/feed-agg
+        value: kube/overlays/cluster30/feedagg
   - name: ghdefaults
     patches:
       - op: replace

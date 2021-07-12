@@ -8,14 +8,33 @@ import (
 	"net/http"
 	"net/http/pprof"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.seankhliao.com/mono/go/internal/stdlog"
+	"k8s.io/klog/v2/klogr"
 )
+
+func BaseContext() (context.Context, logr.Logger) {
+	ctx := context.Background()
+	ctx, _ = signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	l := klogr.New()
+	ctx = logr.NewContext(ctx, l)
+	return ctx, l
+}
+
+func Run(ctx context.Context, o *Options) {
+	if o.Logger == nil {
+		o.Logger = logr.FromContextOrDiscard(ctx)
+	}
+
+	New(ctx, o).Run(ctx)
+}
 
 type Options struct {
 	AdmAddr      string
@@ -27,14 +46,10 @@ type Options struct {
 
 func NewOptions(fs *flag.FlagSet) *Options {
 	var o Options
-	o.InitFlags(fs)
-	return &o
-}
-
-func (o *Options) InitFlags(fs *flag.FlagSet) {
 	fs.StringVar(&o.AdmAddr, "adm.addr", ":8090", "listen address for admin")
 	fs.StringVar(&o.AppAddr, "web.addr", ":8080", "listen address for main app")
 	fs.StringVar(&o.OtlpEndpoint, "otlp.endpoint", "", "otlp grpc endpoint")
+	return &o
 }
 
 type Server struct {
