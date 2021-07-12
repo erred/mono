@@ -1,6 +1,6 @@
 # mono
 
-@seankhliao's _mono_ repo phase of life
+@seankhliao is in the **mono**repo phase of life
 
 [![Go Reference](https://pkg.go.dev/badge/go.seankhliao.com/mono.svg)](https://pkg.go.dev/go.seankhliao.com/mono)
 [![GitHub](https://img.shields.io/github/license/seankhliao/mono?style=flat-square)](LICENSE)
