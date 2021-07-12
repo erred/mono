@@ -123,11 +123,14 @@ func (s *SQLite) UpdateUpstream(ctx context.Context, id string, f *feeds.Feed) e
 	if err != nil {
 		return err
 	}
+
+	ctx, span := s.t.Start(ctx, "db-update")
 	_, err = s.db.ExecContext(ctx, `
 UPDATE upstream
 SET feed_json = ?
 WHERE id = ?
         `, string(b), id)
+	span.End()
 	if err != nil {
 		return err
 	}
