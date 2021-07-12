@@ -1,6 +1,6 @@
 # mono
 
-@seankhliao is in the **mono**repo phase of life
+[@seankhliao][githubseankhliao] is in the **mono**repo phase of life
 
 [![Go Reference][badgepkgsite]][pkgsitemono]
 [![MIT LICENSE][badgelicense]][filelicense]
@@ -36,6 +36,7 @@ in particular the public repos:
 [badgepkgsite]: https://pkg.go.dev/badge/go.seankhliao.com/mono.svg
 [filelicense]: LICENSE
 [githuberred]: https://github.com/erred
+[githubseankhliao]: https://github.com/seankhliao
 [pkgsitemono]: https://pkg.go.dev/go.seankhliao.com/mono
 [repoconfig]: https://github.com/seankhliao/config
 [repogithubio]: https://github.com/seankhliao/seankhliao.github.io
