@@ -1,4 +1,4 @@
-package w16
+package server
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"go.seankhliao.com/mono/go/static"
+	"go.seankhliao.com/mono/go/internal/w16/static"
 )
 
 type server struct {

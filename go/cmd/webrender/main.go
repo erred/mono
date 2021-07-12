@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/go/process"
+	"go.seankhliao.com/mono/go/internal/w16/process"
 	"k8s.io/klog/v2/klogr"
 )
 

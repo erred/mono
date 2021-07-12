@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/go/internal/w16"
+	"go.seankhliao.com/mono/go/internal/w16/server"
 	"go.seankhliao.com/mono/go/webserver"
 )
 
@@ -15,7 +15,7 @@ func main() {
 	ctx, l := webserver.BaseContext()
 
 	var err error
-	wo.Handler, err = w16.New(ctx)
+	wo.Handler, err = server.New(ctx)
 	if err != nil {
 		l.Error(err, "setup")
 		os.Exit(1)
