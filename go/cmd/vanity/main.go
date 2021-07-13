@@ -14,7 +14,6 @@ import (
 )
 
 const (
-	name        = "go.seankhliao.com/vanity"
 	redirectURL = "https://seankhliao.com/"
 )
 
