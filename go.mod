@@ -7,6 +7,7 @@ require (
 	github.com/go-logr/logr v0.4.0
 	github.com/google/go-github/v35 v35.3.0
 	github.com/gorilla/feeds v1.1.1
+	github.com/klauspost/compress v1.13.1
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/tdewolff/minify/v2 v2.9.19
 	github.com/yuin/goldmark v1.4.0
@@ -21,6 +22,7 @@ require (
 	go.opentelemetry.io/otel/metric v0.21.0
 	go.opentelemetry.io/otel/sdk v1.0.0-RC1
 	go.opentelemetry.io/otel/sdk/metric v0.21.0
+	go.opentelemetry.io/otel/trace v1.0.0-RC1
 	google.golang.org/protobuf v1.26.0
 	k8s.io/klog/v2 v2.9.0
 	modernc.org/sqlite v1.11.2
@@ -34,6 +36,7 @@ require (
 	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1 // indirect
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
@@ -48,7 +51,6 @@ require (
 	go.opentelemetry.io/contrib v0.21.0 // indirect
 	go.opentelemetry.io/otel/internal/metric v0.21.0 // indirect
 	go.opentelemetry.io/otel/sdk/export/metric v0.21.0 // indirect
-	go.opentelemetry.io/otel/trace v1.0.0-RC1 // indirect
 	go.opentelemetry.io/proto/otlp v0.9.0 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
 	golang.org/x/mod v0.3.0 // indirect
