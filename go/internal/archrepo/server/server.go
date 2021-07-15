@@ -2,12 +2,13 @@ package server
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+	"go.seankhliao.com/mono/go/pacmandb"
 )
 
 const envBearerToken = "AR_TOKENS" // comma separated list of allowed bearer tokens
@@ -147,11 +149,11 @@ func (s *server) addPackage(ctx context.Context, repo, arch, pkg string, rc io.R
 
 	ctx, span = s.t.Start(ctx, "repo-add")
 	defer span.End()
+
 	dbp := filepath.Join(filepath.Dir(p), repo+".db.tar.zst")
-	cmd := exec.CommandContext(ctx, "repo-add", dbp, p)
-	out, err := cmd.CombinedOutput()
+	err = repoAdd(ctx, dbp, p)
 	if err != nil {
-		return fmt.Errorf("%s: %w: %s", cmd, err, string(out))
+		return fmt.Errorf("add %s to db: %w", pkg, err)
 	}
 	return nil
 }
@@ -223,11 +225,136 @@ func (s *server) deletePackage(ctx context.Context, repo, arch, pkg string) erro
 
 	ctx, span = s.t.Start(ctx, "repo-remove")
 	defer span.End()
+
 	dbp := filepath.Join(filepath.Dir(p), repo+".db.tar.zst")
-	cmd := exec.CommandContext(ctx, "repo-remove", dbp, p)
-	out, err := cmd.CombinedOutput()
+	err = repoRemove(ctx, dbp, pkg)
 	if err != nil {
-		return fmt.Errorf("%s: %w: %s", cmd, err, string(out))
+		return fmt.Errorf("remove %s from db: %w", pkg, err)
+	}
+	return nil
+}
+
+func repoRemove(ctx context.Context, repoPath, pkgName string) error {
+	db, files, err := readRepos(repoPath)
+	if err != nil {
+		return fmt.Errorf("read repo %s: %w", repoPath, err)
+	}
+
+	delete(db.Pkgs, pkgName)
+	delete(files.Pkgs, pkgName)
+
+	err = writeRepos(repoPath, db, files)
+	if err != nil {
+		return fmt.Errorf("write repos %s: %w", repoPath, err)
+	}
+	return nil
+}
+
+func repoAdd(ctx context.Context, repoPath, pkgPath string) error {
+	pkgF, err := os.Open(pkgPath)
+	if err != nil {
+		return fmt.Errorf("open package %s: %w", pkgPath, err)
+	}
+	pkgName := filepath.Base(pkgPath)
+	pkg, err := pacmandb.ParsePackage(pkgName, pkgF)
+	if err != nil {
+		return fmt.Errorf("parse package %s: %w", pkgPath, err)
+	}
+
+	db, files, err := readRepos(repoPath)
+	if err != nil {
+		return fmt.Errorf("read repo %s: %w", repoPath, err)
+	}
+
+	i := strings.LastIndex(pkgName, "-")
+	pkgName = pkgName[:i] // trim -x86_64.pkg.tar.zst
+
+	pkg2 := *pkg
+	pkg2.Files = nil
+	db.Pkgs[pkgName] = pkg2
+	files.Pkgs[pkgName] = *pkg
+
+	err = writeRepos(repoPath, db, files)
+	if err != nil {
+		return fmt.Errorf("write repos %s: %w", repoPath, err)
+	}
+	return nil
+}
+
+func repoPaths(repoPath string) (db, files string) {
+	dir := filepath.Dir(repoPath)
+	repo := strings.Split(filepath.Base(repoPath), ".")[0]
+	db = filepath.Join(dir, repo+".db.tar.zst")
+	files = filepath.Join(dir, repo+".files.tar.zst")
+	return db, files
+}
+
+func readRepos(repoPath string) (db, files *pacmandb.DB, err error) {
+	dbPath, filesPath := repoPaths(repoPath)
+
+	db, err = readRepo(dbPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("read db: %w", err)
+	}
+	files, err = readRepo(filesPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("read files: %w", err)
+	}
+	return db, files, nil
+}
+
+func readRepo(repoPath string) (*pacmandb.DB, error) {
+	f, err := os.Open(repoPath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return &pacmandb.DB{Pkgs: make(map[string]pacmandb.Package)}, nil
+		}
+		return nil, fmt.Errorf("open %s: %w", repoPath, err)
+	}
+	defer f.Close()
+	var db pacmandb.DB
+	err = db.DecodeZstd(f)
+	if err != nil {
+		return nil, fmt.Errorf("decode database %s: %w", repoPath, err)
+	}
+	return &db, nil
+}
+
+func writeRepos(repoPath string, db, files *pacmandb.DB) error {
+	dbPath, filesPath := repoPaths(repoPath)
+
+	err := writeRepo(dbPath, db)
+	if err != nil {
+		return fmt.Errorf("write db: %w", err)
+	}
+	err = writeRepo(filesPath, files)
+	if err != nil {
+		return fmt.Errorf("write files: %w", err)
+	}
+	return nil
+}
+
+func writeRepo(repoPath string, repo *pacmandb.DB) error {
+	tmpPath := repoPath + ".tmp"
+	f, err := os.Create(tmpPath)
+	if err != nil {
+		return fmt.Errorf("create file %s: %w", tmpPath, err)
+	}
+	defer f.Close()
+	err = repo.EncodeZstd(f)
+	if err != nil {
+		return fmt.Errorf("encode db: %w", err)
+	}
+	err = os.Rename(tmpPath, repoPath)
+	if err != nil {
+		return fmt.Errorf("rename db: %w", err)
+	}
+
+	symlink := strings.TrimSuffix(repoPath, ".tar.zst")
+	os.Remove(symlink)
+	err = os.Symlink(repoPath, symlink)
+	if err != nil {
+		return fmt.Errorf("symlink db: %w", err)
 	}
 	return nil
 }

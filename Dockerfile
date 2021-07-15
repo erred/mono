@@ -9,7 +9,7 @@ COPY . .
 RUN go run ./go/cmd/webrender -src blog -dst ./go/static/root -gtm ${GTM}
 RUN go build -trimpath -ldflags='-s -w' -o /bin/ ./go/cmd/...
 
-FROM archlinux:base AS archrepod
+FROM gcr.io/distroless/static AS archrepod
 COPY --from=build /bin/archrepod /bin/archrepod
 ENTRYPOINT ["/bin/archrepod"]
 
