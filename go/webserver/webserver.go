@@ -16,7 +16,7 @@ import (
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.seankhliao.com/mono/go/internal/stdlog"
+	"go.seankhliao.com/mono/go/webserver/stdlog"
 	"k8s.io/klog/v2/klogr"
 )
 
