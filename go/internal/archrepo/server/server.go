@@ -2,9 +2,11 @@ package server
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -264,6 +266,9 @@ func repoAdd(ctx context.Context, repoPath, pkgPath string) error {
 		return fmt.Errorf("read repo %s: %w", repoPath, err)
 	}
 
+	i := strings.LastIndex(pkgName, "-")
+	pkgName = pkgName[:i] // trim -x86_64.pkg.tar.zst
+
 	pkg2 := *pkg
 	pkg2.Files = nil
 	db.Pkgs[pkgName] = pkg2
@@ -301,6 +306,9 @@ func readRepos(repoPath string) (db, files *pacmandb.DB, err error) {
 func readRepo(repoPath string) (*pacmandb.DB, error) {
 	f, err := os.Open(repoPath)
 	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return &pacmandb.DB{Pkgs: make(map[string]pacmandb.Package)}, nil
+		}
 		return nil, fmt.Errorf("open %s: %w", repoPath, err)
 	}
 	defer f.Close()
@@ -336,6 +344,17 @@ func writeRepo(repoPath string, repo *pacmandb.DB) error {
 	err = repo.EncodeZstd(f)
 	if err != nil {
 		return fmt.Errorf("encode db: %w", err)
+	}
+	err = os.Rename(tmpPath, repoPath)
+	if err != nil {
+		return fmt.Errorf("rename db: %w", err)
+	}
+
+	symlink := strings.TrimSuffix(repoPath, ".tar.zst")
+	os.Remove(symlink)
+	err = os.Symlink(repoPath, symlink)
+	if err != nil {
+		return fmt.Errorf("symlink db: %w", err)
 	}
 	return nil
 }
