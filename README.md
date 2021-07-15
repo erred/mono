@@ -3,7 +3,7 @@
 [@seankhliao][githubseankhliao] is in the **mono**repo phase of life
 
 [![Go Reference][badgepkgsite]][pkgsitemono]
-[![MIT LICENSE][badgelicense]][filelicense]
+[![MIT LICENSE][badgelicense]](LICENSE)
 
 Why have a dozen repos when everything can live together in harmony?
 No more changes that span across all the repos when you cange one thing,
@@ -11,12 +11,13 @@ it's just one change now.
 
 ## layout
 
-The top level should be reserved for global config files,
-and code is partitioned primarily by purpose / language.
-
-## projects
-
-see the directories under [`./go/cmd`](cmd/go) for the maintained runnable things.
+- [`blog/`](blog) contains raw data for [seankhliao.com][seankhliaocom]
+- [`ci/`](ci) contains config for building things,
+  except those that need to be at the root
+- [`go/cmd/`](go/cmd) contains runnable things
+- [`kube/`](kube) contains k8s deployment manifests for both infra and apps
+- [`proto/`](proto) hopefully i get better at writing gRPC service APIs that can live here
+- [`terraform/medea/`](terraform/medea) contains a hacky terraform setup for a hetzner root server
 
 ## other repos
 
@@ -30,10 +31,10 @@ in particular the public repos:
 
 [badgelicense]: https://img.shields.io/github/license/seankhliao/mono?style=flat-square
 [badgepkgsite]: https://pkg.go.dev/badge/go.seankhliao.com/mono.svg
-[filelicense]: LICENSE
 [githuberred]: https://github.com/erred
 [githubseankhliao]: https://github.com/seankhliao
 [pkgsitemono]: https://pkg.go.dev/go.seankhliao.com/mono
 [repoconfig]: https://github.com/seankhliao/config
 [repogithubio]: https://github.com/seankhliao/seankhliao.github.io
 [reposeankhliao]: https://github.com/seankhliao/seankhliao
+[seankhliaocom]: https://seankhliao.com/?utm_source=github&utm_medium=mono

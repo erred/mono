@@ -6,6 +6,7 @@ build:
   artifacts:
   - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/replaceme
     kaniko:
+      dockerfile: ci/Dockerfile
       image: gcr.io/kaniko-project/executor:latest
       registryMirror: mirror.gcr.io
       reproducible: true
