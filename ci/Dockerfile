@@ -6,7 +6,7 @@ ARG GOCACHE=/root/.cache/go-build
 ARG GTM=GTM-TLVN7D6
 WORKDIR /workspace
 COPY . .
-RUN go run ./go/cmd/webrender -src blog -dst ./go/static/root -gtm ${GTM}
+RUN go run ./go/cmd/webrender -src blog -dst ./go/internal/w16/static/root -gtm ${GTM}
 RUN go build -trimpath -ldflags='-s -w' -o /bin/ ./go/cmd/...
 
 FROM gcr.io/distroless/static AS archrepod
