@@ -7,7 +7,7 @@ steps:
     name: gcr.io/kaniko-project/executor:latest
     args:
       - -c=.
-      - -f=Dockerfile
+      - -f=ci/Dockerfile
       - -d=$_REG/$_IMG:latest
       - --cache=true
       - --reproducible
