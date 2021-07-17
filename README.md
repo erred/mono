@@ -17,7 +17,19 @@ it's just one change now.
 - [`go/cmd/`](go/cmd) contains runnable things
 - [`kube/`](kube) contains k8s deployment manifests for both infra and apps
 - [`proto/`](proto) hopefully i get better at writing gRPC service APIs that can live here
+- [`terraform/gcp`](terraform/gcp) contains the terraform code for almost everything in my main GCP project
 - [`terraform/medea/`](terraform/medea) contains a hacky terraform setup for a hetzner root server
+
+## secrets
+
+secrets are hidden through a git filter:
+
+```txt
+[filter "ageencrypt"]
+	clean    = age -r age14mg08panez45c6lj2cut2l8nqja0k5vm2vxmv5zvc4ufqgptgy2qcjfmuu -a -
+	smudge   = age -d -i ~/.ssh/age.key -
+	required = true
+```
 
 ## other repos
 
