@@ -2,6 +2,7 @@
 # variables
 ########################################
 variable "publicruns" {
+  description = "cloud run services that are publicly available"
   type = map(object({
     image = string
     url   = string

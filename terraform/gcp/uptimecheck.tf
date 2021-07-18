@@ -1,4 +1,5 @@
 variable "https_checks" {
+  description = "services with standard https uptime checks"
   type = map(object({
     host     = string
     path     = string
@@ -12,7 +13,7 @@ variable "https_checks" {
     }
     "go.seankhliao.com" = {
       host     = "go.seankhliao.com"
-      path     = "uptime-check"
+      path     = "/uptime-check"
       contains = "go-import"
     }
   }
