@@ -6,17 +6,15 @@ metadata:
     prometheus.io/scrape: "true"
     prometheus.io/port: "9000"
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
   - port: 80
     name: http
     protocol: TCP
     targetPort: 8080
-    nodePort: 30080
   - port: 443
     name: https
     protocol: TCP
     targetPort: 8443
-    nodePort: 30443
   - port: 9000
     name: traefik

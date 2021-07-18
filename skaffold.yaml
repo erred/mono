@@ -8,7 +8,6 @@ build:
     kaniko:
       dockerfile: ci/Dockerfile
       image: gcr.io/kaniko-project/executor:latest
-      registryMirror: mirror.gcr.io
       reproducible: true
       singleSnapshot: true
       skipUnusedStages: true
@@ -31,12 +30,12 @@ build:
     volumes:
       - name: modcache
         hostPath:
-          path: /opt/kind/cluster30/kaniko-gomodcache
+          path: /opt/k3s/cluster31/kaniko-gomodcache
       - name: buildcache
         hostPath:
-          path: /opt/kind/cluster30/kaniko-gobuildcache
+          path: /opt/k3s/cluster31/kaniko-gobuildcache
 deploy:
-  kubeContext: kind-cluster30
+  kubeContext: default
   kustomize:
     paths:
       - kube/overlays/cluster30/replaceme

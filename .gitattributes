@@ -5,5 +5,5 @@ kube/overlays/cluster30/ghdefaults/webhook-secret   filter=ageencrypt
 secret.env                                          filter=ageencrypt
 .terraform.lock.hcl                                 linguist-generated=true
 terraform/medea/40-wg0.netdev                       filter=ageencrypt
-terraform/medea/dockerconfig.json                   filter=ageencrypt
+terraform/medea/k3s/registries.yaml                 filter=ageencrypt
 terraform.tfstate                                   filter=ageencrypt

@@ -5,8 +5,8 @@ metadata:
 spec:
   containers:
     - name: debug
-      image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/alpine-debug
+      image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/alpine-debug:latest
       command:
         - sh
         - -c
-        - sleep 100000
+        - sleep infinity

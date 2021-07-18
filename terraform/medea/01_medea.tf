@@ -10,11 +10,9 @@ resource "null_resource" "medea" {
       "rm /etc/sysctl.d/* || true",
       "rm /etc/ssh/ssh_host_{dsa,rsa,ecdsa}_key* || true",
       "pacman -Rns --noconfirm btrfs-progs gptfdisk haveged xfsprogs wget vim net-tools cronie",
-      "pacman -Syu --noconfirm neovim docker",
-      "systemctl enable --now systemd-timesyncd docker",
-      "curl -Lo /usr/local/bin/kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64",
-      "chmod +x /usr/local/bin/kind",
-      "mkdir -p /opt/kind/cluster30",
+      "pacman -Syu --noconfirm neovim",
+      "systemctl enable --now systemd-timesyncd",
+      "mkdir -p /etc/rancher/k3s",
     ]
   }
   provisioner "file" {
@@ -47,11 +45,16 @@ resource "null_resource" "medea" {
     content     = file("41-wg0.network")
   }
   provisioner "file" {
-    destination = "/opt/kind/cluster30.k8s.yaml"
-    content     = file("cluster30.k8s.yaml")
+    destination = "/etc/rancher/k3s/config.yaml"
+    content     = file("k3s/config.yaml")
   }
   provisioner "file" {
-    destination = "/opt/kind/dockerconfig.json"
-    content     = file("dockerconfig.json")
+    destination = "/etc/rancher/k3s/registries.yaml"
+    content     = file("k3s/registries.yaml")
   }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "curl -sfL https://get.k3s.io | sh -"
+  #   ]
+  # }
 }
