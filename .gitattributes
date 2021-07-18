@@ -1,5 +1,7 @@
 data/fin/fin.prototext                              filter=ageencrypt
-kube/infra/skaffold/kaniko-secret                   filter=ageencrypt
+kube/infra/skaffold/artifact-registry               filter=ageencrypt
+kube/infra/skaffold/distribution-registry           filter=ageencrypt
+kube/infra/registry/htpasswd                        filter=ageencrypt
 kube/overlays/cluster30/ghdefaults/private-key      filter=ageencrypt
 kube/overlays/cluster30/ghdefaults/webhook-secret   filter=ageencrypt
 secret.env                                          filter=ageencrypt

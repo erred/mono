@@ -25,7 +25,7 @@ build:
           mountPath: /var/run/gobuildcache
   cluster:
     pullSecretName: kaniko-secret
-    pullSecretPath: kaniko-secret
+    pullSecretPath: artifact-registry
     namespace: skaffold
     volumes:
       - name: modcache
