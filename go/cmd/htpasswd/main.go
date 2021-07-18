@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -33,20 +34,27 @@ func main() {
 		os.Exit(1)
 	}
 
-	if add {
-		if stdin {
-			b, err := io.ReadAll(os.Stdin)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "read passwd from stdin: %v\n", err)
-				os.Exit(1)
-			}
-			pass = string(b)
+	user = strings.TrimSpace(user)
+	if stdin {
+		b, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "read passwd from stdin: %v\n", err)
+			os.Exit(1)
 		}
+		pass = string(bytes.TrimSpace(b))
+	}
 
+	if add {
 		hashedPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "hash passed: %v\n", err)
 			os.Exit(1)
+		}
+		for _, entry := range entries {
+			if entry[0] == user {
+				fmt.Fprintln(os.Stderr, "entry already exists for user")
+				os.Exit(1)
+			}
 		}
 		entries = append(entries, []string{user, string(hashedPass)})
 	} else { // del
