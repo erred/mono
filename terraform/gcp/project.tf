@@ -63,7 +63,7 @@ data "google_iam_policy" "project" {
   }
   binding {
     members = [
-      "serviceAccount:${google_service_account.cluster30_kaniko.email}",
+      "serviceAccount:${google_service_account.cluster31_kaniko.email}",
     ]
     role = "roles/artifactregistry.writer"
   }
@@ -72,12 +72,6 @@ data "google_iam_policy" "project" {
       "serviceAccount:${local.cloudbuild_service_account}",
     ]
     role = "roles/cloudbuild.builds.builder"
-  }
-  binding {
-    members = [
-      "serviceAccount:${google_service_account.cluster30_traefik.email}",
-    ]
-    role = "roles/dns.admin"
   }
   binding {
     members = [

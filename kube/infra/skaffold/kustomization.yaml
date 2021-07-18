@@ -8,5 +8,5 @@ resources:
 secretGenerator:
 - name: kaniko-secret
   files:
-    - artifact-registry
-    - distribution-registry
+    - secrets/artifact-registry
+    - secrets/config.json

@@ -8,7 +8,3 @@ resources:
 - persistentvolumeclaim.k8s.yaml
 - serviceaccount.k8s.yaml
 - statefulset.k8s.yaml
-secretGenerator:
-  - name: weechat
-    envs:
-      - secret.env

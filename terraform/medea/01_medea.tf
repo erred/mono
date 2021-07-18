@@ -38,7 +38,7 @@ resource "null_resource" "medea" {
   }
   provisioner "file" {
     destination = "/etc/systemd/network/40-wg0.netdev"
-    content     = file("40-wg0.netdev")
+    content     = file("secrets/40-wg0.netdev")
   }
   provisioner "file" {
     destination = "/etc/systemd/network/41-wg0.network"
@@ -50,7 +50,7 @@ resource "null_resource" "medea" {
   }
   provisioner "file" {
     destination = "/etc/rancher/k3s/registries.yaml"
-    content     = file("k3s/registries.yaml")
+    content     = file("secrets/registries.yaml")
   }
   # provisioner "remote-exec" {
   #   inline = [

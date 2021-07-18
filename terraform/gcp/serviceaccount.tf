@@ -3,24 +3,18 @@ resource "google_project_default_service_accounts" "default" {
   action  = "DEPRIVILEGE"
 }
 
-resource "google_service_account" "cluster30_kaniko" {
-  account_id = "cluster30-kaniko"
+resource "google_service_account" "cluster31_kaniko" {
+  account_id = "cluster31-kaniko"
 }
-resource "google_service_account_iam_policy" "cluster30_kaniko" {
-  service_account_id = google_service_account.cluster30_kaniko.name
-  policy_data        = data.google_iam_policy.service_account_cluster30_kaniko.policy_data
+resource "google_service_account_iam_policy" "cluster31_kaniko" {
+  service_account_id = google_service_account.cluster31_kaniko.name
+  policy_data        = data.google_iam_policy.service_account_cluster31_kaniko.policy_data
 }
-data "google_iam_policy" "service_account_cluster30_kaniko" {}
+data "google_iam_policy" "service_account_cluster31_kaniko" {}
+resource "google_service_account_key" "cluster31_kaniko" {
+  service_account_id = google_service_account.cluster31_kaniko.name
+}
 
-
-resource "google_service_account" "cluster30_traefik" {
-  account_id = "cluster30-traefik"
-}
-resource "google_service_account_iam_policy" "cluster30_traefik" {
-  service_account_id = google_service_account.cluster30_traefik.name
-  policy_data        = data.google_iam_policy.service_account_cluster30_traefik.policy_data
-}
-data "google_iam_policy" "service_account_cluster30_traefik" {}
 
 resource "google_service_account" "hetzner_medea" {
   account_id = "hetzner-medea"
@@ -30,3 +24,6 @@ resource "google_service_account_iam_policy" "hetzner_medea" {
   policy_data        = data.google_iam_policy.service_account_hetzner_medea.policy_data
 }
 data "google_iam_policy" "service_account_hetzner_medea" {}
+resource "google_service_account_key" "hetzner_medea" {
+  service_account_id = google_service_account.hetzner_medea.name
+}

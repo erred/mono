@@ -1,23 +1,21 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: archrepod
+namespace: ghdefaults
 bases:
-  - ../../../base/archrepod
+  - ../../../base/ghdefaults
 resources:
   - namespace.k8s.yaml
 patches:
   - target:
       kind: Deployment
-      name: archrepod
+      name: ghdefaults
     patch: |
       - op: add
-        path: /spec/template/spec/containers/0/envFrom
-        value:
-          - secretRef:
-              name: archrepod
+        path: /spec/template/spec/containers/0/args/0
+        value: "-app-id=126001"
   - target:
       kind: Deployment
-      name: archrepod
+      name: ghdefaults
     patch: |
       - op: add
         path: /spec/template/spec/containers/0/args/0
@@ -30,9 +28,10 @@ patches:
             fieldRef:
               fieldPath: metadata.labels['app.kubernetes.io/name']
 secretGenerator:
-  - name: archrepod
-    envs:
-      - secret.env
+  - name: ghdefaults
+    files:
+      - secrets/private-key
+      - secrets/webhook-secret
 images:
-  - name: docker.seankhliao.com/archrepod
-    newName: europe-north1-docker.pkg.dev/com-seankhliao/kluster/archrepod
+  - name: docker.seankhliao.com/ghdefaults
+    newName: europe-north1-docker.pkg.dev/com-seankhliao/kluster/ghdefaults

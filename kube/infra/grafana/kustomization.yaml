@@ -22,4 +22,4 @@ configMapGenerator:
 secretGenerator:
   - name: grafana
     envs:
-      - secret.env
+      - secrets/env

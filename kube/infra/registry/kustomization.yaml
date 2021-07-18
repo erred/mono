@@ -17,4 +17,4 @@ configMapGenerator:
 secretGenerator:
   - name: registry
     files:
-      - htpasswd
+      - secrets/htpasswd

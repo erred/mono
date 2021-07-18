@@ -15,4 +15,4 @@ resources:
 secretGenerator:
   - name: traefik
     envs:
-      - secret.env
+      - secrets/env

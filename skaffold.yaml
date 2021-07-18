@@ -26,6 +26,8 @@ build:
   cluster:
     pullSecretName: kaniko-secret
     pullSecretPath: artifact-registry
+    # dockerConfig:
+    #   secretName: kaniko-secret
     namespace: skaffold
     volumes:
       - name: modcache
@@ -38,7 +40,7 @@ deploy:
   kubeContext: default
   kustomize:
     paths:
-      - kube/overlays/cluster30/replaceme
+      - kube/overlays/cluster31/replaceme
 profiles:
   - name: archrepod
     patches:
@@ -50,7 +52,7 @@ profiles:
         value: archrepod
       - op: replace
         path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster30/archrepod
+        value: kube/overlays/cluster31/archrepod
   - name: feedagg
     patches:
       - op: replace
@@ -61,7 +63,7 @@ profiles:
         value: feedagg
       - op: replace
         path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster30/feedagg
+        value: kube/overlays/cluster31/feedagg
   - name: ghdefaults
     patches:
       - op: replace
@@ -72,7 +74,7 @@ profiles:
         value: ghdefaults
       - op: replace
         path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster30/ghdefaults
+        value: kube/overlays/cluster31/ghdefaults
   - name: medea
     patches:
       - op: replace
@@ -83,7 +85,7 @@ profiles:
         value: singlepage
       - op: replace
         path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster30/medea
+        value: kube/overlays/cluster31/medea
   - name: paste
     patches:
       - op: replace
@@ -94,7 +96,7 @@ profiles:
         value: paste
       - op: replace
         path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster30/paste
+        value: kube/overlays/cluster31/paste
   - name: vanity
     patches:
       - op: replace
@@ -105,7 +107,7 @@ profiles:
         value: vanity
       - op: replace
         path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster30/vanity
+        value: kube/overlays/cluster31/vanity
   - name: w16
     patches:
       - op: replace
@@ -116,4 +118,4 @@ profiles:
         value: w16
       - op: replace
         path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster30/w16
+        value: kube/overlays/cluster31/w16

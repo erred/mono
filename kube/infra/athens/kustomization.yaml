@@ -13,4 +13,4 @@ resources:
 secretGenerator:
   - name: athens
     envs:
-      - secret.env
+      - secrets/env

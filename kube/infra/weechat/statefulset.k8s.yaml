@@ -11,11 +11,6 @@ spec:
       containers:
         - name: weechat
           image: docker.io/seankhliao/weechat:latest
-          # tty: true
-          # stdin: true
-          envFrom:
-            - secretRef:
-                name: weechat
           volumeMounts:
             - mountPath: /home/user/.config/weechat
               name: weechat
