@@ -17,17 +17,12 @@ steps:
       - --use-new-run
 
   - id: deploy
-    name: gcr.io/cloud-builders/gcloud:latest
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
     entrypoint: gcloud
     args:
       - run
       - deploy
-      - w
+      - seankhliao-com
       - --image=$_REG/$_IMG:latest
       - --region=us-central1
       - --platform=managed
-      - --allow-unauthenticated
-      - --cpu=1
-      - --memory=128Mi
-      - --timeout=10s
-      - --async
