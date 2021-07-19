@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -121,6 +122,8 @@ loop:
 		done <- mirrors
 	}()
 	ch := make(chan struct{}, parallel)
+	var cnt, total int64
+	total = int64(len(rawMirrors))
 	var wg sync.WaitGroup
 	replacer := strings.NewReplacer("$repo", "community", "$arch", "x86_64")
 	for i := range rawMirrors {
@@ -135,18 +138,21 @@ loop:
 			t := time.Now()
 			r, err := client.Get(u)
 			if err != nil {
-				log.Printf("WARN   GET=%q err=%q", u, err)
+				c := atomic.AddInt64(&cnt, 1)
+				log.Printf("WARN   %3d/%3d err=%q mirror=%q", c, total, err, u)
 				return
 			}
 			defer r.Body.Close()
 			_, err = io.Copy(io.Discard, r.Body)
 			if err != nil {
-				log.Printf("WARN   GET=%q err=%q", u, err)
+				c := atomic.AddInt64(&cnt, 1)
+				log.Printf("WARN   %3d/%3d err=%q mirror=%q", c, total, err, u)
 				return
 			}
 			s := time.Since(t)
 			collect <- Mirror{u: m, d: s}
-			log.Printf("DEBUG  t=%v mirror=%q", s, m)
+			c := atomic.AddInt64(&cnt, 1)
+			log.Printf("DEBUG  %3d/%3d t=%v mirror=%q", c, total, s, m)
 		}(rawMirrors[i])
 	}
 	wg.Wait()
