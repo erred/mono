@@ -24,3 +24,5 @@ steps:
       - deploy
       - go-seankhliao-com
       - --image=$_REG/$_IMG:latest
+      - --region=us-central1
+      - --platform=managed
