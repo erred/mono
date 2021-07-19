@@ -1,10 +1,5 @@
 resource "google_sourcerepo_repository" "mono" {
   name = "github_seankhliao_mono"
-  lifecycle {
-    ignore_changes = [
-      size,
-    ]
-  }
 }
 resource "google_sourcerepo_repository_iam_policy" "mono" {
   repository  = google_sourcerepo_repository.mono.name

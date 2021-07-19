@@ -17,7 +17,7 @@ steps:
       - --use-new-run
 
   - id: deploy
-    name: gcr.io/cloud-builders/gcloud:latest
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
     entrypoint: gcloud
     args:
       - run

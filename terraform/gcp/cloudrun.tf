@@ -74,6 +74,13 @@ resource "google_service_account_iam_policy" "publicruns" {
 }
 data "google_iam_policy" "publicruns_service_account" {
   for_each = var.publicruns
+
+  binding {
+    members = [
+      "serviceAccount:${local.cloudbuild_service_account}",
+    ]
+    role = "roles/iam.serviceAccountUser"
+  }
 }
 
 resource "google_cloud_run_service" "publicruns" {
