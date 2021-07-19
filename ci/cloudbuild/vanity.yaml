@@ -22,12 +22,5 @@ steps:
     args:
       - run
       - deploy
-      - vanity
+      - go-seankhliao-com
       - --image=$_REG/$_IMG:latest
-      - --region=us-central1
-      - --platform=managed
-      - --allow-unauthenticated
-      - --cpu=1
-      - --memory=128Mi
-      - --timeout=10s
-      - --async

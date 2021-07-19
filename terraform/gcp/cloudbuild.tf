@@ -4,6 +4,7 @@ resource "google_cloudbuild_trigger" "vanity" {
 
   filename = "ci/cloudbuild/vanity.yaml"
   included_files = [
+    "ci/cloudbuild/vanity.yaml",
     "ci/Dockerfile",
     "go.*",
     "go/cmd/vanity/**",
@@ -26,6 +27,7 @@ resource "google_cloudbuild_trigger" "w16" {
   filename = "ci/cloudbuild/w16.yaml"
   included_files = [
     "blog/**",
+    "ci/cloudbuild/w16.yaml",
     "ci/Dockerfile",
     "go.*",
     "go/cmd/w16/**",
