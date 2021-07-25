@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: maddy
+spec:
+  # Secret names are always required.
+  secretName: maddy-tls
+  duration: 2160h # 90d
+  renewBefore: 720h # 15d
+  subject:
+    organizations:
+    - seankhliao
+  privateKey:
+    algorithm: ECDSA
+  dnsNames:
+  - mx1.medea.seankhliao.com
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer

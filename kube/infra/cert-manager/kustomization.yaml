@@ -6,5 +6,7 @@ resources:
 - clusterissuer.k8s.yaml
 secretGenerator:
   - name: gcp-serviceaccount
+    options:
+      disableNameSuffixHash: true
     files:
       - secrets/serviceaccount.json
