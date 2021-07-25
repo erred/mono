@@ -3,6 +3,18 @@ resource "google_project_default_service_accounts" "default" {
   action  = "DEPRIVILEGE"
 }
 
+resource "google_service_account" "cluster31_certmanager" {
+  account_id = "cluster31-certmanager"
+}
+resource "google_service_account_iam_policy" "cluster31_certmanager" {
+  service_account_id = google_service_account.cluster31_certmanager.name
+  policy_data        = data.google_iam_policy.service_account_cluster31_certmanager.policy_data
+}
+data "google_iam_policy" "service_account_cluster31_certmanager" {}
+resource "google_service_account_key" "cluster31_certmanager" {
+  service_account_id = google_service_account.cluster31_certmanager.name
+}
+
 resource "google_service_account" "cluster31_kaniko" {
   account_id = "cluster31-kaniko"
 }

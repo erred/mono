@@ -1,5 +1,6 @@
 data/fin/fin.prototext                              filter=ageencrypt
 kube/infra/athens/secrets/env filter=ageencrypt
+kube/infra/cert-manager/secrets/serviceaccount.json filter=ageencrypt
 kube/infra/grafana/secrets/env filter=ageencrypt
 kube/infra/skaffold/secrets/artifact-registry filter=ageencrypt
 kube/infra/skaffold/secrets/config.json filter=ageencrypt

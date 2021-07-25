@@ -69,6 +69,12 @@ data "google_iam_policy" "project" {
   }
   binding {
     members = [
+      "serviceAccount:${google_service_account.cluster31_certmanager.email}"
+    ]
+    role = "roles/dns.admin"
+  }
+  binding {
+    members = [
       "serviceAccount:${local.cloudbuild_service_account}",
     ]
     role = "roles/cloudbuild.builds.builder"
