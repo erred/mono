@@ -1,0 +1,75 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>plain git private go modules</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12021-03-29-plain-git-private-go-modules/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="someone complained it was too hard"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12021-03-29</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-go--modules><em>go</em> modules</h3><p><code>GOPATH</code> is dying, better switch to modules soon,
+so how can you make it work with just a git (no http(s))?<h4 id=-ssh--setup><em>ssh</em> setup</h4><p>make <code>ssh</code> work automatically, ie <code>ssh arch.seankhliao.com</code>. <code>~/.ssh/config</code>:<pre><code class=language-txt>Host arch.seankhliao.com
+    User arccy                      # assuming you don't use a generic git user
+    Port 443                        # assuming you use nonstandard port
+    IdentityFile ~/.ssh/id_ecdsa_sk # ssh keyzzzz
+</code></pre><h4 id=-git--setup><em>git</em> setup</h4><p>make <code>git</code> always use <code>ssh</code>, and point it to your home directory. <code>~/.gitconfig</code>:<pre><code class=language-txt>[url &quot;arccy@arch.seankhliao.com:&quot;]
+    insteadOf = &quot;git://arch.seankhliao.com/&quot;
+    insteadOf = &quot;https://arch.seankhliao.com/&quot;
+</code></pre><h4 id=-dependency-><em>dependency</em></h4><p>create a dependency!<pre><code class=language-sh>$ mkdir -p ~/tmp/hello &amp;&amp; cd ~/tmp/hello
+
+$ go mod init arch.seankhliao.com/hello.git
+
+$ cat &lt;&lt; EOF &gt; hello.go
+package hello
+
+var Hello = &quot;world&quot;
+EOF
+</code></pre><p>create a git repo on the remote<pre><code class=language-sh>$ ssh arch.seankhliao.com git init --bare hello -b main
+Initialized empty Git repository in /home/arccy/hello/
+</code></pre><p>create a git repo locally and push to remote<pre><code class=language-sh>$ git init -b main
+Initialized empty Git repository in /home/arccy/tmp/hello/.git/
+
+$ git add .
+
+$ git commit -m &quot;init&quot;
+[main (root-commit) 02adee5] init
+ 1 file changed, 3 insertions(+)
+ create mode 100644 hello.go
+
+$ git remote add origin https://arch.seankhliao.com/hello
+
+$ git push -u origin main
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 240 bytes | 240.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+To arch.seankhliao.com:hello
+ * [new branch]      main -&gt; main
+Branch 'main' set up to track remote branch 'main' from 'origin'.
+</code></pre><h4 id=-main-><em>main</em></h4><p>Now to use the dependency<pre><code class=language-sh>$ mkdir -p ~/tmp/world &amp;&amp; cd ~/tmp/world
+
+# you may want to persist this setting with go env -w GOPRIVATE=...
+$ export GOPRIVATE=arch.seankhliao.com
+
+$ go mod init example/world
+go: creating new go.mod: module example/world
+
+$ cat &lt;&lt; EOF &gt; main.go
+package main
+
+import (
+        &quot;fmt&quot;
+
+        &quot;arch.seankhliao.com/hello.git&quot; // use .git to tell Go about repo root
+)
+
+func main() {
+        fmt.Println(hello.Hello)
+}
+EOF
+
+$ go mod tidy
+go: finding module for package arch.seankhliao.com/hello.git
+go: downloading arch.seankhliao.com/hello.git v0.0.0-20210329200831-02adee55f661
+go: found arch.seankhliao.com/hello.git in arch.seankhliao.com/hello.git v0.0.0-20210329200831-02adee55f661
+
+$ go run .
+world
+</code></pre><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

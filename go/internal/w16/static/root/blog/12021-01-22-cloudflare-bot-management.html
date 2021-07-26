@@ -1,0 +1,75 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>cloudflare bot management</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12021-01-22-cloudflare-bot-management/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="managing bots with cloudflare"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12021-01-22</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-cloudflare-><em>cloudflare</em></h3><p>$job has a bot problem,
+(or maybe a shitty backend problem),
+<a href=https://www.cloudflare.com/products/bot-management/>cloudflare bot management</a>
+to the rescue?<h4 id=-background-><em>background</em></h4><p>There are typically 3 types of resources we serve:
+page, static resource, api endpoint.
+A page is the initial request for a user,
+this could be a static html page or some dynamically generated one.
+Static resources are usually served from a CDN
+and api endpoints serve both the web frontend and mobile apps.
+What's important is that for pages, we can serve challenges
+(cloudflare making you wait a bit or making you solve a captcha).
+For static resources, we probably don't care that much,
+and for api endpoints, because the requests are made programmatically,
+there's not much we can do besides allow/block.<h5 id=-products-><em>products</em></h5><p>Cloudflare has quite a few blocking products that sit in front of their CDN,
+workers, and your servers. The order they happen in can be seen:</p><picture><img src=https://developers.cloudflare.com/firewall/static/5bbd49ff428e4d4f2f3d3b8688a8a8f3/29007/firewall-rules-order-and-priority-1.png alt="cloudflare rule priority"></picture><h5 id=-not--enough><em>not</em> enough</h5><p>So why are the existing products not enough?
+The existing tools (IP, user agent, WAF, rate limiters...) are like scalpels,
+precise for their functions, but not very flexible to changes.
+Ex: IP and rate limit blocks are easy to get around by just spinning up new VMs in clouds,
+or if you really want (and don't mind IPs from <a href=https://luminati.io/proxy-types/rotating-residential-ips>dubious sources</a>)
+with a large pool of proxies.<p>Sure, with enough investigation, you can tailor blocks using the existing tools
+to more or less only block specific attacks, but that's a lot of work for a fragile solution,
+and you inevitably end up with a bunch of rules that are no longer relevent as script kiddies move on.<h4 id=-bot--management><em>bot</em> management</h4><p>If the existing tools were fishing rods and bait,
+bot management is like a dragnet.
+Requests are classed by heuristics, machine learning
+(they refuse to say what sort of machine learning is fast enough to run on every request),
+and behavioural analysis,
+and you get a 1-100 score you can use as part of your firewall rules.<ul><li>Advantages: it catches a lot of things.
+The landscape shifts pretty often and due to the whitelisting style of rules you write,
+it's slightly easier to stay ahead.<li>Disadvantages: it catches too much stuff.
+It's a really broad brush and if you're not careful you can easily break something in prod,
+as you accidentally block something another team uses
+(and good luck getting marketing to list out all the tools they use).
+Also, hope your internal services and mobile apps set proper user agents for you to filter...</ul><p>Where previously your rules are more building up ORs of potentially bad sources,
+ex (<code>cf.client.bot</code> is available to everyone as verified good bots):<pre><code class=language-txt>(
+  (
+    ip.geoip.asn in { xxxx yyyy zzzz }
+    or http.user_agent contains &quot;fuzz&quot;
+    or ip.src in { &quot;a.b.c.d/32&quot; &quot;q.r.s.t/31&quot; }
+  )
+  and not cf.client.bot
+  and http.host eq &quot;example.com&quot;
+)
+</code></pre><p>With bot management it is more digging out exceptions for known good sources:<pre><code class=language-txt>(
+  cf.bot_management.score eq 1
+  and not cf.bot_management.static_resource
+  and not cf.bot_management.verified_bot
+  and not ip.src in $office
+  and not ip.src in $cloud
+  and not ip.src in $trusted_third_party
+  and not http.user_agent contains &quot;company&quot;
+  and not http.user_agent contains &quot;seo.tool.we.use&quot;
+  and http.host eq &quot;example.com&quot;
+)
+</code></pre><p>With terraform it's slightly better since we can use
+variables and string interpolation to manage a bunch of rules,
+but it doesn't help with investigating all those potentially legitimate requests you might block<pre><code class=language-terraform>resource &quot;cloudflare_filter&quot; &quot;ex&quot; {
+  # ...
+  expression = &lt;&lt;-EOF
+  (
+    cf.bot_management.score eq 1
+    and not cf.bot_management.static_resource
+    and not cf.bot_management.verified_bot
+    ${join(&quot;\n  &quot;, formatlist(&quot;and not ip.src in %s&quot;, local.known_ip_lists))}
+    ${join(&quot;\n  &quot;, formatlist(&quot;and not http.user_agent contains %s&quot;, local.known_user_agents))}
+    and http.host eq &quot;example.com&quot;
+  )
+  EOF
+}
+</code></pre><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

@@ -1,0 +1,138 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>go mod basics</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12021-04-12-go-mod-basics/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="is this a faq on modules?"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12021-04-12</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-modules-><em>modules</em></h3><p>Go <a href=https://golang.org/ref/mod>modules</a>:
+<em>the</em> dependency management system for the Go ecosystem.<p>What it optimizes for:
+<em>automatic</em> and <em>stable</em> version selection <em>over time</em>.
+This means that if your code builds now with a set of recorded dependencies,
+it will continue to build in the future
+no matter what your dependencies publish (or unpublish).
+To do this, it relies on the ecosystem following
+<a href=https://semver.org/>semantic versioning</a>
+and on shared infrastructure such as a
+<a href=https://proxy.golang.org/>caching proxy</a>
+and <a href=https://sum.golang.org/>transparency log</a>.
+Recommended reading:
+<a href=https://research.swtch.com/vgo-import>semantic import versioning</a>
+<a href=https://research.swtch.com/vgo-mvs>minimal version selection</a>
+<a href=https://research.swtch.com/vgo-repro>reproducible, verifiable, verified builds</a><h4 id=-lightning--round><em>lightning</em> round</h4><h5 id=-how--do-i><em>How</em> do I</h5><h6 id=-start-><em>start</em></h6><pre><code class=language-sh>go mod init example.com/some/module
+</code></pre><p>Modules are units of versioning,
+and in most cases you will want a single module at the root of your repository.<p>Module names are <code>/</code> separated ascii, the first segment must contain a dot
+(names without a dot are reserved for the stdlib with the exception of <code>example</code> and <code>test</code>).
+If you host your code remotely, it should match the code host;
+if it's only available locally, feel free to use one of the
+<a href=https://tools.ietf.org/html/rfc6761>reserved</a> <a href=https://tools.ietf.org/html/rfc6762>tlds</a>
+like <code>some-name.local</code>.
+Versions 2+ need a <code>/vN</code> suffix.<h6 id=-get--dependencies><em>get</em> dependencies</h6><p><code>go get some-package@version</code> or after writing <code>import "..."</code> in youf code, <code>go mod tidy</code><p>The first gives you more control, the second will also trim out unused dependencies.<p><code>@version</code>, one of:<ul><li><code>vX.Y.Z</code>: a version number<li><code>@abcdef</code>: a commit sha<li><code>@master</code>: a branch name<li><code>@latest</code>: one of the special <a href=https://golang.org/ref/mod#version-queries>version queries</a>, latest means highest tagged version</ul><p><em>note:</em> indirect references like <code>@latest</code> and <code>@branch</code> are cached by proxies. use <code>GOPROXY=direct</code> to skip the proxy.<h6 id=-update--dependencies><em>update</em> dependencies</h6><p>update all dependencies:<pre><code class=language-sh>go get -u ./...
+</code></pre><p>update all dependencies, but only to patch versions:<pre><code class=language-sh>go get -u=patch ./...`
+</code></pre><p>update only direct dependencies:<pre><code class=language-sh>go get $(go list -f '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}' -m ./...)
+</code></pre><h5 id=-list--the-chosen-dependencies><em>list</em> the chosen dependencies</h5><p>Things you actually use:<pre><code class=language-sh>go list -deps -f '{{ if not .Standard }}{{ .Module }}{{ end }}' ./path/to/package | sort | uniq
+
+# or
+
+go version -m $executable
+</code></pre><p>Why a module is somewhere in the dependency graph<pre><code class=language-sh>go mod why some.module/dependency
+
+# or
+
+go mod graph
+</code></pre><h5 id=-printf--debug-a-dependency><em>printf</em> debug a dependency</h5><p><code>go mod vendor</code> and edit the files in <code>vendor/</code>.
+The next run of <code>go mod vendor</code> will wipe away those changes.<p>If you need more control or expect to contribute a fix upstream,
+clone the repo somewhere and use replace:
+<code>go mod edit -replace dependency.module/path=../path/to/cloned/repo</code>.<h5 id=-fork--a-dependency><em>fork</em> a dependency</h5><p>Is this a temporary or permanent fork?<p>Temporary: <code>go mod edit -replace dependency.module/path=forked.module/path@version</code><p>Permanent: rename all instances of the import path in the forked module and treat it like any other dependency.<h4 id=-private--code><em>private</em> code</h4><p>You want to write private code, also as <a href=/blog/12021-03-29-plain-git-private-go-modules/>other blog post</a>.<h5 id=-init-><em>init</em></h5><p>If you use one of the more fully featured code hosting software that responds
+with <code>&lt;meta go-import="..."></code> or you have a vanity domain setup:<pre><code class=language-sh>go mod init gitlab.corp.example/path/to/repo
+
+go mod init github.com/your/repo
+
+go mod init vanity.example/repo
+</code></pre><p>Otherwise (eg with plain git), use <code>.git</code> as part of your module path
+(also import paths):<pre><code class=language-sh>go mod init git.host.example/your/repo.git
+</code></pre><h5 id=-git--config><em>git</em> config</h5><p>You'll also want to have git use ssh instead of https:<pre><code class=language-sh>git config --global url.&quot;git@github.com:&quot;.insteadOf https://github.com/
+
+git config --global url.&quot;you@git.host.example&quot;.insteadOf https://git.host.example
+</code></pre><p>or if you prefer editing .gitconfig by hand:<pre><code class=language-gitconfig>[url &quot;git@github.com:&quot;]
+    insteadOf = https://github.com/
+[url &quot;you@git.host.example:&quot;]
+    insteadOf = https://git.host.example/
+</code></pre><h5 id=-go--command><em>go</em> command</h5><p>Go will use a proxy by default. If you don't have a private one setup,
+exclude module path prefixes from lookup from proxies:<pre><code class=language-sh>GOPRIVATE=github.com/you,git.host.example
+# persist with
+go env -w GOPRIVATE=github.com/you,git.host.example
+</code></pre><h4 id=-local--only-code><em>local</em> only code</h4><p>You never want to share or host your code anywhere.<pre><code class=language-sh>go mod init example.local/app1
+</code></pre><p>if you still want to use multiple modules:<pre><code class=language-txt>code
+├── app1
+│  ├───main.go
+│  └── go.mod
+│        # module example.local/app1
+│        #
+│        # go 1.16
+│        #
+│        # require example.local/some-lib v0.0.0
+│        #
+│        # replace example.local/some-lib =&gt; ../some-lib
+│
+└── some-lib
+   ├───lib.go
+   └── go.mod
+         # module example.local/app1
+         #
+         # go 1.16
+</code></pre><h4 id=-ci--and-docker><em>ci</em> and docker</h4><p>This is <a href=/blog/12021-01-23-docker-buildx-caching/>complicated</a>
+How to optimize this depends on 2 things:
+are your worker nodes stateful (can they retain a cache/volume between builds)
+and what do you use to build containers (docker, docker buildx, kaniko, ...).<h5 id=-stateful--workers><em>stateful</em> workers</h5><p>Your workers have persistent volumes you can use between builds.<h6 id=-stateful--worker-docker-buildx><em>stateful</em> worker docker buildx</h6><p>This shares a module download cache and a build cache between all docker builds.
+Docker currently doesn't allow control over the cache location.<pre><code class=language-Dockerfile>#syntax=docker/dockerfile:1.2
+FROM golang:alpine AS build
+WORKDIR /workspace
+COPY . .
+RUN --mount=type=cache,id=gomod,target=/go/pkg/mod \
+    --mount=type=cache,id=gobuild,target=/root/.cache/go-build \
+    go build -o app
+
+FROM scratch
+COPY --from=build /workspace/app /app
+ENTRYPOINT [&quot;/app&quot;]
+</code></pre><h6 id=-stateful--worker-kaniko><em>stateful</em> worker kaniko</h6><p>This takes advantage of kaniko skipping <code>/var/run</code>,
+so we can put our mutable cache there and share it between runs.<pre><code class=language-sh>docker run --rm -it \
+  -v $(pwd):/workspace \
+  -v /path/to/mod/cache:/var/run/go-mod \
+  -v /path/to/build/cache:/var/run/go-build \
+  -w /workspace \
+  gcr.io/kaniko-project/executor:latest \
+  -c=. \
+  -f=Dockerfile \
+  -d=your.docker/registry/image
+</code></pre><p>with dockerfile:<pre><code class=language-Dockerfile>FROM golang:alpine AS build
+ENV GOCACHE=/var/run/go-build \
+    GOMODCACHE=/var/run/go-mod
+WORKDIR /workspace
+COPY . .
+RUN go build -o app
+
+FROM scratch
+COPY --from=build /workspace/app /app
+ENTRYPOINT [&quot;/app&quot;]
+</code></pre><h5 id=-stateless--workers><em>stateless</em> workers</h5><p>This is complicated,
+you have to trade off between downloading and restoring a cache,
+and just doing the work.<p>if you just want the download step to be cacheable as a layer:<pre><code class=language-Dockerfile>FROM golang:alpine AS build
+WORKDIR /workspace
+COPY go.mod go.sum .
+RUN go mod download
+
+COPY . .
+RUN go build -o app
+</code></pre><p>and run with the below if you're using multistage builds<pre><code class=language-sh>docker buildx \
+  --cache-from type=registry,ref=your.registry/image \
+  --cache-to   type=registry,ref=your.registry/image,mode=max \
+</code></pre><p>If you also want to share the build cache as a layer,
+the best way might be to build a base image with your code once,
+and update the base image every time you update dependencies.<pre><code class=language-Dockerfile>FROM golang:alpine AS base-image
+WORKDIR /workspace
+COPY . .
+RUN go build ./... &amp;&amp; \
+    rm -rf *
+</code></pre><h4 id=-questions-><em>questions</em></h4><p>The better places to ask questions:<p><code>#modules</code> on <a href=https://gophers.slack.com/>gophers slack</a>,
+<a href=https://join.slack.com/t/gophers/shared_invite/zt-o2s1e0w3-uQ1wyrfVloMffstqOgKIZQ>invite link</a><p>Mailing list: <a href=https://groups.google.com/g/golang-nuts>go-nuts</a><h4 id=-places--i-looked-for-questions><em>places</em> i looked for questions</h4><ul><li><a href=https://github.com/golang/go/wiki/ExperienceReports#modules>wiki</a>: experience reports<li><a href="https://www.google.com/search?q=site%3Areddit.com%2Fr%2Fgolang+modules">reddit</a>: first 100 results from google<li><a href="https://groups.google.com/g/golang-nuts/search?q=modules">go-nuts</a> search "modules" up to 2020<li><a href="https://github.com/golang/go/issues?page=10&q=label%3Amodules">issues</a>: label modules, also <a href="https://www.google.com/search?q=site:github.com/golang/go/issues+modules+problems">google search</a><li>random blogs i found</ul><h5 id=-reports-><em>reports</em></h5><p>summary / comments<ul><li><a href=https://groups.google.com/g/golang-nuts/c/21xRZmknkQQ/m/kX_JlOSHCwAJ>abusing go as generic depenency manager</a> 2020, ...<li><a href=https://www.reddit.com/r/golang/comments/9u4zsj/go_modules_checksum_mismatch/>checksum mismatch</a> 2018, lots of reasons<li><a href=https://www.reddit.com/r/golang/comments/9p2xti/go_modules_cache_location/>CI and mod cache</a> 2018-2020, it's complicated<li><a href=https://www.cockroachlabs.com/blog/dep-go-modules/>Cockroach migration</a> 2021, dep->modules, go.sum lines, tooling versioning, c/proto files<li><a href=https://groups.google.com/g/golang-nuts/c/PPmCyg4T1hY/m/uqt1f9sCBgAJ>codegen</a> 2020, no, pregenerate<li><a href=https://groups.google.com/g/golang-nuts/c/gjM1zVnd7Ek/m/w8lOn9v-AQAJ>contribution / fork flow</a> 2021, more examples?<li><a href=https://gist.github.com/ineiti/4a4a1798876225f7a553a13120d705ae>Cothority</a> 2019, people are no longer forced to place repos in predictable locations<li><a href=https://www.reddit.com/r/golang/comments/9weqd8/does_go_modules_support_something_like_dev_only/>dev dependencies</a> 2018, not really possible<li><a href=https://discuss.dgraph.io/t/go-modules-on-badger-and-dgraph/4662>Dgraph / Badger</a> 2019, want v2 but don't want to force users to rewrite import path<li><a href=https://dgraph.io/blog/post/serialization-versioning/>Dgraph / Badger Round2</a> 2019, consider more than API compat in semver<li><a href=https://groups.google.com/g/golang-nuts/c/l7oXXpfmqUo/m/BGrzFqpWBgAJ>docker share module cache</a> 2021, need docker support<li><a href=https://github.com/golang/go/issues/37724>exclude directories</a> 2020, add a go.mod<li><a href=https://groups.google.com/g/golang-nuts/c/RZ1qGp8REYg/m/QKe8QMofCwAJ>friction log</a> 2021, overloaded go get<li><a href=https://github.com/golang/go/issues/34094>gitlab subgroups</a> 2019, fixed<li><a href=https://groups.google.com/g/golang-nuts/c/0VgPQbQEKdU/m/qFKLoVQpAgAJ>go create</a> 2021, unclear problem statement<li><a href=https://utcc.utoronto.ca/~cks/space/blog/programming/GoModulesGoVersionWhy>Go directive</a> 2021, better docs needed?<li><a href=https://www.reddit.com/r/golang/comments/aspm32/godoc_with_modules_outside_gopath/>godoc with modules</a> 2019, it works now<li><a href=https://groups.google.com/g/golang-nuts/c/KL0VwEN--k0/m/BYewzynlFQAJ>gopath / code layout</a> 2021, <code>GOPATH/src/*/</code> interdependencies?<li><a href=https://gist.github.com/myitcv/79c3f12372e13b0cbbdf0411c8c46fd5>GopherJS Migration</a> 2018, should've done everything in a single commit<li><a href=https://github.com/KateGo520/Hero/issues/1>Hero</a> 2021, references mostly 2018-2019 issues, issues supporting modules / GOPATH simultaneously<li><a href=https://www.reddit.com/r/golang/comments/j8pqms/go_modules_making_me_rage_how_do_i_fork_a_module/>How to fork</a> 2020, people seem to get this wrong pretty often, also <a href=https://www.reddit.com/r/golang/comments/guf22q/golang_modules_and_developing_in_a_fork_to/>1</a><li><a href=https://www.reddit.com/r/golang/comments/98hbvk/go_modules_how_to_deal_with_test_dependencies/>ignore dependency's test dependencies</a> 2018, lazy module loading?<li><a href=https://groups.google.com/g/golang-nuts/c/d3ZMjah6VGE/m/HULNtwu9BgAJ>internal, relative?</a> 2021, internal is enforced<li><a href=https://groups.google.com/g/golang-nuts/c/FAO6x5AhfPg/m/dPvO_5r1FgAJ>k8s and module cycles</a> 2021, k8s and prometheus, also <a href=https://twitter.com/rakyll/status/1348723364894961666>1</a><li><a href=https://www.reddit.com/r/golang/comments/g9mrtn/managing_licenses_with_go_modules/>license check</a> 2020, go list -> go license<li><a href=https://utcc.utoronto.ca/~cks/space/blog/programming/GoModuleSupportNeed>Linux distro Go version</a> 2021, stable distros are slow<li><a href=https://groups.google.com/g/golang-nuts/c/WbbVeO321ak/m/3QmWi5vdBgAJ>local debug</a> 2021, local replace, also <a href=https://groups.google.com/g/golang-nuts/c/9MfGXLmRu8w/m/D2gm_viYBAAJ>1</a> <a href=https://groups.google.com/g/golang-nuts/c/9-5aDopSGvo/m/dLGsOtnQBQAJ>2</a> <a href=https://groups.google.com/g/golang-nuts/c/ga1XPbquXL4/m/DBhDCNG3AAAJ>3</a><li><a href=https://www.reddit.com/r/golang/comments/ah0w1q/modules_and_local_imports/>Local only code</a> 2019, module names != code lives on internet, also <a href=https://www.reddit.com/r/golang/comments/fix89j/using_modules_locally_without_publishing_to_vcs/>1</a> <a href=https://www.reddit.com/r/golang/comments/kcc2td/importing_a_module_from_a_local_path/>2</a><li><a href=https://github.com/golang/go/issues/40513>mod graph confusion</a> 2020, replaces source code not version<li><a href=https://evilmartians.com/chronicles/speeding-up-go-modules-for-docker-and-ci>module and ci</a> 2019, download only<li><a href=https://groups.google.com/g/golang-nuts/c/2Xcfb4f7ans/m/M6Eg50DhBwAJ>modules and gopls</a> 2021, need to exmplain module path, gopls woes, also <a href=https://groups.google.com/g/golang-nuts/c/KXmc4v2ay4k/m/jjiWOV20BgAJ>1</a><li><a href=https://www.reddit.com/r/golang/comments/9gwqg4/how_to_handle_working_on_multiple_modules_at_once/>Multiple module development</a> 2018-2020, this definitely needs better tooling, also <a href=https://www.reddit.com/r/golang/comments/jdwuyy/how_to_work_with_multiple_modules/>1</a> <a href=https://www.reddit.com/r/golang/comments/juizr6/what_is_the_current_115_best_practice_to_work_on/>2</a> <a href=https://www.reddit.com/r/golang/comments/kku3ec/local_development_between_2_go_modules/>3</a> <a href=https://www.reddit.com/r/golang/comments/ejsgl0/using_local_development_modules_without_pushing/>4</a> <a href=https://www.reddit.com/r/golang/comments/lvqgln/how_do_you_do_rapid_development_with_modules/>5</a><li><a href=https://groups.google.com/g/golang-nuts/c/HOfo5INo3nM/m/C0e9fPduAQAJ>need example</a> 2021, example workflow, local only<li><a href=https://github.com/golang/go/issues/40323>new major versions</a> proposal<li><a href=https://groups.google.com/g/golang-nuts/c/JAmfHLMN2XE/m/EK5lIRoICgAJ>no commands to work across module boundaries</a> 2021, unfortunate, also <a href=https://groups.google.com/g/golang-nuts/c/B-gvL92b2Vo/m/EqzEzewoDgAJ>1</a><li><a href=https://groups.google.com/g/golang-nuts/c/7Z6U5aKxaJI/m/-Trvp6sxBgAJ>non root tags</a> 2020, docs<li><a href=https://groups.google.com/g/golang-nuts/c/_BqV6Rk15UA/m/ns4y8jbxBgAJ>painful</a> 2021, multiple interdependent flows, more docs for independent / small teams<li><a href=https://www.reddit.com/r/golang/comments/bxnqcb/applying_patches_to_go_module_dependencies/>patching</a> 2019, complicated by caddy doing nonstandard<li><a href=https://www.reddit.com/r/golang/comments/fmrmbq/help_unable_to_setup_go_modules_with_private/>private bitbucket</a> 2020, GOPRIVATE<li><a href=https://www.reddit.com/r/golang/comments/9els7j/go_module_with_private_gitlab_repos/>private gitlab</a> 2018, .netrc<li><a href=https://groups.google.com/g/golang-nuts/c/dp96wZbHtvs/m/qybVYz1WBAAJ>private, ssh</a> 2021, more visible docs? also <a href=https://groups.google.com/g/golang-nuts/c/0uMSmt_TnKM/m/oB_TqrFcAgAJ>1</a> <a href=https://groups.google.com/g/golang-nuts/c/lIIxpRmAuYY/m/pF402MkmCAAJ>2</a><li><a href=https://www.reddit.com/r/golang/comments/igyry9/go_modules_and_project_structuring/>project structuring</a> 2020, not exactly modules problem<li><a href=https://www.reddit.com/r/golang/comments/9s3512/go_modules_and_importing_protobuf_files/>protobuf</a> 2018, precompile protos, also <a href=https://www.reddit.com/r/golang/comments/gdv1ah/go_modules_and_proto/>1</a><li><a href=https://www.reddit.com/r/golang/comments/d2n5s0/error_410_gone_when_switching_to_modules_in_go_113/>proxy 410 gone</a> 2019, invalid file name, private code<li><a href=https://github.com/golang/go/issues/38065>proxy cache issues</a> ongoing, set GOPROXY<li><a href=https://www.reddit.com/r/golang/comments/f243lc/go_modules_proxy/>proxy operations problems</a> 2020, proxy dependent?<li><a href=https://www.rallyhealth.com/coding/docker-moby-go-dependencies>Rally / Docker rename</a> 2017, docker/docker -> moby/moby, solved by modules requiring canonical import path<li><a href=https://blog.samwhited.com/2019/01/supporting-go-modules/>SamWhited migrating multiple projects</a> 2019, tooling could definitely be improved<li><a href=https://www.reddit.com/r/golang/comments/lkenmn/modules_how_do_i_show_the_chain_of_dependencies/>Show chain of dependencies</a> 2021, <code>go mod why</code> is anemic<li><a href=https://groups.google.com/g/golang-nuts/c/bxbe9vI6Duc/m/LNtAMC3EBQAJ>simple test programs</a> 2021, go run *.go<li><a href=https://brandon.dimcheff.com/2019/04/go-modules-the-best-of-both-worlds/>Tooling</a> 2019, tooling support for modules is only halfway there<li><a href=https://www.reddit.com/r/golang/comments/kqf3ui/modules_hellp_private_modules_monorepo_module/>too many go.mod</a> 2021, as title<li><a href=https://utcc.utoronto.ca/~cks/space/blog/programming/GoModuleBuildsWhatPossible>Too optimized for remote repos</a> 2021, tooling changes should stabilize soon, <code>@ref</code>, losing clone into <code>GOPATH/src</code><li><a href=https://groups.google.com/g/golang-nuts/c/aOvjBRUWJPA/m/c3CqVI9iFwAJ>unversioned not latest major</a> 2021, SIV<li><a href=https://www.reddit.com/r/golang/comments/9ahlvo/use_branches_with_go_modules/>use branched</a> 2018, @ref allows branches<li><a href=https://www.reddit.com/r/golang/comments/b9osrj/modules_and_vendoring/>vendor and modules</a> 2019, it automatically uses vendor now<li><a href=https://www.reddit.com/r/golang/comments/bdtrti/best_way_to_visualize_library_dependencies_with/>visualize dependency graph</a> 2019, needs better tooling</ul><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

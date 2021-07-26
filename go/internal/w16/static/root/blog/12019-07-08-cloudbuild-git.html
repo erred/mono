@@ -1,0 +1,68 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>cloudbuild git</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12019-07-08-cloudbuild-git/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="git stuff done on cloudbuild"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12019-07-08</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><p><a href=https://cloud.google.com/cloud-build/>Google Cloud Build</a>,
+the minimalist CI system that is kinda close to
+<a href=https://knative.dev/docs/build/>Knative Build</a><p>Anyways,
+here's to working with git in the cloud build environment<h3 id=environment>Environment</h3><p>you are <em>root</em>,
+your repo is shallow cloned into <code>/workspace</code><h4 id=-github--permissions><em>Github</em> Permissions</h4><p>goals: make a mountable volume with github permissions<p>use by mounting the volume into other steps,
+<code>git push</code>... should just work<ol><li>create key <code>ssh-keygen -t ed25519 -C some_descriptive_comment -f ssh_keyfile</code><li>add key to Github repo > Settings > Deploy Keys > Add deploy key > copy and paste <code>ssh_keyfile.pub</code><li>create GCP KMS keyring <code>gcloud kms keyrings create keyring_name --location global</code><li>create GCP KMS key <code>gcloud kms keys create key_name --location=global --keyring=keyring_name --purpose=encryption</code><li>encrypt ssh private key <code>gcloud kms encrypt --plaintext-file=ssh_keyfile --ciphertext-file=ssh_keyfile.kms --location=global --keyring=keyring_name --key=key_name</code><li>add cloudbuild step</ol><p>cloudbuild.yaml:<pre><code>secrets:
+  - kmsKeyName: projects/project_id/locations/global/keyRings/keyring_name/cryptoKeys/key_name
+    secretEnv:
+      GH_KEY: ouput of $(base64 ssh_keyfile.kms)
+steps:
+  - id: setup git permissions
+    name: gcr.io/cloud-builders/gcloud
+    # this is Github's public key
+    # get by running: ssh-keyscan -t rsa github.com
+    env:
+      - GH_KNOWN=github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8V
+    secretEnv:
+      - GH_KEY
+    entrypoint: bash
+    volumes:
+      - name: config
+        path: /root
+    args:
+      - -c
+      - &gt;-
+        set -euxo pipefail &amp;&amp;
+        mkdir -p /root/.ssh &amp;&amp;
+        printenv GH_KNOWN &gt; /root/.ssh/known_hosts &amp;&amp;
+        printenv GH_KEY &gt; /root/.ssh/id_ed25519 &amp;&amp; chmod 0600 /root/.ssh/id_ed25519 &amp;&amp;
+        echo Hostname github.com &gt;&gt; /root/.ssh/config &amp;&amp; echo IdentityFile /root/.ssh/id_ed25519 &gt;&gt; /root/.ssh/config &amp;&amp;
+        git config user.email $(gcloud auth list --filter=status:ACTIVE --format='value(account)')
+
+
+  - id: test git push
+    name: gcr.io/cloud-builders/git
+    volumes:
+      - name: config
+        path: /root
+    entrypoint: bash
+    args:
+      - -c
+      - &gt;-
+        set -euxo pipefail &amp;&amp;
+        touch test_file &amp;&amp;
+        git add test_file &amp;&amp;
+        git commit -m &quot;add test file&quot; &amp;&amp;
+        git push git@github.com:user/repo $BRANCH_NAME
+
+</code></pre><h4 id=getting-more--history->Getting More <em>History</em></h4><p>goals: restore history and branch names<p>cloudbuild shallow clones the current commit to save time,
+it is also set as <code>master</code><pre><code>steps:
+  - id: restore history
+    name: gcr.io/cloud-builders/git
+    entrypoint: bash
+    args:
+    - -c
+    - &gt;-
+      set -euxo pipefail &amp;&amp;
+      git fetch --unshallow &amp;&amp;              # gets all history use --depth=n for more limited history
+      git branch -m $BRANCH_NAME &amp;&amp;         # rename current branch to its original name
+      git checkout -b master origin/master  # set master to upstream master
+
+</code></pre><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

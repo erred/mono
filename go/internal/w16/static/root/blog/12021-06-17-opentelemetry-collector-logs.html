@@ -1,0 +1,111 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>opentelemetry-collector logs</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12021-06-17-opentelemetry-collector-logs/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="collecting logs with otel"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12021-06-17</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-logs-><em>logs</em></h3><p>The formalized version of <em>printf</em> debugging.
+Anyway, you run a lot of applications written by a lot of different people.
+Their logs are all over the place, what can you do?<p>Recently the <a href=https://opentelemetry.io/docs/collector/>OpenTelemetry Collector</a>,
+with the donation of <a href=https://github.com/open-telemetry/opentelemetry-log-collection>stanza / opentelemetry-log-collection</a>
+gained the ability to <a href=https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver>collect logs</a>,
+do some light processing and ship them elsewhere.
+It's still early so sort of limited in what it can do.<p>Let's look at log outputs from some Go logging libraries and how you'd parse them.<h4 id=-std--log><em>std</em> log</h4><p>While the <a href=https://pkg.go.dev/log>log</a> package does have flags for you to control output,
+In the standard config it just adds time.
+It also has no structure in the messages:<pre><code>2021/06/17 22:37:44 Something happened foo=bar
+</code></pre><p>This can be parsed with:<pre><code class=language-yaml>receivers:
+  filelog/std:
+    include:
+      - std.log
+    operators:
+      - type: regex_parser
+        regex: '^(?P&lt;timestamp_field&gt;.{19}) (?P&lt;message&gt;.*)$'
+        timestamp:
+          parse_from: timestamp_field
+          layout_type: strptime
+          layout: '%Y/%m/%d %T'
+</code></pre><p>Resulting in (otel logging exporter output):<pre><code>Resource labels:
+     -&gt; host.name: STRING(eevee)
+     -&gt; os.type: STRING(LINUX)
+InstrumentationLibraryLogs #0
+InstrumentationLibrary
+LogRecord #0
+Timestamp: 2021-06-17 22:37:44 +0000 UTC
+Severity: Undefined
+ShortName:
+Body: {
+     -&gt; message: STRING(Something happened foo=bar)
+}
+</code></pre><h4 id=-json-><em>json</em></h4><p>There are a lot of structured loggers out there,
+I happen to like <a href=https://github.com/rs/zerolog>zerolog</a>.<pre><code>{&quot;level&quot;:&quot;error&quot;,&quot;error&quot;:&quot;oops&quot;,&quot;foo&quot;:&quot;bar&quot;,&quot;time&quot;:&quot;2021-06-17T22:38:02+02:00&quot;,&quot;message&quot;:&quot;something bad happened&quot;}
+</code></pre><p>json is well supported<p><em>note:</em> the
+<a href=https://github.com/observiq/ctimefmt/blob/3e07deba22cf7a753f197ef33892023052f26614/ctimefmt.go#L63>strptime</a>
+parser seems to take issue with the timezone for some reason,
+so I'm using the <a href=https://pkg.go.dev/time#Parse>Go time parser</a><pre><code class=language-yaml>receivers:
+  filelog/json:
+    include:
+      - json.log
+    include_file_name: false
+    operators:
+      - type: json_parser
+        timestamp:
+          parse_from: time
+          layout_type: gotime
+          layout: 2006-01-02T15:04:05Z07:00
+        severity:
+          parse_from: level
+</code></pre><p>output:<pre><code>Resource labels:
+     -&gt; host.name: STRING(eevee)
+     -&gt; os.type: STRING(LINUX)
+InstrumentationLibraryLogs #0
+InstrumentationLibrary
+LogRecord #0
+Timestamp: 2021-06-17 20:38:02 +0000 UTC
+Severity: Error
+ShortName:
+Body: {
+     -&gt; error: STRING(oops)
+     -&gt; foo: STRING(bar)
+     -&gt; message: STRING(something bad happened)
+}
+</code></pre><h4 id=-klog---glog><em>klog</em> / glog</h4><p><a href=https://pkg.go.dev/k8s.io/klog/v2>klog</a> is kubernetes' standard logger,
+mostly based on <a href=https://pkg.go.dev/github.com/golang/glog>glog</a>.
+And recent versions have gained support for structured logging.
+But this is where we reach the limits of the current log parser.<p>Unlike <a href=https://github.com/grafana/loki>loki</a> it doesn't
+have a <a href=https://brandur.org/logfmt>logfmt</a>
+<a href=https://grafana.com/docs/loki/latest/logql/#logfmt>parser</a>
+meaning your <code>key=value</code> pairs are just stuck there.
+All the more reason to use json loggers then...<pre><code>E0617 22:38:02.013247   76356 main.go:57]  &quot;msg&quot;=&quot;something bad happened&quot; &quot;error&quot;=&quot;oops&quot;
+</code></pre><p>config:<pre><code class=language-yaml>receivers:
+  filelog/klog:
+    include:
+      - klog.log
+    include_file_name: false
+    operators:
+      - type: regex_parser
+        # Lmmdd hh:mm:ss.uuuuuu threadid file:line]
+        regex: '^(?P&lt;level&gt;[EI])(?P&lt;timestamp_field&gt;.{20})\s+(?P&lt;threadid&gt;\d+)\s(?P&lt;file&gt;\w+\.go):(?P&lt;line&gt;\d+)]\s+(?P&lt;message&gt;.*)$'
+        timestamp:
+          parse_from: timestamp_field
+          layout: '%m%d %H:%M:%S.%f'
+        severity:
+          parse_from: level
+          mapping:
+            error: E
+            info: I
+</code></pre><p>result<pre><code>Resource labels:
+     -&gt; host.name: STRING(eevee)
+     -&gt; os.type: STRING(LINUX)
+InstrumentationLibraryLogs #0
+InstrumentationLibrary
+LogRecord #0
+Timestamp: 2021-06-17 22:38:02.013247 +0000 UTC
+Severity: Error
+ShortName:
+Body: {
+     -&gt; file: STRING(main.go)
+     -&gt; line: STRING(57)
+     -&gt; msg: STRING(&quot;msg&quot;=&quot;something bad happened&quot; &quot;error&quot;=&quot;oops&quot;  )
+     -&gt; threadid: STRING(73779)
+}
+</code></pre><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

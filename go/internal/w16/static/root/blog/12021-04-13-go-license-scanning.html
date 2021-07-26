@@ -1,0 +1,288 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>go license scanning</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12021-04-13-go-license-scanning/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="did i accidentally use any GPL things..."><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12021-04-13</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-license--scan><em>license</em> scan</h3><p>Open source is fun, but also kinda annoying.
+See that thing? It's free and available to use,
+except it has an incompatible license....<p>Anyway, find out if you're accidentally violating any today<h4 id=-tools-><em>tools</em></h4><p><em>go-licenses</em> is probably your best bet right now.<h5 id=-i--tried><em>i</em> tried</h5><h6 id=go-licenses>go-licenses</h6><p><a href=https://github.com/google/go-licenses>go-licenses</a><p>This one also tried to discover the url for the licenses,
+drop stderr to ignore the errors from it not understanding vanity imports.<pre><code class=language-sh>$ git clone https://github.com/google/go-licenses
+$ cd go-licenses
+$ go install
+
+$ cd ~/w
+$ go-licenses csv ./... 2&gt;/dev/null
+go.opentelemetry.io/contrib/instrumentation/host,Unknown,Apache-2.0
+go.opentelemetry.io/otel/metric,Unknown,Apache-2.0
+github.com/felixge/httpsnoop,https://github.com/felixge/httpsnoop/blob/master/LICENSE.txt,MIT
+github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg,https://github.com/prometheus/common/blob/master/internal/bitbucket.org/ww/goautoneg/README.txt,BSD-3-Clause
+go.opentelemetry.io/otel/exporters/metric/prometheus,Unknown,Apache-2.0
+github.com/golang/protobuf,https://github.com/golang/protobuf/blob/master/LICENSE,BSD-3-Clause
+github.com/matttproud/golang_protobuf_extensions/pbutil,https://github.com/matttproud/golang_protobuf_extensions/blob/master/pbutil/LICENSE,Apache-2.0
+github.com/prometheus/procfs,https://github.com/prometheus/procfs/blob/master/LICENSE,Apache-2.0
+go.opentelemetry.io/otel,Unknown,Apache-2.0
+github.com/cespare/xxhash/v2,https://github.com/cespare/xxhash/blob/master/v2/LICENSE.txt,MIT
+github.com/prometheus/common,https://github.com/prometheus/common/blob/master/LICENSE,Apache-2.0
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp,Unknown,Apache-2.0
+github.com/prometheus/client_golang/prometheus,https://github.com/prometheus/client_golang/blob/master/prometheus/LICENSE,Apache-2.0
+github.com/beorn7/perks/quantile,https://github.com/beorn7/perks/blob/master/quantile/LICENSE,MIT
+go.opentelemetry.io/otel/sdk/export/metric,Unknown,Apache-2.0
+go.opentelemetry.io/otel/sdk,Unknown,Apache-2.0
+github.com/yuin/goldmark-meta,https://github.com/yuin/goldmark-meta/blob/master/LICENSE,MIT
+gopkg.in/yaml.v2,Unknown,Apache-2.0
+github.com/shirou/gopsutil,https://github.com/shirou/gopsutil/blob/master/LICENSE,BSD-3-Clause
+go.opentelemetry.io/contrib,Unknown,Apache-2.0
+github.com/prometheus/client_model/go,https://github.com/prometheus/client_model/blob/master/go/LICENSE,Apache-2.0
+golang.org/x/sys,Unknown,BSD-3-Clause
+go.opentelemetry.io/otel/trace,Unknown,Apache-2.0
+go.opentelemetry.io/contrib/instrumentation/runtime,Unknown,Apache-2.0
+go.opentelemetry.io/otel/sdk/metric,Unknown,Apache-2.0
+go.seankhliao.com/w/v15,Unknown,MIT
+github.com/go-logr/logr,https://github.com/go-logr/logr/blob/master/LICENSE,Apache-2.0
+google.golang.org/protobuf,Unknown,BSD-3-Clause
+k8s.io/klog/v2,Unknown,Apache-2.0
+github.com/yuin/goldmark,https://github.com/yuin/goldmark/blob/master/LICENSE,MIT
+</code></pre><h6 id=wwhrd>wwhrd</h6><p><a href=https://github.com/frapposelli/wwhrd>wwhrd</a><p>I think it's too fine grained? working on the package instead of the module/repo level.<pre><code class=language-sh>$ git clone https://github.com/frapposelli/wwhrd
+$ cd wwhrc
+$ go install .
+
+$ cd ~/w
+$ go mod vendor
+$ wwhrd list
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/trace
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/set
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark/extension
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/controller/time
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/instrumentation
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/encoding/protowire
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/genname
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/filetype
+INFO[0001] Found License                                 license=MIT package=github.com/beorn7/perks/quantile
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/controller/basic
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/semconv
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/encoding/prototext
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/reflect/protoregistry
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/descfmt
+INFO[0001] Found License                                 license=MIT package=github.com/go-ole/go-ole
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/procfs/internal/util
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/trace
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/fieldsort
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/internal/global
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/detrand
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/encoding/tag
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/encoding/messageset
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/aggregator/sum
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/internal/trace/parent
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/pragma
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/internal/baggage
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/common/model
+INFO[0001] Found License                                 license=MIT package=github.com/StackExchange/wmi
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/procfs/internal/fs
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark-meta
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/golang/protobuf/ptypes/duration
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark/extension/ast
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/client_golang/prometheus/internal
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/shirou/gopsutil/cpu
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/shirou/gopsutil/internal/common
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/aggregator/minmaxsumcount
+INFO[0001] Found License                                 license=Apache-2.0 package=gopkg.in/yaml.v2
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/shirou/gopsutil/mem
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/errors
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark/text
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/runtime/protoimpl
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/golang/protobuf/ptypes/any
+INFO[0001] Found License                                 license=BSD-3-Clause package=golang.org/x/sys/unix
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/internal
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/export/trace
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/encoding/text
+INFO[0001] Found License                                 license=MIT package=github.com/felixge/httpsnoop
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/flags
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/propagation
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/shirou/gopsutil/process
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/attribute
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/metric/global
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/procfs
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/client_golang/prometheus/promhttp
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark/ast
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/metric
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/internal
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/unit
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/internal/metric
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark/util
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/metric/registry
+INFO[0001] Found License                                 license=BSD-3-Clause package=golang.org/x/sys/internal/unsafeheader
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/golang/protobuf/ptypes/timestamp
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/version
+INFO[0001] Found License                                 license=Apache-2.0 package=k8s.io/klog/v2/klogr
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/client_golang/prometheus
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/types/known/anypb
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/runtime/protoiface
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/export/metric
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/common/expfmt
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/fieldnum
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark/renderer
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/encoding/defval
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/selector/simple
+INFO[0001] Found License                                 license=MIT package=github.com/cespare/xxhash/v2
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/aggregator/exact
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/strs
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/shirou/gopsutil/net
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark/parser
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/contrib
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/resource
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/contrib/instrumentation/runtime
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/filedesc
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/proto
+INFO[0001] Found License                                 license=MIT package=github.com/go-ole/go-ole/oleutil
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/prometheus/client_model/go
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/aggregator
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/impl
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/aggregator/histogram
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/matttproud/golang_protobuf_extensions/pbutil
+INFO[0001] Found License                                 license=BSD-3-Clause package=golang.org/x/sys/windows
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark/renderer/html
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/descopts
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/types/known/durationpb
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/golang/protobuf/proto
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/internal/mapsort
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/exporters/metric/prometheus
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/metric/processor/basic
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/internal/trace/noop
+INFO[0001] Found License                                 license=Apache-2.0 package=k8s.io/klog/v2
+INFO[0001] Found License                                 license=Apache-2.0 package=github.com/go-logr/logr
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/types/known/timestamppb
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/codes
+INFO[0001] Found License                                 license=MIT package=github.com/yuin/goldmark
+INFO[0001] Found License                                 license=BSD-3-Clause package=google.golang.org/protobuf/reflect/protoreflect
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/metric/number
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/contrib/instrumentation/host
+INFO[0001] Found License                                 license=BSD-3-Clause package=github.com/golang/protobuf/ptypes
+INFO[0001] Found License                                 license=Apache-2.0 package=go.opentelemetry.io/otel/sdk/export/metric/aggregation
+</code></pre><h6 id=golicense>golicense</h6><p><a href=https://github.com/mitchellh/golicense>golicense</a><p>This works on final binaries, so no test dependencies included...<p>also reaches out to github.<pre><code class=language-sh>$ git clone https://github.com/mitchellh/golicense
+$ cd golicense
+$ go install .
+
+$ cd ~/w
+$ go build ./cmd/w
+$ golicense -plain w
+github.com/beorn7/perks                                       MIT License
+github.com/prometheus/common                                  Apache License 2.0
+github.com/cespare/xxhash                                     MIT License
+github.com/golang/protobuf                                    BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License
+github.com/shirou/gopsutil                                    BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License
+github.com/prometheus/client_golang                           Apache License 2.0
+github.com/prometheus/client_model                            Apache License 2.0
+go.opentelemetry.io/contrib                                   Apache License 2.0
+go.opentelemetry.io/otel                                      Apache License 2.0
+go.opentelemetry.io/contrib/instrumentation/runtime           Apache License 2.0
+github.com/felixge/httpsnoop                                  MIT License
+github.com/go-logr/logr                                       Apache License 2.0
+github.com/prometheus/procfs                                  Apache License 2.0
+golang.org/x/sys                                              BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License
+go.opentelemetry.io/otel/trace                                Apache License 2.0
+google.golang.org/protobuf                                    BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License
+go.opentelemetry.io/otel/metric                               Apache License 2.0
+go.opentelemetry.io/contrib/instrumentation/host              Apache License 2.0
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp Apache License 2.0
+go.opentelemetry.io/otel/exporters/metric/prometheus          Apache License 2.0
+k8s.io/klog                                                   Apache License 2.0
+github.com/matttproud/golang_protobuf_extensions              Apache License 2.0
+go.opentelemetry.io/otel/sdk                                  Apache License 2.0
+go.opentelemetry.io/otel/sdk/metric                           Apache License 2.0
+go.opentelemetry.io/otel/sdk/export/metric                    Apache License 2.0
+</code></pre><h6 id=lc>lc</h6><p><a href=https://github.com/boyter/lc>lc</a><p>only walks filesystem paths (works better if you vendor all your deps)<pre><code class=language-sh>$ git clone https://github.com/boyter/lc
+$ cd lc
+$ ./generate_database.sh
+$ go install .
+
+$ cd ~/w
+$ go mod vendor
+$ lc
+LICENSE
+ likely licence; unable to identify
+content/blog/12019-06-18-license-to-hack.md
+ likely licence; unable to identify
+content/blog/12021-04-13-go-license-scanning.md
+ likely licence; unable to identify
+vendor/github.com/StackExchange/wmi/LICENSE
+ likely licence; unable to identify
+vendor/github.com/beorn7/perks/LICENSE
+ likely licence; unable to identify
+vendor/github.com/cespare/xxhash/v2/LICENSE.txt
+ likely licence; unable to identify
+vendor/github.com/felixge/httpsnoop/LICENSE.txt
+ likely licence; unable to identify
+vendor/github.com/go-logr/logr/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/github.com/go-ole/go-ole/LICENSE
+ likely licence; unable to identify
+vendor/github.com/golang/protobuf/LICENSE
+ Blended BSD-3-Clause 79.60701512785884
+vendor/github.com/matttproud/golang_protobuf_extensions/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/github.com/prometheus/client_golang/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/github.com/prometheus/client_model/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/github.com/prometheus/common/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/github.com/prometheus/procfs/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/github.com/shirou/gopsutil/LICENSE
+ Blended BSD-3-Clause 79.44269573919561
+vendor/github.com/yuin/goldmark/LICENSE
+ likely licence; unable to identify
+vendor/github.com/yuin/goldmark-meta/LICENSE
+ likely licence; unable to identify
+vendor/go.opentelemetry.io/contrib/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/contrib/instrumentation/host/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/contrib/instrumentation/runtime/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/otel/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/otel/exporters/metric/prometheus/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/otel/metric/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/otel/sdk/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/otel/sdk/export/metric/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/otel/sdk/metric/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/go.opentelemetry.io/otel/trace/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/golang.org/x/sys/LICENSE
+ Blended BSD-3-Clause 79.63331092357137
+vendor/golang.org/x/sys/unix/syscall_bsd.go
+ likely licence; unable to identify
+vendor/golang.org/x/sys/unix/xattr_bsd.go
+ likely licence; unable to identify
+vendor/google.golang.org/protobuf/LICENSE
+ likely licence; unable to identify
+vendor/gopkg.in/yaml.v2/LICENSE
+ Blended Apache-2.0 82.67973856209152
+vendor/gopkg.in/yaml.v2/LICENSE.libyaml
+ likely licence; unable to identify
+vendor/k8s.io/klog/v2/LICENSE
+ likely licence; unable to identify
+</code></pre><h6 id=go-license-detector>go-license-detector</h6><p><a href=https://github.com/go-enry/go-license-detector>go-license-detector</a><p>Doesn't seem to find anything from my dependencies?<pre><code class=language-sh>$ git clone https://github.com/go-enry/go-license-detector
+$ cd go-license-detector
+$ go install ./cmd/license-detector
+
+$ cd ~/w
+$ license-detector .
+.
+        95%        MIT
+        82%        MIT-0
+</code></pre><h5 id=-other--tools><em>other</em> tools</h5><h6 id=snyk>snyk</h6><p><a href=https://snyk.io/>snyk</a><p>apparently it can do this? but I think you have to link your source code to their online service...<h6 id=licensed>licensed</h6><p><a href=https://github.com/github/licensed>licensed</a><p>don't know how to run ruby, also works on file paths only (vendor)<footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

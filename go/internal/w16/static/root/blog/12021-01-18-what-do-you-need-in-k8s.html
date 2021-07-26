@@ -1,0 +1,88 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>what do you need in k8s</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12021-01-18-what-do-you-need-in-k8s/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="k8s, the build-a-bear diy PaaS thing"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12021-01-18</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-kubernetes-><em>kubernetes</em></h3><p>You're thinking of running <a href=https://kubernetes.io/>kubernetes</a>.
+Let's think this through first.<h4 id=-before--you-start><em>before</em> you start</h4><p>Where do you want to run it?
+In the cloud with a managed control plane:
+<a href=https://cloud.google.com/kubernetes-engine>GKE</a>,
+<a href=https://aws.amazon.com/eks/>EKS</a>?
+In the cloud with bare VMs?
+Or on prem?<p>If it's managed,
+do you use <a href=https://www.terraform.io/>terraform</a>,
+use the cloud provider specific CLI / SDK / config management,
+or do you have a snowflake cluster where you can use <a href=https://gardener.cloud/>gardener</a>.<p>If not, you need to at least choose:
+a <a href=https://github.com/containernetworking/cni>CNI</a> provider for networking,
+and a <a href=https://github.com/container-storage-interface/spec>CSI</a> provider for storage.
+Which one is probably going to be affected by the features you need later.<p>Also, you need to decide how you want to spin up / manage your nodes / kubelets.
+<a href=https://github.com/kubernetes/kubeadm>kubeadm</a>,
+<a href=https://k3s.io/>k3s</a>, ...
+or something more specialized, maybe <a href=https://k0sproject.io/>k0s</a>.<h4 id=-config--management><em>config</em> management</h4><p>You have a cluster, now you want to install stuff into it.
+Best to decide now which tool you want to use and <em>standardize</em> on it.
+<a href=https://helm.sh/>helm</a> is <em>the</em> package manager, but it's a shitty one,
+you're almost certainly better off without it unless you run stock everything.
+You can always use raw manifests
+but <a href=https://kustomize.io/>kustomize</a> is a worthwhile layer on top,
+it even comes built in with <a href=https://kubernetes.io/docs/reference/kubectl/kubectl/>kubectl</a>.<p>Or you just need to be different,
+<a href=https://grafana.com/oss/tanka/>grafana tanka</a> uses jsonnet,
+terraform has a <a href=https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs>kubernetes</a> provider.<p>Whatever you choose, you also have the problem of secrets.
+<a href=https://github.com/bitnami-labs/sealed-secrets>sealed-secrets</a> are a write only solution,
+a lot of other ones use <a href=https://github.com/mozilla/sops>sops</a> under the hood,
+like <a href=https://github.com/viaduct-ai/kustomize-sops>ksops</a>.
+Or be like me and hack up some dingy solution with <a href=https://git-scm.com/docs/gitattributes#_filter>gitattributes filter</a>
+and <a href=https://github.com/FiloSottile/age>age</a>.<h4 id=-cluster--basics><em>cluster</em> basics</h4><p>It's alive, now what?
+If you serve web traffic,
+you'll want an <a href=https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/>ingress controller</a>
+to give you more than L4 routing,
+<a href=https://kubernetes.github.io/ingress-nginx/>ingress-nginx</a> is default
+(not to be confused with <a href=https://www.nginx.com/products/nginx-ingress-controller/>nginx ingress</a>),
+<a href=https://traefik.io/>traefik</a> is pretty popular if you're not doing weird stuff,
+or maybe you already know you need a service mesh,
+<a href=https://istio.io/>istio</a> has the most mindshare,
+<a href=https://linkerd.io/>linkerd</a> is another big one,
+others seem more half-hearted.<p>It's 2021, you need to serve TLS,
+<a href=https://cert-manager.io/>cert-manager</a> is almost mandatory,
+even if it is still a pain to manage/upgrade.
+If you do the sane thing and give each service its own subdomain,
+you'll need to manage your DNS entries too,
+<a href=https://github.com/kubernetes-sigs/external-dns>external-dns</a> can do that for you.<p>Oh and if you're not in the cloud, you'll need something like <a href=https://metallb.universe.tf/>MetalLB</a>,
+hostports, or some other way of exposing your ingress controllers to the outside world,
+<a href=https://www.envoyproxy.io/>envoy</a> with some static config
+will probably also work, you're only exposing a single service anyway.<h4 id=-observability-><em>observability</em></h4><p>What next? you can deploy your application now and it'll serve traffic just fine.
+But you want to know what it's doing, how well it's performing
+and have something to look at when things go wrong.
+Say hello to the 3 pillars of oberservability: <em>metrics</em>, <em>logs</em>, <em>tracing</em>.<p><a href=https://prometheus.io/>prometheus</a> is what everyone uses for metrics
+(unless you use some hosted thing), it scrapes metrics from various services and stores it.
+If you run at some mind boggling scale, you can consider
+<a href=https://thanos.io/>thanos</a> or <a href=https://cortexmetrics.io/>cortex</a>
+for scaling prometheus, but for most people a beefy prometheus (HA pair if you care) is enough.<p>Along with prometheus, you'll want:
+<a href=https://github.com/kubernetes/kube-state-metrics>kube-state-metrics</a> to expose k8s things to prometheus,
+<a href=https://github.com/prometheus/node_exporter>node exporter</a> for metrics about your host,
+<a href=https://github.com/prometheus/pushgateway>pushgateway</a> if you have things that can't be scraped,
+and <a href=https://github.com/prometheus/alertmanager>alertmanager</a> for alerting.<p>For logs you'll want <a href=https://grafana.com/docs/loki/latest/clients/promtail/>promtail</a> to scrape the logs,
+and <a href=https://grafana.com/docs/loki/latest/>loki</a> to store them.<p>Don't forget the most important part, pretty dashboards!
+Do you even have a choice other than <a href=https://grafana.com/>grafana</a>?<p>For tracing, well...
+until <a href=https://opentelemetry.io/>opentelemetry</a> manages to stop making breaking api changes every few weeks,
+one of <a href=https://www.jaegertracing.io/>jaeger</a> or <a href=https://zipkin.io/>zipkin</a> will have to do
+(both have committed to eventually converge on opentelemetry).
+Maybe you can store in <a href=https://grafana.com/oss/tempo/>grafana tempo</a>?<p>If you're fancy, you can run the <a href=https://github.com/open-telemetry/opentelemetry-collector>opentelemetry collector</a>
+to ingest traces and metrics so you can preprocess / filter / reexport them,
+you still need to store the data somewhere though, so it doesn't really save you from running the above components.<h4 id=-cicd-><em>cicd</em></h4><p>Now... you want a fluid way of getting your application code
+(or any of the previous components) into a running cluster.
+<code>git push</code> should be all you need!<p>For <em>CI</em> you may want some solution integrated with you code host,
+or you want to run something yourself,
+<a href=https://tekton.dev/>tekton</a> is a decent choice.<p>What about <em>CD</em>? What about it? If you believe in GitOps
+(code in git describes desired state, controllers make it happen),
+<a href=https://toolkit.fluxcd.io/>fluxcd</a> is available but
+<a href=https://argoproj.github.io/argo-cd/>argocd</a> is more mature.<h4 id=-security-><em>security</em></h4><p>Ah, better have a good threat model in mind before you start thinking about this.<p>For you cluster, you'll want to lock down <em>RBAC</em>,
+and since it's allow only (no deny) <a href=https://github.com/kubernetes-sigs/multi-tenancy/tree/master/incubator/hnc>hierarchical namespaces</a>
+make managing permissions less daunting.<p><a href=https://kubernetes.io/docs/concepts/policy/limit-range/>LimitRange</a> can ensure nothing will exhaust all your resources,
+<a href=https://kubernetes.io/docs/concepts/policy/pod-security-policy/>PodSecurityPolicies</a> limits the permissions of your pods,
+and <a href=https://kubernetes.io/docs/concepts/services-networking/network-policies/>NetworkPolicies</a> limits the cross talk between your services,
+though if you use istio you can control it at L7 with <a href=https://istio.io/latest/docs/reference/config/security/authorization-policy/>AuthorizationPolicies</a>.<p>I'm sure you can dream up of various things you want to enforce on your k8s objects
+<a href=https://github.com/open-policy-agent/gatekeeper>OpenPolicyAgent Gatekeeper</a> makes that possible.<p>What about protecting your services?
+<a href=https://pomerium.io/>pomerium</a> is a decent solution to implement SSO for multiple services with an external provider, integrating with your ingress controller.
+I'm sure you could cook up something similar with the <a href=https://www.ory.sh/>ory</a> projects.<h4 id=-are--we-done-yet><em>are</em> we done yet</h4><p>Maybe? Are we ever done?
+At least your resume is now filled with exciting new technologies...<footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

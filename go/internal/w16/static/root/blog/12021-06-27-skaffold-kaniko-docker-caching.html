@@ -1,0 +1,161 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>skaffold kaniko docker caching</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12021-06-27-skaffold-kaniko-docker-caching/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="the convoluted setup i go through to get proper caching"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12021-06-27</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-skaffold-><em>skaffold</em></h3><p><a href=https://skaffold.dev/>skaffold</a> is a great dev tool to detect code changes
+and manage the build & deploy phases.
+I use it with <a href=https://github.com/GoogleContainerTools/kaniko>kaniko</a>
+to build images in my cluster.
+Unfortunately, this comes with a set of problems: caching.<h4 id=-baseline-><em>baseline</em></h4><p>Here's our starting setup, using a <a href=https://github.com/seankhliao/feed-agg>random project</a>
+I had lying around.
+A standard multistage dockerfile and skaffold pipeline.<pre><code class=language-Dockerfile>FROM golang:alpine AS build
+ENV CGO_ENABLED=0
+WORKDIR /workspace
+COPY . .
+RUN go build -trimpath -ldflags='-s -w' -o /bin/feed-agg
+
+FROM gcr.io/distroless/static
+COPY conf.yaml /etc/feed-agg/conf.yaml
+COPY --from=build /bin/feed-agg /bin/feed-agg
+ENTRYPOINT [&quot;/bin/feed-agg&quot;]
+</code></pre><pre><code class=language-yaml>apiVersion: skaffold/v2beta16
+kind: Config
+metadata:
+  name: feed-agg
+build:
+  artifacts:
+  - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feed-agg
+    kaniko:
+      reproducible: true
+      singleSnapshot: true
+      skipUnusedStages: true
+      useNewRun: true
+      image: gcr.io/kaniko-project/executor:latest
+  cluster:
+    pullSecretName: kaniko-secret
+    pullSecretPath: kaniko-secret
+    namespace: skaffold
+deploy:
+  kubeContext: kind-cluster30
+  kustomize:
+    paths:
+      - kustomize/overlays/cluster30
+</code></pre><p>There are a few problems with this:<ul><li>it downloads dependencies from a remote proxy every time<li>it rebuilds everything from scratch every time</ul><p>I could split out <code>COPY go.mod go.sum ./</code> and <code>RUN go mod download</code>
+and use docker's layering to cache the dependency download,
+but that's meh: it changes every time any dependency changes
+and bloats the image repo.<h4 id=-private--proxy><em>private</em> proxy</h4><p>Instead of downloading from som remote proxy,
+we could instead use a local-ish one.
+I'm running <a href=https://gomods.io/>athens</a>,
+and we can conditionally pass in the proxy using build args,
+preserving the defaults when we build elsewhere.<p><em>note:</em> <code>ARG</code> needs to be specified after <code>FROM</code> to take effect inside the image.<p>This is only very marginally faster than using the public proxy
+but does solve one other problem:
+private dependencies.
+This way no credentials need to be passed to the build image,
+since access is implicit.<pre><code class=language-Dockerfile>FROM golang:alpine AS build
+ARG GOPROXY=https://proxy.golang.org,direct
+...
+</code></pre><pre><code class=language-yaml>apiVersion: skaffold/v2beta16
+kind: Config
+metadata:
+  name: feed-agg
+build:
+  artifacts:
+  - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feed-agg
+    kaniko:
+      ...
+      buildArgs:
+        GOPROXY: http://athens.athens.svc.cluster.local
+</code></pre><h4 id=-mounted--caches><em>mounted</em> caches</h4><p>To really speed things up,
+we need to make use of <code>go</code>'s native caching,
+namely its local filesystem build and module caches.
+We can use <code>kaniko</code>'s <code>--whitelist-var-run</code>, excluding it from the build image
+to mount the caches.<p><em>note:</em> I'm using <code>hostPath</code> because I'm running a single node
+using <a href=https://kind.sigs.k8s.io/>kind</a>
+and couldn't be bothered to set a CSI provider that could provision
+ReadWriteMany persistent volumes.<pre><code class=language-Dockerfile>FROM golang:alpine AS build
+ARG GOMODCACHE=/go/pkg/mod
+ARG GOCACHE=/root/.cache/go-build
+...
+</code></pre><pre><code class=language-yaml>apiVersion: skaffold/v2beta16
+kind: Config
+metadata:
+  name: feed-agg
+build:
+  artifacts:
+  - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feed-agg
+    kaniko:
+      ...
+      buildArgs:
+        GOCACHE: /var/run/gobuildcache
+        GOMODCACHE: /var/run/gomodcache
+      volumeMounts:
+        - name: modcache
+          mountPath: /var/run/gomodcache
+        - name: buildcache
+          mountPath: /var/run/gobuildcache
+  cluster:
+    ...
+    volumes:
+      - name: modcache
+        hostPath:
+          path: /opt/kind/cluster30/kaniko-gomodcache
+      - name: buildcache
+        hostPath:
+          path: /opt/kind/cluster30/kaniko-gobuildcache
+</code></pre><h4 id=-final--setup><em>final</em> setup</h4><p>So here's everything,
+taking an initial build from 149sec down to 25sec.<pre><code class=language-Dockerfile>FROM golang:alpine AS build
+ARG CGO_ENABLED=0
+ARG GOPROXY=https://proxy.golang.org,direct
+ARG GOMODCACHE=/go/pkg/mod
+ARG GOCACHE=/root/.cache/go-build
+WORKDIR /workspace
+COPY . .
+RUN go build -trimpath -ldflags='-s -w' -o /bin/feed-agg
+
+FROM gcr.io/distroless/static
+COPY conf.yaml /etc/feed-agg/conf.yaml
+COPY --from=build /bin/feed-agg /bin/feed-agg
+ENTRYPOINT [&quot;/bin/feed-agg&quot;]
+</code></pre><pre><code class=language-yaml>apiVersion: skaffold/v2beta16
+kind: Config
+metadata:
+  name: feed-agg
+build:
+  artifacts:
+  - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feed-agg
+    kaniko:
+      reproducible: true
+      singleSnapshot: true
+      skipUnusedStages: true
+      useNewRun: true
+      whitelistVarRun: true
+      image: gcr.io/kaniko-project/executor:latest
+      registryMirror: mirror.gcr.io
+      buildArgs:
+        GOPROXY: http://athens.athens.svc.cluster.local
+        GOCACHE: /var/run/gobuildcache
+        GOMODCACHE: /var/run/gomodcache
+      volumeMounts:
+        - name: modcache
+          mountPath: /var/run/gomodcache
+        - name: buildcache
+          mountPath: /var/run/gobuildcache
+  cluster:
+    pullSecretName: kaniko-secret
+    pullSecretPath: kaniko-secret
+    namespace: skaffold
+    volumes:
+      - name: modcache
+        hostPath:
+          path: /opt/kind/cluster30/kaniko-gomodcache
+      - name: buildcache
+        hostPath:
+          path: /opt/kind/cluster30/kaniko-gobuildcache
+deploy:
+  kubeContext: kind-cluster30
+  kustomize:
+    paths:
+      - kustomize/overlays/cluster30
+</code></pre><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

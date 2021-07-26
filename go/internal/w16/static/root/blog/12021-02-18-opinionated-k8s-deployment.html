@@ -1,0 +1,381 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>opinionated k8s deployment</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12021-02-18-opinionated-k8s-deployment/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="an opionionated and commented deployment manifest for generic apps"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12021-02-18</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-kubernetes--manifests><em>kubernetes</em> manifests</h3><p>YAML engineer reporting in.<p><em>note:</em> yaml is long and repetitive,
+I'm still not sure if I'm happy I introduced <a href=https://yaml.org/spec/1.2/spec.html#anchor//>yaml anchors</a>
+to my team. tldr, the 2 docs below are equivalent, anchors do not carry accross documents (<code>---</code>):<pre><code class=language-yaml>name: &amp;name foo
+somewhere:
+  else:
+    x: *name
+---
+name: foo
+somewhere:
+  else:
+    x: foo
+</code></pre><h4 id=metadata>metadata</h4><p>Every object has them: names, labels, annotations.
+They even have a <a href=https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/>recommended set of labels</a><pre><code class=language-yaml>metadata:
+  name: foo
+  annotations:
+    # stick values that you don't want to filter by here,
+    # such as info for other apps that read service definitions
+    # or as a place to store data to make your controller stateless
+  labels:
+    # sort of duplicates metadata.name
+    app.kubernetes.io/name: foo
+
+    # separate multiple instances, not really necessary if you do app-per-namespace
+    app.kubernetes.io/instance: default
+
+    # you might not want to add this on everything (eg namespaces, security stuff)
+    # since with least privilege you can't change them
+    # and they don't really change that often(?)
+    app.kubernetes.io/version: &quot;1.2.3&quot;
+
+    # the hardest part is probably getting it to not say &quot;helm&quot; when you don't actually use helm
+    app.kubernetes.io/managed-by: helm
+
+    # these two aren't really necessary for single deployment apps
+    #
+    # the general purpose of &quot;name&quot;, eg name=envoy component=proxy
+    app.kubernetes.io/component: server
+    # what the entire this is
+    app.kubernetes.io/part-of: website
+</code></pre><h4 id=-namespace-><em>namespace</em></h4><p>The hardest part about namespaces is your namespace allocation policy,
+do you:<ul><li>dump everything in a single namespace (<code>default</code>?)<li>give each team their own namespace<li>give each app their own namespace<li>give each app revision their own namespace</ul><p><a href=https://github.com/kubernetes-sigs/multi-tenancy/tree/master/incubator/hnc>Hierarchical Namespaces</a>
+might help a bit, making the latter ones more tenable but still, things to think about.<p>Currently I'm in the "each app their own namespace" camp,
+and live with the double names in service addresses<pre><code class=language-yaml>apiVersion: v1
+kind: Namespace
+metadata:
+  name: foo
+</code></pre><h4 id=-ingress-><em>ingress</em></h4><p>The least common denominator of L4/L7 routing...<pre><code class=language-kubernetes>apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: foo
+spec:
+  # for if you run multiple ingress controllers
+  ingressClassName: default
+
+  rules:
+      # DNS style wildcards only
+    - host: &quot;*.example.com&quot;
+      http:
+        paths:
+          - path: /
+            pathType: Prefix # or Exact, prefix uses path segment matching
+            backend:
+              service:
+                name: foo
+                port:
+                  name: http
+                  # number: 80
+
+  tls:
+    secretName: foo-tls
+    hosts:
+      - &quot;*.example.com&quot;
+</code></pre><h4 id=-service-><em>service</em></h4><pre><code class=language-yaml>apiVersion: v1
+kind: Service
+metadata:
+  name: foo
+spec:
+  # change as needed
+  type: ClusterIP
+
+  # only for type LoadBalancer
+  externalTrafficPolicy: Local
+
+  # for statefulsets that need peer discovery,
+  # eg. etcd or cockroachdb
+  publishNotReadyAddresses: true
+
+  ports:
+    - appProtocol: opentelemetry
+      name: otlp
+      port: 4317
+      protocol: TCP
+      targetPort: otlp # name or number, defaults to port
+
+  selector:
+    # these 2 should be enough to uniquely identify apps,
+    # note this value cannot change once created
+    app.kubernetes.io/name: foo
+    app.kubernetes.io/instance: default
+</code></pre><h4 id=-serviceaccount-><em>serviceaccount</em></h4><p>note: while it does have a <code>spec.secrets</code> field, it currently doesn't really do anything useful.<pre><code class=language-yaml>apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: foo
+  annotations:
+    # workload identity for attaching to GCP service accounts in GKE
+    iam.gke.io/gcp-service-account: GSA_NAME@PROJECT_ID.iam.gserviceaccount.com
+</code></pre><h4 id=-app-><em>app</em></h4><h5 id=-deployment-><em>deployment</em></h5><p>Use only if you app is truly stateless:
+no PersistentVolumeClaims unless it's <code>ReadOnlyMany</code>,
+even then PVCs still restrict the nodes you can run on.<pre><code class=language-yaml>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo
+spec:
+  # don't set if you plan on autoscaling
+  replicas: 1
+
+  # stop cluttering kubectl get all with old replicasets,
+  # your gitops tooling should let you roll back
+  revisionHistoryLimit: 3
+
+  selector:
+    matchLabels:
+      # these 2 should be enough to uniquely identify apps,
+      # note this value cannot change once created
+      app.kubernetes.io/name: foo
+      app.kubernetes.io/instance: default
+
+  # annoyingly named differently from StatefulSet or DaemonSet
+  strategy:
+    # prefer maxSurge to keep availability during upgrades / migrations
+    rollingUpdate:
+      maxSurge: 25% # rounds up
+      maxUnavailable: 0
+
+    # Recreate if you want blue-green style
+    # or if you're stuck with a PVC
+    type: RollingUpdate
+
+  template: # see pod below
+</code></pre><h5 id=-statefulset-><em>statefulset</em></h5><p>If your app has any use for persistent data, use this,
+even if you only have a single instance.
+Also gives you nice DNS names per pod.<pre><code class=language-yaml>apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: foo
+spec:
+  # or Parallel for all at once
+  podManagementPolicy: OrderedReady
+  replicas: 3
+
+  # stop cluttering kubectl get all with old replicasets,
+  # your gitops tooling should let you roll back
+  revisionHistoryLimit: 3
+
+  selector:
+    matchLabels:
+      # these 2 should be enough to uniquely identify apps,
+      # note this value cannot change once created
+      app.kubernetes.io/name: foo
+      app.kubernetes.io/instance: default
+
+  # even though they say it must exist, it doesn't have to
+  # (but you lose per pod DNS)
+  serviceName: foo
+
+  template: # see pod below
+
+  updateStrategy:
+    rollingUpdate: # this should only be used by tooling
+    type: RollingUpdate
+
+  volumeClaimTemplates: # see pvc below
+</code></pre><h5 id=-daemonset-><em>daemonset</em></h5><pre><code class=language-yaml>apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: foo
+spec:
+  # stop cluttering kubectl get all with old replicasets,
+  # your gitops tooling should let you roll back
+  revisionHistoryLimit: 3
+
+  selector:
+    matchLabels:
+      # these 2 should be enough to uniquely identify apps,
+      # note this value cannot change once created
+      app.kubernetes.io/name: foo
+      app.kubernetes.io/instance: default
+
+  template: # see pod below
+
+  updateStrategy:
+    rollingUpdate:
+      # make it faster for large clusters
+      maxUnavailable: 30%
+    type: RollingUpdate
+</code></pre><h5 id=-pod-><em>pod</em></h5><pre><code class=language-yaml>apiVersion: v1
+kind: Pod
+metadata:
+  name: foo
+spec:
+  containers:
+    - name: foo
+      args:
+        - -flag1=v1
+        - -flag2=v2
+      envFrom
+        - configMapRef:
+            name: foo-env
+            optional: true
+          prefix: APP_
+      image: docker.example.com/app:v1
+      imagePullPolicy: IfNotPresent
+
+      ports:
+        - containerPort: 4317
+          name: otlp
+          protocol: TCP
+
+      # do extra stuff
+      lifecycle:
+        postStart:
+        preStop:
+
+      startupProbe: # allow a longer startup
+      livenessProbe: # stay alive to not get killed
+      readinessProbe: # stay alive to route traffic
+
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          add:
+            - CAP_NET_ADMIN
+        privileged: false
+        readOnlyRootFilesystem: true
+
+      resources:
+        # ideally set after running some time and profiling actual usage,
+        # prefer to start high and rachet down
+        requests:
+          cpu: 500m
+          memory: 128Mi
+        limits:
+          cpu: 1500m
+          memory: 512Mi
+
+      volumeMounts: # as needed
+
+  # don't inject env with service addresses/ports
+  # not many things use them, they clutter up the env
+  # and may be a performance hit with large number of services
+  enableServiceLinks: false
+
+  # do create PriorityClasses and every pod one,
+  # helps with deciding which pods to kill first
+  priorityClassName: critical
+
+  securityContext:
+    fsGroup: 65535
+    runAsGroup: 65535
+    runAsNonRoot: true
+    runAsUser: 65535 # may conflict with container setting and need for $HOME
+
+  serviceAccountName: foo
+
+  terminationGracePeriodSeconds: 30
+
+  volumes: # set as needed
+</code></pre><h6 id=-scheduling-><em>scheduling</em></h6><p>theres is some overlap in managing pod scheduling, especially around where they run:<ul><li><code>affinity</code>: these only let you select to either run 0 or unlimited pods per selector<li><code>affinity.nodeAffinity</code>: general purpose choose a node<li><code>affinity.podAffinity</code>: general purpose choose to schedule next to things<li><code>affinity.podAntiAffinity</code>: general purpose choose not to schedule next to things<li><code>nodeSelector</code>: shorthand for choosing nodes with labels<li><code>tolerations</code>: allow scheduling on nodes with taints<li><code>topologySpreadConstraints</code>: choose how many to schedule in a single topology domain</ul><pre><code class=language-yaml>apiVersion: v1
+kind: Pod
+metadata:
+  name: foo
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms: # OR
+          # has to be pool-0
+          - matchExpressions: # AND
+              - key: cloud.google.com/gke-nodepool
+                operator: In
+                values:
+                  - pool-0
+      preferredDuringSchedulingIgnoredDuringExecution
+        # prefer zone us-central1-a
+        - weight: 25
+          preference:
+            - matchExpressions: # AND
+              - key: topology.kubernetes.io/zone
+                operator: In
+                values:
+                  - us-central1-a
+
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        # prefer to be on the same node as a bar
+        - weight: 25
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: bar
+                app.kubernetes.io/instance: default
+            topologyKey: kubernetes.io/hostname
+
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution: # AND
+        # never schedule in the same region as buzz
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: buzz
+              app.kubernetes.io/instance: default
+          topologyKey: topology.kubernetes.io/region
+
+
+  topologySpreadConstraints: # AND
+    # limit to 1 instance per node
+    - maxSkew: 1
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: foo
+          app.kubernetes.io/instance: default
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule # or ScheduleAnyway
+</code></pre><h6 id=-command-><em>command</em></h6><ul><li>none: docker default<li><code>args</code>: Docker entrypoint + container args<li><code>command</code>: container command<li><code>command</code> and <code>args</code>: container command + container args</ul><h4 id=-persistentvolumeclaim-><em>persistentvolumeclaim</em></h4><pre><code class=language-yaml>apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: foo
+spec:
+  accessModes: ReadWriteOnce # ReadOnlyMany or ReadWriteMany (rare)
+
+  dataSource: # prepopulate with data from a VolumeSnapshot or PersistentVolumeClaim
+
+  resources:
+    requests:
+      storage: 10Gi
+
+  # bind to existing PV
+  selector: matchLabels
+
+  storageClassName: ssd
+
+  volumeMode: Filesystem # or Block
+</code></pre><h4 id=-horizontalpodautoscaler-><em>horizontalpodautoscaler</em></h4><pre><code class=language-yaml>apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: foo
+spec:
+  behavior: # fine tune when to scale up / down
+
+  maxReplicas: 5
+  minReplicas: 1
+
+  metrics:
+    -  # TODO
+
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: foo
+</code></pre><h4 id=-poddisruptionbudget-><em>poddisruptionbudget</em></h4><pre><code class=language-yaml>apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: foo
+spec:
+  # when you have a low number of replicas
+  # ensure you can disrupt them
+  maxUnavailable: 1
+
+  # allows for more disruptions
+  minAvailable: 75%
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: foo
+      app.kubernetes.io/instance: default
+</code></pre><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

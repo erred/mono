@@ -1,0 +1,142 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>updated weechat</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12020-08-06-updated-weechat/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="updated weechat configs"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12020-08-06</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-weechat--config-updates><em>weechat</em> config updates</h3><p>use it more, config it more<h4 id=-bouncer--mode><em>bouncer</em> mode</h4><p><em>note</em>: the following uses ed25519 certs,
+it works between weechat on archlinux (with GnuTLS),
+but not between weechat on archlinux and android.
+Use other certs (ex: ECDSA) if mobile apps are required.<p>configure at least the important parts:
+server login/autojoin, secured data, relay<p>generate a self signed ssh certificate,
+adjust <code>DNS:...,IP:...</code> as appropriate<pre><code class=language-sh>openssl req -x509 -nodes -days 7300 \
+  -key &lt;(openssl genpkey -algorithm ED25519 | tee relay.pem) \
+  -subj &quot;/O=weechat/CN=localhost&quot; \
+  -addext &quot;subjectAltName=DNS:localhost,IP:0.0.0.0&quot; \
+  -keyout relay.pem -out relay.pem
+
+# or as 2 separate calls if you have weird issues
+openssl genpkey -algorithm ED25519 -out relay.pem
+openssl req -x509 -nodes -days 7300 \
+  -key relay.pem \
+  -subj &quot;/O=weechat/CN=localhost&quot; \
+  -addext &quot;subjectAltName=DNS:localhost,IP:0.0.0.0&quot; \
+  -keyout relay.pem -out relay.pem
+</code></pre><p>obtain fingerprint with<pre><code class=language-sh>openssl x509 -in relay.pem -outform der | sha256sum -b | cut -d ' ' -f1
+</code></pre><p>add systemd user service (from archwiki)<pre><code class=language-systemd>[Unit]
+Description=A headless WeeChat client and relay service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/weechat-headless --daemon
+
+[Install]
+WantedBy=default.target
+</code></pre><p>enable service and enable linger for user
+(run service on boot, don't stop when logout),
+reboot<pre><code class=language-sh>systemctl --user daemon-reload
+systemctl --user enable weechat-headless
+sudo loginctl enable-linger $USER
+sudo reboot
+</code></pre><h4 id=weechat--configs->weechat <em>configs</em></h4><p>in alphabetical order,
+but secured data should probably be set first<h5 id=-buflist-><em>buflist</em></h5><p>hide all the merged server buffer<pre><code class=language-txt>/set buflist.look.display_conditions ${buffer.hidden}==0 &amp;&amp; ${merged}==0 || ${name}==weechat
+</code></pre><h5 id=-irc-><em>irc</em></h5><p>stop jumping buffer<pre><code class=language-txt>/set irc.look.buffer_switch_autojoin off
+</code></pre><p>more colors<pre><code class=language-txt>/set irc.look.color_nicks_in_names on
+/set irc.look.color_nicks_in_nicklist on
+</code></pre><p>disable ctcp<pre><code class=language-txt>/set irc.ctcp.action &quot;&quot;
+/set irc.ctcp.clientinfo &quot;&quot;
+/set irc.ctcp.finger &quot;&quot;
+/set irc.ctcp.ping &quot;&quot;
+/set irc.ctcp.source &quot;&quot;
+/set irc.ctcp.time &quot;&quot;
+/set irc.ctcp.userinfo &quot;&quot;
+/set irc.ctcp.version &quot;&quot;
+</code></pre><p>default messages<pre><code class=language-txt>/set irc.server_default.msg_part going... going... gone!
+/set irc.server_default.msg_quit it can't be DNS?! it's always DNS!!!
+/set irc.server_default.nicks &quot;&quot;
+/set irc.server_default.username &quot;&quot;
+</code></pre><h6 id=-bouncer--server><em>bouncer</em> server</h6><pre><code class=language-txt>/server add bouncer 192.168.100.1/7992
+/set irc.server.bouncer.ssl on
+/set irc.server.bouncer.ssl_fingerprint 33300c58504afc85a43ab49acea568d37780b214b078f8917eb9033a762b8e26
+/set irc.server.bouncer.autoconnect on
+/set irc.server.bouncer.username seankhliao
+/set irc.server.bouncer.nicks seankhliao,arccy
+/set irc.server.bouncer.password freenode:${sec.data.relay_pass}
+</code></pre><h6 id=-freenode--server><em>freenode</em> server</h6><pre><code class=language-txt>/server add freenode chat.freenode.net/6697
+/set irc.server.freenode.ssl on
+/set irc.server.freenode.autoconnect on
+/set irc.server.freenode.autojoin #archlinux,#archlinux-offtopic,#archlinux-reproducible,#go-nuts
+/set irc.server.freenode.username seankhliao
+/set irc.server.freenode.nicks seankhliao,arccy
+</code></pre><h6 id=-sasl--with-password><em>SASL</em> with password</h6><p>login and identify with password<pre><code class=language-txt>/set irc.server.freenode.sasl_mechanism plain
+/set irc.server.freenode.sasl_username seankhliao
+/set irc.server.freenode.sasl_password ${sec.data.freenode_pass}
+</code></pre><h6 id=-sasl--with-certfp><em>SASL</em> with CertFP</h6><p>login and identify with client certs<p>generate cert as above with name <code>freenode.pem</code>, add<pre><code class=language-txt>/set irc.server.freenode.ssl_cert %h/ssl/freenode.pem
+/set irc.server.freenode.sasl_mechanism external
+</code></pre><p>check and associate current cert with identity,
+future logins won't require password<pre><code class=language-txt>/msg NickServ identify PASSWORD
+/whois seankhliao
+/msg NickServ CERT ADD
+</code></pre><h5 id=-logger-><em>logger</em></h5><p>don't log join/leave, and dim log line<pre><code class=language-txt>/set logger.color.backlog_end darkgray
+/set logger.color.backlog_line darkgray
+/set logger.file.color_lines on
+/set logger.level.irc 2
+</code></pre><h5 id=-scripts-><em>scripts</em></h5><p>colorize_nicks<pre><code class=language-txt>/script install colorize_nicks.py
+/set colorize_nicks.look.colorize_input on
+/set colorize_nicks.look.min_nick_length 3
+</code></pre><p>notify<pre><code class=language-txt>/script install notify.py
+</code></pre><h5 id=-relay-><em>relay</em></h5><p>open up a protected relay<pre><code class=language-txt>/set relay.network.password ${sec.data.relay_pass}
+/set relay.irc.backlog_since_last_message on
+/set relay.port.ssl.irc 7992
+/set relay.port.ssl.weechat 7993
+</code></pre><p>unlimited backlog<pre><code class=language-txt>/set relay.irc.backlog_max_number 0
+</code></pre><h5 id=-secure-><em>secure</em></h5><p>store data "securely",
+decrypt automatically with passphrase in a file<pre><code class=language-txt>/secure passphrase
+/set sec.crypt.passphrase_file ~/.ssh/weechat_pass
+/secure set relay_pass xxxxxx
+/secure set freenode_pass yyyyyy
+</code></pre><h5 id=-trigger-><em>trigger</em></h5><p>stylized messages<pre><code class=language-txt>/trigger del beep
+/trigger addreplace irc_join modifier &quot;2000|weechat_print&quot; &quot;${tg_tags} =~ ,irc_join,&quot; &quot;/.*[^(]\((.*)\).*/${color:237}${tg_tag_nick}@${re:1}/tg_message_nocolor /.*/${tg_prefix}\t${tg_message_nocolor}&quot;
+/trigger addreplace irc_nick modifier &quot;2000|weechat_print&quot; &quot;${tg_tags} =~ ,irc_nick,&quot; &quot;/.*irc_nick1_([^,]*),irc_nick2_([^,]*).*/${re:1} -&gt; ${re:2}/tg_tags /.*/${tg_prefix}\t${tg_tags}&quot;
+/trigger addreplace irc_quit modifier &quot;2000|weechat_print&quot; &quot;${tg_tags} =~ ,irc_quit,&quot; &quot;/.*[^(]\((.*)\).*\ (\(.*\))/${color:237}${tg_tag_nick}@${re:1}: ${re:2}/tg_message_nocolor /.*/${tg_prefix}\t${tg_message_nocolor}&quot;
+/trigger addreplace irc_part modifier &quot;2000|weechat_print&quot; &quot;${tg_tags} =~ ,irc_part,&quot; &quot;/.*[^(]\((.*)\).*\ (.*)/${color:237}${tg_tag_nick}@${re:1}: ${re:2}/tg_message_nocolor /.*/${tg_prefix}\t${tg_message_nocolor}&quot;
+/trigger addreplace nick_color_action modifier weechat_print &quot;${tg_tags} =~ ,irc_action, &amp;&amp; ${tg_tags} !~ ,self_msg,&quot; &quot;/.*/${info:nick_color,${tg_tag_nick}}${tg_prefix_nocolor}\t${tg_message}&quot;
+/trigger addreplace url_color modifier weechat_print &quot;${tg_tags} !~ irc_quit&quot; &quot;;[a-z]+://\S+;${color:32}${re:0}${color:reset};&quot;
+</code></pre><p>from <a href=https://github.com/weechat/weechat/wiki/Triggers>weechat wiki</a>,
+dim user<pre><code class=language-txt>/alias add dim trigger addreplace dim_$server_$1 modifier weechat_print &quot;${tg_tag_nick} == $1 &amp;&amp; \${server} == $server&quot; &quot;/(.*)/${color:darkgray}${tg_prefix_nocolor}\t${color:darkgray}${tg_message_nocolor}/&quot;; print \---\t$1 is now dimmed on $server
+/alias add undim trigger del dim_$server_$1; print \---\t$1 is no longer dimmed
+</code></pre><h5 id=-weechat-><em>weechat</em></h5><p>disable the giant logo<pre><code class=language-txt>/set weechat.startup.display_logo off
+</code></pre><p>change the look of the left gutter:
+more compact time,
+change icons<pre><code class=language-txt>/set weechat.look.buffer_time_format  ${color:253}%H${color:245}%M
+/set weechat.look.prefix_action *
+/set weechat.look.prefix_error !!
+/set weechat.look.prefix_join &gt;&gt;
+/set weechat.look.prefix_network ~
+/set weechat.look.prefix_quit &lt;&lt;
+/set weechat.look.read_marker_string *
+</code></pre><p>colors:
+<em>purple</em> (5) is me,
+more colors for everyone else<pre><code class=language-txt>/set weechat.color.chat_delimiters darkgray
+/set weechat.color.chat_highlight 5
+/set weechat.color.chat_highlight_bg 0
+/set weechat.color.chat_nick_colors 1,2,3,4,6,7,9,10,11,12,13,14,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,69,70,182,183,184,224,225,226,227
+/set weechat.color.chat_nick_self 5
+/set weechat.color.chat_prefix_suffix gray
+</code></pre><p>disable unused plugins<pre><code class=language-txt>/set weechat.plugin.autoload *,!fifo,!guile,!javascript,!lua,!perl,!php,!ruby,!tcl,!spell,!xfer
+</code></pre><p>move buffers to top,
+who looks at the nicklist with 1800 people in a channel,
+abbreviated statusline,
+no titlebar<pre><code class=language-txt>/set weechat.bar.buflist.position top
+/set weechat.bar.nicklist.hidden on
+/set weechat.bar.status.color_bg 0
+/set weechat.bar.status.items +buffer_name+(buffer_modes)+{buffer_nicklist_count}+buffer_zoom+buffer_filter,scroll,[lag],[hotlist],completion
+/set weechat.bar.title.hidden on
+</code></pre><p>filter out join/leaves, except for recent partiticants,<pre><code class=language-txt>/set irc.look.smart_filter on
+/filter add irc_smart * irc_smart_filter *
+</code></pre><p>navigate with ctrl+arrows<pre><code class=language-txt>/key bind meta2-1;5A /window page_up
+/key bind meta2-1;5B /window page_down
+/key bind meta2-1;5C /buffer +1
+/key bind meta2-1;5D /buffer -1
+</code></pre><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

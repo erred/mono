@@ -1,0 +1,52 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>zsh prompt</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12020-11-01-zsh-prompt/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="things i found useful in zsh prompt"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12020-11-01</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-prompt-><em>prompt</em></h3><p>Maybe one day I'll get back to being a minimalist and just use <code>$</code> or <code>#</code> or <code>;</code>,
+but right now I'm liking my custom prompt,
+loosely based on <a href=https://github.com/sindresorhus/pure>sindresorhus/pure</a>.<pre><code class=language-txt>22:49:16 ~ 0:00:00
+»
+</code></pre><h4 id=-bit--by-bit><em>bit</em> by bit</h4><ul><li>start with a newline:
+this can be annoying as it takes up a lot of space,
+but saves you when the previous output doesn't end with a newline<li>current time:
+not as smart as using a time updated when execution starts
+<a href=https://redandblack.io/blog/2020/bash-prompt-with-updating-time/>example bash</a>
+but this is simpler and you can work out the same info by doing maths with the next prompt<li>full path:
+very useful to orient yourself / copy-paste<li>previous command execution time:
+how long it took for the previous command to execute,
+took me quite a while to collapse it into a 2 line thing.<li>second line:
+yes it uses more vertical space,
+but I like having my commands consistently aligned within an environment<li>screen:
+tells me if I'm in a screen session<li>virtual env:
+tells me if I have a virtual env activated,
+not used much since I don't do much python these days<li>git branch:
+current branch of git repo<li>conditional coloring:
+red / magneta based on if the previous command exited properly,
+magneta because I like it.<li>user@host:
+only shown if I'm ssh-ed into somewhere,
+otherwise it's redundant information<li><code>»</code>:
+my current preferred arrow,
+might cause issues if locale/termcap isn't set properly(?)</ul><pre><code class=language-sh>#!/usr/bin/env zsh
+
+export PROMPT_EOL_MARK=''
+
+function _preexec() {
+    typeset -g prompt_timestamp=$EPOCHSECONDS
+}
+
+function _precmd() {
+    integer elapsed=$(( EPOCHSECONDS - ${prompt_timestamp:-$EPOCHSECONDS} ))
+    local human=&quot;$(( elapsed / 3600 )):${(l:2::0:)$(( elapsed / 60 % 60 ))}:${(l:2::0:)$(( elapsed % 60 ))}&quot;
+    vcs_info
+    local newline=$'\n%{\r%}'
+
+    PROMPT=&quot;${newline}%F{green}%*%f %F{blue}%~%f %F{yellow}${human}%f${newline}&quot;
+    PROMPT+=&quot;%F{242}${STY:+screen-}${VIRTUAL_ENV:+venv-}${vcs_info_msg_0_:+${vcs_info_msg_0_} }%f&quot;
+    PROMPT+=&quot;%(?.%F{magenta}.%F{red})${SSH_CONNECTION+%n@%m}»%f &quot;
+}
+
+add-zsh-hook precmd  _precmd
+add-zsh-hook preexec _preexec
+</code></pre><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>

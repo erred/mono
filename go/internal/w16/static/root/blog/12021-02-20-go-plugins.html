@@ -1,0 +1,234 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"><title>go plugins</title><script>(function(b,d,e,a,g){b[a]=b[a]||[],b[a].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(e)[0],c=d.createElement(e),h=a!="dataLayer"?"&l="+a:"";c.async=!0,c.src="https://www.googletagmanager.com/gtm.js?id="+g+h,f.parentNode.insertBefore(c,f)})(window,document,"script","dataLayer","GTM-TLVN7D6")</script><link rel=canonical href=https://seankhliao.com/blog/12021-02-20-go-plugins/><link rel=manifest href=/manifest.json><meta name=theme-color content="#000000"><meta name=description content="plugins in go"><link rel=icon href=https://seankhliao.com/favicon.ico><link rel=icon href=https://seankhliao.com/static/icon.svg type=image/svg+xml sizes=any><link rel=apple-touch-icon href=https://seankhliao.com/static/icon-192.png><style>*{box-sizing:border-box}:root{background:#000;color:#eceff1;font:18px inconsolata,monospace}@font-face{font-family:inconsolata;font-style:normal;font-weight:400;font-display:swap;src:local("Inconsolata"),local("Inconsolata-Regular"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-400.woff2)format("woff2")}@font-face{font-family:inconsolata;font-style:normal;font-weight:700;font-display:swap;src:local("Inconsolata Bold"),local("Inconsolata-Bold"),url(https://seankhliao.com/static/inconsolata-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/inconsolata-700.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:400;font-display:swap;src:local("Lora"),local("Lora-Regular"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-400.woff2)format("woff2")}@font-face{font-family:lora;font-style:normal;font-weight:700;font-display:swap;src:local("Lora Bold"),local("Lora-Bold"),url(https://seankhliao.com/static/lora-var.woff2)format("woff2-variations"),url(https://seankhliao.com/static/lora-700.woff2)format("woff2")}body{grid:20vh 60vh/1fr repeat(3,minmax(90px,280px))1fr;display:grid;gap:0 1em;margin:0;padding:1vmin;background:#000;color:#eceff1;font:18px inconsolata,monospace}body>*{grid-column:2/span 3}h1{font-size:4.5vmin;grid-area:1/4/span 1/span 2;margin:0;place-self:end}h2{color:#999;font-size:3.5vmin;grid-area:2/4/span 1/span 2;place-self:start end;text-align:right}hgroup{font:700 5vmin lora,serif;grid-area:1/1/span 2/span 2;margin:0;place-self:end start}hgroup a{display:grid;grid:repeat(2,10vmin)/repeat(8,10vmin);place-content:center center}hgroup *:nth-child(n+5){grid-row:2/span 1}footer,iframe,pre,table,picture{grid-column:1/span 5;margin:.25em -1vmin 2em}picture img{width:100%;margin:auto}h3,h4,picture{margin:25vh 0 .25em}h5,h6{margin:1.5em 0 .25em}h3{font-size:2.441em}h4{font-size:1.953em}h5{font-size:1.563em}h6{font-size:1.25em}p{line-height:1.5;margin:0 0 1em}footer{margin:10vh auto 3vh}a,a:visited{color:inherit;font-weight:700;text-decoration:underline 1px #707070}a:hover{color:#a06be0;transition:color .16s;text-decoration:underline 1px #a06be0}h1 a,h1 a:hover,h1 a:visited,hgroup a,hgroup a:hover,hgroup a:visited{color:inherit;text-decoration:none}ul{list-style:none;margin:0}ul>*{margin:.5em;line-height:1.5em}ul>li:before{content:"»";margin:0 1ch 0 -3ch;position:absolute}ol>*{line-height:1.75em}blockquote{margin:1em;padding:.25em 1em;border-left:1ch solid #999}code{background:#303030;font:1em inconsolata,monospace;padding:.1em}pre{background:#303030;overflow-x:scroll;padding:1em}pre::-webkit-scrollbar{display:none}pre code{padding:0}iframe{margin:auto}em{color:#a06be0;background-color:unset;font-style:normal;font-weight:700}time{color:#999}table{border-collapse:collapse;border-style:hidden}th,td{padding:.4em;text-align:left}th{font-weight:700;border-bottom:.2em solid #999}tr:nth-child(5n) td{border-bottom:.1em solid #999}tbody tr:hover{background:#404040}noscript iframe{height:0;width:0;display:none;visibility:hidden}</style><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TLVN7D6" height=0 width=0 style=display:none;visibility:hidden></iframe></noscript><h1><a href=/blog/>b<em>log</em></a></h1><h2>12021-02-20</h2><hgroup><a href=/><span>S</span><span>E</span><span>A</span><span>N</span>
+<em>K</em><em>.</em><em>H</em><em>.</em>
+<span>L</span><span>I</span><span>A</span><span>O</span></a></hgroup><h3 id=-plugins-><em>plugins</em></h3><p>Standalone, extensible, what's not to like about plugins?
+Except that they're weird and poorly supported...<p>Anyway, here's 3 ways to do it in Go<h4 id=-plugin-><em>plugin</em></h4><p>The standard library comes with <a href=https://pkg.go.dev/plugin>plugin</a>.
+Problems abound, such as open (once) only,
+needs exact compiler versions for main/plugin,
+limited platform support,
+you have to write Go, etc...<p>Anyway, you look up symbols by string name and get access to them as pointers.<p>Not strictly necessary but nice to have an authoritative definition of the interface
+<code>example.com/plug/plug.go</code>:<pre><code class=language-go>package plug
+
+type Plug interface {
+        SayHello(n string) (string, error)
+}
+</code></pre><p><code>example.com/plug/a/a.go</code>:<pre><code class=language-go>package main
+
+import plug &quot;example.com/plug&quot;
+
+var A0 plug.Plug = A{}
+
+type A struct{}
+
+func (a A) SayHello(name string) (string, error) {
+        return &quot;hello, &quot; + name, nil
+}
+</code></pre><p><code>example.com/main.go</code>:<pre><code class=language-go>package main
+
+import (
+        &quot;fmt&quot;
+        &quot;log&quot;
+        &quot;plugin&quot;
+
+        plug &quot;go.seankhliao.com/testrepo-287/internal/plugin&quot;
+)
+
+func main() {
+        ap, err := plugin.Open(&quot;a.so&quot;)
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        as, err := ap.Lookup(&quot;A0&quot;)
+        if err != nil {
+                log.Fatal(err)
+        }
+        a := *as.(*plug.Plug)
+
+        fmt.Println(a.SayHello(&quot;a&quot;))
+}
+</code></pre><h4 id=-githubcomhashicorpgo-plugin-><em>github.com/hashicorp/go-plugin</em></h4><p>This is probably the one the sees the widest support,
+plugins are executables that talk <code>net/rpc</code> (<code>encoding/gob</code>) or <code>grpc</code>
+over a local unix socket<p>Shame it makes you write shims converting between Go interfaces and
+actual rpc implementations,
+so verbose and so much <code>interface{}</code><p><code>example.com/plug/plug.go</code>:<pre><code class=language-go>package hashi
+
+import (
+        &quot;net/rpc&quot;
+
+        &quot;github.com/hashicorp/go-plugin&quot;
+)
+
+// Handshake is for ensuring the plugin is known/supported
+var Handshake = plugin.HandshakeConfig{
+        ProtocolVersion:  1,
+        MagicCookieKey:   &quot;HASHI&quot;,
+        MagicCookieValue: &quot;hola&quot;,
+}
+
+// Plug is the interface that clients (main) will call and servers (plugins) will implement
+type Plug interface {
+        SayHello(string) (string, error)
+}
+
+// P satisfies the hashicorp/go-plugin.Plugin interface for instantiating clients / servers
+type P struct {
+        Plug
+}
+
+func (p *P) Server(*plugin.MuxBroker) (interface{}, error) {
+        return &amp;Server{p.Plug}, nil
+}
+
+func (p *P) Client(m *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+        return &amp;Client{c}, nil
+}
+
+// Server is a shim for converting a net/rpc call to our interface
+type Server struct {
+        p Plug
+}
+
+func (s *Server) SayHello(n string, r *string) (err error) {
+        *r, err = s.p.SayHello(n)
+        return
+}
+
+// Client is a shim for converting our nice interface to a net/rpc call
+type Client struct {
+        c *rpc.Client
+}
+
+func (c *Client) SayHello(n string) (string, error) {
+        var r string
+        // Plugin is the object hashicorp/go-plugin registers
+        err := c.c.Call(&quot;Plugin.SayHello&quot;, n, &amp;r)
+        return r, err
+}
+</code></pre><p><code>example.com/plug/a/a.go</code>:<pre><code class=language-go>package main
+
+import (
+        &quot;github.com/hashicorp/go-plugin&quot;
+        &quot;example.com/plug&quot;
+)
+
+type A struct{}
+
+func (a A) SayHello(n string) (string, error) {
+        return &quot;hello, &quot; + n, nil
+}
+
+func main() {
+        plugin.Serve(&amp;plugin.ServeConfig{
+                HandshakeConfig: plug.Handshake,
+                Plugins: plugin.PluginSet{
+                        &quot;a&quot;: &amp;plug.P{&amp;A{}},
+                },
+        })
+}
+</code></pre><p><code>example.com/main.go</code>:<pre><code class=language-go>package main
+
+import (
+        &quot;fmt&quot;
+        &quot;log&quot;
+        &quot;os/exec&quot;
+
+        &quot;github.com/hashicorp/go-plugin&quot;
+        &quot;example.com/plug&quot;
+)
+
+func main() {
+        client := plugin.NewClient(&amp;plugin.ClientConfig{
+                HandshakeConfig: plug.Handshake,
+                Plugins: plugin.PluginSet{
+                        &quot;a&quot;: &amp;plug.P{},
+                },
+                Cmd: exec.Command(&quot;./a&quot;),
+        })
+        defer client.Kill()
+
+        realClient, err := client.Client()
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        ai, err := realClient.Dispense(&quot;a&quot;)
+        if err != nil {
+                log.Fatal(err)
+        }
+        a := ai.(plug.Plug)
+
+        fmt.Println(a.SayHello(&quot;a&quot;))
+}
+</code></pre><h4 id=-grpc-><em>grpc</em></h4><p>What if you sacrifice some lifecycle handlers <code>go-plugin</code> gives you
+and write <code>grpc</code> directly?<p><code>example.com/plug/plug.proto</code>:<pre><code class=language-proto>syntax = &quot;proto3&quot;;
+
+option go_package = &quot;example.com/plug&quot;;
+
+service Plug {
+  rpc SayHello(HelloReq) returns (HelloRes) {}
+}
+message HelloReq {
+  string n = 1;
+}
+message HelloRes {
+  string msg = 1;
+}
+</code></pre><p><code>example.com/plug/a/a.go</code>:<pre><code class=language-go>package main
+
+import (
+        &quot;context&quot;
+        &quot;log&quot;
+        &quot;net&quot;
+        &quot;os&quot;
+
+        &quot;example.com/plug&quot;
+        &quot;google.golang.org/grpc&quot;
+)
+
+type Server struct {
+        grpcplug.UnimplementedPlugServer
+}
+
+func (s *Server) SayHello(ctx context.Context, req *plug.HelloReq) (*plug.HelloRes, error) {
+        return &amp;plug.HelloRes{Msg: &quot;hello, &quot; + req.N}, nil
+}
+
+func main() {
+        lis, err := net.Listen(&quot;tcp&quot;, os.Args[1])
+        if err != nil {
+                log.Fatal(err)
+        }
+        s := grpc.NewServer()
+        plug.RegisterPlugServer(s, &amp;Server{})
+        s.Serve(lis)
+}
+</code></pre><p><code>example.com/main.go</code>:<pre><code class=language-go>package main
+
+import (
+        &quot;context&quot;
+        &quot;fmt&quot;
+        &quot;log&quot;
+        &quot;os/exec&quot;
+
+        &quot;example.com/plug&quot;
+        &quot;google.golang.org/grpc&quot;
+)
+
+func main() {
+        fmt.Println(exec.Command(&quot;./a&quot;, &quot;127.0.0.1:8888&quot;).Start())
+        conn, err := grpc.Dial(&quot;127.0.0.1:8888&quot;, grpc.WithInsecure(), grpc.WithBlock())
+        if err != nil {
+                log.Fatal(err)
+        }
+        client := plug.NewPlugClient(conn)
+
+        res, err := client.SayHello(context.TODO(), &amp;plug.HelloReq{
+                N: &quot;a&quot;,
+        })
+        fmt.Println(res.Msg, err)
+}
+</code></pre><footer><a href=https://seankhliao.com/>home</a>
+|
+<a href=https://seankhliao.com/blog/>blog</a>
+|
+<a href=https://github.com/seankhliao>github</a></footer>
