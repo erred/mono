@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "feedagg",
+    srcs = [
+        "config.go",
+        "feed.go",
+        "feedagg.go",
+        "sqlite.go",
+    ],
+    importpath = "go.seankhliao.com/mono/go/internal/feedagg",
+    visibility = ["//go:__subpackages__"],
+    deps = [
+        "//go/render",
+        "@com_github_go_logr_logr//:logr",
+        "@com_github_gorilla_feeds//:feeds",
+        "@com_github_mmcdole_gofeed//:gofeed",
+        "@io_k8s_sigs_yaml//:yaml",
+        "@io_opentelemetry_go_contrib_instrumentation_net_http_otelhttp//:otelhttp",
+        "@io_opentelemetry_go_otel//:otel",
+        "@io_opentelemetry_go_otel//attribute",
+        "@io_opentelemetry_go_otel_trace//:trace",
+        "@org_modernc_sqlite//:sqlite",
+    ],
+)

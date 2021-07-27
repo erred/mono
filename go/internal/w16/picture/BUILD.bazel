@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "picture",
+    srcs = ["picture.go"],
+    importpath = "go.seankhliao.com/mono/go/internal/w16/picture",
+    visibility = ["//go:__subpackages__"],
+    deps = [
+        "@com_github_yuin_goldmark//:goldmark",
+        "@com_github_yuin_goldmark//ast",
+        "@com_github_yuin_goldmark//renderer",
+        "@com_github_yuin_goldmark//renderer/html",
+        "@com_github_yuin_goldmark//util",
+    ],
+)

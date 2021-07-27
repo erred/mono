@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "ghdefaults_lib",
+    srcs = [
+        "doc.go",
+        "main.go",
+    ],
+    importpath = "go.seankhliao.com/mono/go/cmd/ghdefaults",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//go/internal/ghdefaults",
+        "//go/webserver",
+    ],
+)
+
+go_binary(
+    name = "ghdefaults",
+    embed = [":ghdefaults_lib"],
+    visibility = ["//visibility:public"],
+)

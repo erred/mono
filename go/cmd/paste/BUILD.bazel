@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "paste_lib",
+    srcs = [
+        "doc.go",
+        "main.go",
+    ],
+    importpath = "go.seankhliao.com/mono/go/cmd/paste",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//go/internal/paste",
+        "//go/webserver",
+    ],
+)
+
+go_binary(
+    name = "paste",
+    embed = [":paste_lib"],
+    visibility = ["//visibility:public"],
+)

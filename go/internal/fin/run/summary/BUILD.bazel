@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "summary",
+    srcs = ["summary.go"],
+    importpath = "go.seankhliao.com/mono/go/internal/fin/run/summary",
+    visibility = ["//go:__subpackages__"],
+    deps = [
+        "//go/internal/fin/run",
+        "//go/internal/fin/store",
+        "//proto/seankhliao/fin/v1alpha1",
+    ],
+)

@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "feedagg_lib",
+    srcs = [
+        "doc.go",
+        "main.go",
+    ],
+    importpath = "go.seankhliao.com/mono/go/cmd/feedagg",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//go/internal/feedagg",
+        "//go/webserver",
+    ],
+)
+
+go_binary(
+    name = "feedagg",
+    embed = [":feedagg_lib"],
+    visibility = ["//visibility:public"],
+)

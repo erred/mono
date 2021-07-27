@@ -1,0 +1,23 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+
+proto_library(
+    name = "fin_proto",
+    srcs = ["fin.proto"],
+    visibility = ["//visibility:public"],
+)
+
+go_proto_library(
+    name = "fin_go_proto",
+    importpath = "go.seankhliao.com/mono/proto/seankhliao/fin/v1alpha1",
+    proto = ":fin_proto",
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "v1alpha1",
+    embed = [":fin_go_proto"],
+    importpath = "go.seankhliao.com/mono/proto/seankhliao/fin/v1alpha1",
+    visibility = ["//visibility:public"],
+)

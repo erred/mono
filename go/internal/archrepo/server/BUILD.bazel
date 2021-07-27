@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "server",
+    srcs = ["server.go"],
+    importpath = "go.seankhliao.com/mono/go/internal/archrepo/server",
+    visibility = ["//go:__subpackages__"],
+    deps = [
+        "//go/pacmandb",
+        "@com_github_go_logr_logr//:logr",
+        "@io_opentelemetry_go_otel//:otel",
+        "@io_opentelemetry_go_otel//attribute",
+        "@io_opentelemetry_go_otel_trace//:trace",
+    ],
+)

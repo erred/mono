@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "process",
+    srcs = ["process.go"],
+    importpath = "go.seankhliao.com/mono/go/internal/w16/process",
+    visibility = ["//go:__subpackages__"],
+    deps = ["//go/render"],
+)

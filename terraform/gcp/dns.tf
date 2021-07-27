@@ -92,8 +92,7 @@ resource "google_dns_record_set" "TXT__default__domainkey_medea" {
   name         = "default._domainkey.${google_dns_managed_zone.medea.dns_name}"
   type         = "TXT"
   rrdatas = [
-    "\"${substr(local.medea_dkim, 0, 253)}\"",
-    "\"${substr(local.medea_dkim, 253, -1)}\"",
+    "\"${substr(local.medea_dkim, 0, 253)}\" \"${substr(local.medea_dkim, 253, -1)}\"",
   ]
   ttl = 1
 }

@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "vanity_lib",
+    srcs = [
+        "doc.go",
+        "main.go",
+    ],
+    embedsrcs = ["index.gohtml"],
+    importpath = "go.seankhliao.com/mono/go/cmd/vanity",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//go/webserver",
+        "@com_github_go_logr_logr//:logr",
+        "@io_opentelemetry_go_otel//:otel",
+        "@io_opentelemetry_go_otel_trace//:trace",
+    ],
+)
+
+go_binary(
+    name = "vanity",
+    embed = [":vanity_lib"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "singlepage_lib",
+    srcs = [
+        "doc.go",
+        "main.go",
+    ],
+    importpath = "go.seankhliao.com/mono/go/cmd/singlepage",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//go/render",
+        "//go/webserver",
+        "@com_github_go_logr_logr//:logr",
+        "@io_opentelemetry_go_otel//:otel",
+    ],
+)
+
+go_binary(
+    name = "singlepage",
+    embed = [":singlepage_lib"],
+    visibility = ["//visibility:public"],
+)

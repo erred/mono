@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "w16_lib",
+    srcs = [
+        "doc.go",
+        "main.go",
+    ],
+    importpath = "go.seankhliao.com/mono/go/cmd/w16",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//go/internal/w16/server",
+        "//go/webserver",
+    ],
+)
+
+go_binary(
+    name = "w16",
+    embed = [":w16_lib"],
+    visibility = ["//visibility:public"],
+)
