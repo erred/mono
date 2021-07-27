@@ -1,4 +1,10 @@
 version: v1beta1
+breaking:
+  use:
+    - WIRE_JSON
+build:
+  excludes:
+    - bazel-mono
 lint:
   use:
     - BASIC
@@ -9,6 +15,3 @@ lint:
     - PACKAGE_AFFINITY
     - PACKAGE_DIRECTORY_MATCH
     - PACKAGE_SAME_DIRECTORY
-breaking:
-  use:
-    - WIRE_JSON
