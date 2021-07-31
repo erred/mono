@@ -35,3 +35,11 @@ Usually this centers around our wildcard certificates,
 which have been handed out like candy before...
 Anyway, this is the best way to know which ones are valid/expiring
 and we can point to it when some third party claims "some" certificate is expiring.
+
+#### _logs_
+
+There's a list of [Google trusted logs](https://www.gstatic.com/ct/log_list/log_list.json),
+Which can be accessed through API
+specified in [RFC 6962](https://datatracker.ietf.org/doc/html/rfc6962).
+
+_note:_ this api only provides head + numeric ranges of log entries.
