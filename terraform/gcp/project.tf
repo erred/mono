@@ -97,6 +97,12 @@ data "google_iam_policy" "project" {
     ]
     role = "roles/run.admin"
   }
+  binding {
+    members = [
+      "user:seankhliao@gmail.com",
+    ]
+    role = "roles/storage.admin"
+  }
 
   dynamic "binding" {
     for_each = toset(var.googleapis_with_identity)

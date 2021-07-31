@@ -23,6 +23,8 @@ https://seankhliao.com/draft/12019-06-16-moving/
 https://seankhliao.com/draft/12019-06-15-biases/
 https://seankhliao.com/draft/12019-06-14-minimalism/
 https://seankhliao.com/draft/12019-06-13-wanderlust/
+https://seankhliao.com/blog/12021-07-30-k8s-secret-stringdata/
+https://seankhliao.com/blog/12021-07-29-makefile-notes/
 https://seankhliao.com/blog/12021-07-28-dns-txt/
 https://seankhliao.com/blog/12021-07-27-maddy-email/
 https://seankhliao.com/blog/12021-07-21-background-auth/

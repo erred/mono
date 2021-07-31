@@ -1,4 +1,8 @@
 terraform {
+  backend "gcs" {
+    bucket = "com-seankhliao-terraform"
+    prefix = "mono/terraform/gcp"
+  }
   required_providers {
     google = {
       # use beta as default

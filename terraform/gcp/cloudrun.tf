@@ -47,11 +47,9 @@ resource "google_storage_bucket_iam_policy" "cloudrun_logs" {
 data "google_iam_policy" "bucket_cloudrun_logs" {
   binding {
     members = [
-      "projectEditor:${data.google_project.default.project_id}",
-      "projectOwner:${data.google_project.default.project_id}",
       google_logging_project_sink.cloudrun_logs.writer_identity,
     ]
-    role = "roles/storage.legacyBucketOwner"
+    role = "roles/storage.objectCreator"
   }
 }
 

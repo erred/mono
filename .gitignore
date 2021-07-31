@@ -4,4 +4,4 @@ bazel-mono
 bazel-out
 bazel-testlogs
 .terraform/
-*.tfstate*backup
+*tfstate*
