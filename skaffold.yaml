@@ -4,118 +4,29 @@ metadata:
   name: mono
 build:
   artifacts:
-  - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/replaceme
-    kaniko:
-      dockerfile: ci/Dockerfile
-      image: gcr.io/kaniko-project/executor:latest
-      reproducible: true
-      singleSnapshot: true
-      skipUnusedStages: true
-      target: replaceme
-      useNewRun: true
-      whitelistVarRun: true
-      buildArgs:
-        GOPROXY: http://athens.athens.svc.cluster.local
-        GOCACHE: /var/run/gobuildcache
-        GOMODCACHE: /var/run/gomodcache
-      volumeMounts:
-        - name: modcache
-          mountPath: /var/run/gomodcache
-        - name: buildcache
-          mountPath: /var/run/gobuildcache
-  cluster:
-    pullSecretName: kaniko-secret
-    pullSecretPath: artifact-registry
-    # dockerConfig:
-    #   secretName: kaniko-secret
-    namespace: skaffold
-    volumes:
-      - name: modcache
-        hostPath:
-          path: /opt/k3s/cluster31/kaniko-gomodcache
-      - name: buildcache
-        hostPath:
-          path: /opt/k3s/cluster31/kaniko-gobuildcache
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/archrepod
+      bazel:
+        target: //go/cmd/archrepod:image.tar
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feedagg
+      bazel:
+        target: //go/cmd/feedagg:image.tar
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/ghdefaults
+      bazel:
+        target: //go/cmd/ghdefaults:image.tar
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/singlepage
+      bazel:
+        target: //go/cmd/singlepage:image.tar
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/paste
+      bazel:
+        target: //go/cmd/paste:image.tar
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/vanity
+      bazel:
+        target: //go/cmd/vanity:image.tar
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/w16
+      bazel:
+        target: //go/cmd/w16:image.tar
 deploy:
   kubeContext: default
   kustomize:
     paths:
-      - kube/overlays/cluster31/replaceme
-profiles:
-  - name: archrepod
-    patches:
-      - op: replace
-        path: /build/artifacts/0/image
-        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/archrepod
-      - op: replace
-        path: /build/artifacts/0/kaniko/target
-        value: archrepod
-      - op: replace
-        path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster31/archrepod
-  - name: feedagg
-    patches:
-      - op: replace
-        path: /build/artifacts/0/image
-        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feedagg
-      - op: replace
-        path: /build/artifacts/0/kaniko/target
-        value: feedagg
-      - op: replace
-        path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster31/feedagg
-  - name: ghdefaults
-    patches:
-      - op: replace
-        path: /build/artifacts/0/image
-        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/ghdefaults
-      - op: replace
-        path: /build/artifacts/0/kaniko/target
-        value: ghdefaults
-      - op: replace
-        path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster31/ghdefaults
-  - name: medea
-    patches:
-      - op: replace
-        path: /build/artifacts/0/image
-        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/singlepage
-      - op: replace
-        path: /build/artifacts/0/kaniko/target
-        value: singlepage
-      - op: replace
-        path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster31/medea
-  - name: paste
-    patches:
-      - op: replace
-        path: /build/artifacts/0/image
-        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/paste
-      - op: replace
-        path: /build/artifacts/0/kaniko/target
-        value: paste
-      - op: replace
-        path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster31/paste
-  - name: vanity
-    patches:
-      - op: replace
-        path: /build/artifacts/0/image
-        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/vanity
-      - op: replace
-        path: /build/artifacts/0/kaniko/target
-        value: vanity
-      - op: replace
-        path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster31/vanity
-  - name: w16
-    patches:
-      - op: replace
-        path: /build/artifacts/0/image
-        value: europe-north1-docker.pkg.dev/com-seankhliao/kluster/w16
-      - op: replace
-        path: /build/artifacts/0/kaniko/target
-        value: w16
-      - op: replace
-        path: /deploy/kustomize/paths/0
-        value: kube/overlays/cluster31/w16
+      - kube/overlays/cluster31

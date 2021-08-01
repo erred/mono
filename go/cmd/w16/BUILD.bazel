@@ -18,22 +18,25 @@ go_binary(
     name = "w16",
     embed = [":w16_lib"],
     visibility = ["//visibility:public"],
+    pure = "on"
 )
 
-load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
-go_image(
-    name = "go_image",
-    binary = ":w16",
-    pure = "on",
+container_image(
+    name = "image",
+    base = "@go_image_static//image",
+    files = [":w16"],
+    entrypoint = ["/w16"],
 )
+
 
 load("@io_bazel_rules_docker//container:container.bzl", "container_push")
 
 container_push(
     name = "push",
     format = "OCI",
-    image = ":go_image",
+    image = ":image",
     registry = "europe-north1-docker.pkg.dev",
     repository = "com-seankhliao/kluster/w16",
     skip_unchanged_digest = True,

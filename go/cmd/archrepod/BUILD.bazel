@@ -18,14 +18,16 @@ go_binary(
     name = "archrepod",
     embed = [":archrepod_lib"],
     visibility = ["//visibility:public"],
+    pure= "on",
 )
 
-load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
-go_image(
-    name = "go_image",
-    binary = ":archrepod",
-    pure = "on",
+container_image(
+    name = "image",
+    base = "@go_image_static//image",
+    files = [":archrepod"],
+    entrypoint = ["/archrepod"],
 )
 
 load("@io_bazel_rules_docker//container:container.bzl", "container_push")
@@ -33,7 +35,7 @@ load("@io_bazel_rules_docker//container:container.bzl", "container_push")
 container_push(
     name = "push",
     format = "OCI",
-    image = ":go_image",
+    image = ":image",
     registry = "europe-north1-docker.pkg.dev",
     repository = "com-seankhliao/kluster/archrepod",
     skip_unchanged_digest = True,
