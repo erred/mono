@@ -1,4 +1,12 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 
-# gazelle:prefix go.seankhliao.com/mono
-gazelle(name = "gazelle")
+gazelle(
+    name = "gazelle",
+    prefix = "go.seankhliao.com/mono",
+)
+
+load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
+
+buildifier(
+    name = "buildifier",
+)

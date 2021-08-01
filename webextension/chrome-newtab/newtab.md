@@ -50,6 +50,7 @@ _blogs:_
 [@rakyll](https://medium.com/@rakyll)
 [xkcd](https://xkcd.com)
 [cks](https://utcc.utoronto.ca/~cks/space/blog/__IndexChron)
+[jayconrod](https://jayconrod.com/posts)
 
 _comics:_
 [your throne](https://www.webtoons.com/en/fantasy/your-throne/list?title_no=2009)

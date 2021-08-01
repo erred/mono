@@ -22,3 +22,22 @@ go_binary(
     embed = [":vanity_lib"],
     visibility = ["//visibility:public"],
 )
+
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+
+go_image(
+    name = "go_image",
+    binary = ":vanity",
+    pure = "on",
+)
+
+load("@io_bazel_rules_docker//container:container.bzl", "container_push")
+
+container_push(
+    name = "push",
+    format = "OCI",
+    image = ":go_image",
+    registry = "europe-north1-docker.pkg.dev",
+    repository = "com-seankhliao/kluster/vanity",
+    skip_unchanged_digest = True,
+)

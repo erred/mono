@@ -1,13 +1,14 @@
+workspace(name = "com_seankhliao_go_mono")
+
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-http_archive(
+git_repository(
     name = "bazel_gazelle",
-    sha256 = "62ca106be173579c0a167deb23358fdfe71ffa1e4cfdddf5582af26520f1c66f",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
-    ],
+    commit = "0709f360ae257d660816eac7ac5b8000d278bb7e",
+    remote = "https://github.com/bazelbuild/bazel-gazelle",
+    # master ~ 2021-08-01
+    shallow_since = "1627660378 -0600",
 )
 
 http_archive(
@@ -20,18 +21,12 @@ http_archive(
     ],
 )
 
-# http_archive(
-#     name = "io_bazel_rules_docker",
-#     sha256 = "59d5b42ac315e7eadffa944e86e90c2990110a1c8075f1cd145f487e999d22b3",
-#     strip_prefix = "rules_docker-0.17.0",
-#     urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.17.0/rules_docker-v0.17.0.tar.gz"],
-# )
 git_repository(
     name = "io_bazel_rules_docker",
-    # master ~ 2021-08-01
-    shallow_since = "1627591998 -0400",
     commit = "3b0187852774ef0e424c92ec7b78a2a199a0503b",
     remote = "https://github.com/bazelbuild/rules_docker",
+    # master ~ 2021-08-01
+    shallow_since = "1627591998 -0400",
 )
 
 http_archive(
