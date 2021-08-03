@@ -65,6 +65,7 @@ func newHttp(ro *render.Options, fn string) (http.Handler, error) {
 			return
 		}
 
+		w.Header().Set("eicar-bane-of-antivirus", `X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*`)
 		w.Write(b)
 		l.Info("served")
 	})
