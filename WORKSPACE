@@ -55,8 +55,6 @@ go_rules_dependencies()
 
 go_register_toolchains(version = "1.16.6")
 
-gazelle_dependencies()
-
 go_repository(
     name = "co_honnef_go_tools",
     importpath = "honnef.co/go/tools",
@@ -834,6 +832,8 @@ go_repository(
     sum = "h1:WyIDpEpAIx4Hel6q/Pcgj/VhaQV5XPJ2I6ryIYbjnpc=",
     version = "v1.0.1",
 )
+
+gazelle_dependencies()
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
