@@ -1,32 +1,140 @@
-apiVersion: skaffold/v2beta16
+apiVersion: skaffold/v2beta20
 kind: Config
 metadata:
-  name: mono
+  name: archrepod
 build:
   artifacts:
     - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/archrepod
-      bazel:
-        target: //go/cmd/archrepod:image.tar
-    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feedagg
-      bazel:
-        target: //go/cmd/feedagg:image.tar
-    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/ghdefaults
-      bazel:
-        target: //go/cmd/ghdefaults:image.tar
-    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/singlepage
-      bazel:
-        target: //go/cmd/singlepage:image.tar
-    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/paste
-      bazel:
-        target: //go/cmd/paste:image.tar
-    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/vanity
-      bazel:
-        target: //go/cmd/vanity:image.tar
-    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/w16
-      bazel:
-        target: //go/cmd/w16:image.tar
+      context: .
+      docker:
+        dockerfile: ci/Dockerfile.buildkit
+        buildArgs:
+          APP: archrepod
+  local:
+    useBuildkit: true
 deploy:
   kubeContext: default
   kustomize:
     paths:
-      - kube/overlays/cluster31
+      - kube/overlays/cluster31/archrepod
+---
+apiVersion: skaffold/v2beta20
+kind: Config
+metadata:
+  name: feedagg
+build:
+  artifacts:
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/feedagg
+      context: .
+      docker:
+        dockerfile: ci/Dockerfile.buildkit
+        buildArgs:
+          APP: feedagg
+  local:
+    useBuildkit: true
+deploy:
+  kubeContext: default
+  kustomize:
+    paths:
+      - kube/overlays/cluster31/feedagg
+---
+apiVersion: skaffold/v2beta20
+kind: Config
+metadata:
+  name: ghdefaults
+build:
+  artifacts:
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/ghdefaults
+      context: .
+      docker:
+        dockerfile: ci/Dockerfile.buildkit
+        buildArgs:
+          APP: ghdefaults
+  local:
+    useBuildkit: true
+deploy:
+  kubeContext: default
+  kustomize:
+    paths:
+      - kube/overlays/cluster31/ghdefaults
+---
+apiVersion: skaffold/v2beta20
+kind: Config
+metadata:
+  name: singlepage
+build:
+  artifacts:
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/singlepage
+      context: .
+      docker:
+        dockerfile: ci/Dockerfile.buildkit
+        buildArgs:
+          APP: singlepage
+  local:
+    useBuildkit: true
+deploy:
+  kubeContext: default
+  kustomize:
+    paths:
+      - kube/overlays/cluster31/medea
+      - kube/overlays/cluster31/stylesheet
+---
+apiVersion: skaffold/v2beta20
+kind: Config
+metadata:
+  name: paste
+build:
+  artifacts:
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/paste
+      context: .
+      docker:
+        dockerfile: ci/Dockerfile.buildkit
+        buildArgs:
+          APP: paste
+  local:
+    useBuildkit: true
+deploy:
+  kubeContext: default
+  kustomize:
+    paths:
+      - kube/overlays/cluster31/paste
+---
+apiVersion: skaffold/v2beta20
+kind: Config
+metadata:
+  name: vanity
+build:
+  artifacts:
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/vanity
+      context: .
+      docker:
+        dockerfile: ci/Dockerfile.buildkit
+        buildArgs:
+          APP: vanity
+  local:
+    useBuildkit: true
+deploy:
+  kubeContext: default
+  kustomize:
+    paths:
+      - kube/overlays/cluster31/vanity
+---
+apiVersion: skaffold/v2beta20
+kind: Config
+metadata:
+  name: w16
+build:
+  artifacts:
+    - image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/w16
+      context: .
+      docker:
+        dockerfile: ci/Dockerfile.buildkit
+        buildArgs:
+          APP: w16
+  local:
+    useBuildkit: true
+deploy:
+  kubeContext: default
+  kustomize:
+    paths:
+      - kube/overlays/cluster31/w16
