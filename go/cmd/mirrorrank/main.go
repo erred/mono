@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -139,6 +140,9 @@ loop:
 			r, err := client.Get(u)
 			if err != nil {
 				c := atomic.AddInt64(&cnt, 1)
+				if strings.Contains(err.Error(), "context deadline exceeded") {
+					err = errors.New("timeout")
+				}
 				log.Printf("WARN   %3d/%3d err=%q mirror=%q", c, total, err, u)
 				return
 			}
@@ -146,6 +150,9 @@ loop:
 			_, err = io.Copy(io.Discard, r.Body)
 			if err != nil {
 				c := atomic.AddInt64(&cnt, 1)
+				if strings.Contains(err.Error(), "context deadline exceeded") {
+					err = errors.New("timeout")
+				}
 				log.Printf("WARN   %3d/%3d err=%q mirror=%q", c, total, err, u)
 				return
 			}

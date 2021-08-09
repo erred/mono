@@ -40,7 +40,7 @@ _google:_
 [analytics](https://analytics.google.com)
 [datastudio](https://datastudio.google.com/reporting/91bc28c3-a44f-4bcc-a838-58cf6a56ca04/page/BMLbB)
 [domains](https://domains.google.com)
-[search](https://search.google.com)
+[search](https://search.google.com/search-console/)
 
 ### _to_ read
 

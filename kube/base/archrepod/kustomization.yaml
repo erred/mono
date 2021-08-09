@@ -8,3 +8,7 @@ resources:
   - persistentvolumeclaim.k8s.yaml
   - service.k8s.yaml
   - serviceaccount.k8s.yaml
+patches:
+  - path: ../../patches/defaults.yaml
+  - path: ../../patches/healthz.yaml
+  - path: ../../patches/otel-svc-name.yaml

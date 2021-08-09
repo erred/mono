@@ -53,3 +53,4 @@ So i think you could just extract the contents of crds `openAPIV3Schema`
 from the customary yaml into json and call it a day.
 The API server also serves everything it know about, via `/openapi/v2`,
 and can be called with `kubectl get --raw /openapi/v2`.
+I also learned there is [openapi2jsonschema](https://github.com/yannh/openapi2jsonschema)...
