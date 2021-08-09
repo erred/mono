@@ -60,3 +60,7 @@ On the pod level, there are readiness gates.
 These check the `pod.conditions.status` for specific conditions to be `True`.
 This also means it's only really useful for k8s-aware workloads which can patch their own pods
 (not available to kubectl)
+
+#### _minReadySeconds_
+
+Deployments and Daemonsets also have a `minReadySeconds` field that gate if the app should serve traffic.
