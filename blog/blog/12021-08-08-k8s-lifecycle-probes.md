@@ -52,3 +52,11 @@ as in kill the pod if this one fails.
 
 This determines if the pod is in the "Ready" state,
 and by extension, if traffic should be routed to it.
+
+
+#### _readiness_ gates
+
+On the pod level, there are readiness gates.
+These check the `pod.conditions.status` for specific conditions to be `True`.
+This also means it's only really useful for k8s-aware workloads which can patch their own pods
+(not available to kubectl)
