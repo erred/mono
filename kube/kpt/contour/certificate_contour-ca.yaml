@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: contour-ca
+  namespace: projectcontour
+spec:
+  revisionHistoryLimit: 1
+  commonName: contour-ca
+  duration: 87600h
+  isCA: true
+  issuerRef:
+    name: contour-selfsigned
+  privateKey:
+    algorithm: ECDSA
+  secretName: root-secret
+  subject: contour-ca

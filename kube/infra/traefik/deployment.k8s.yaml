@@ -72,8 +72,8 @@ spec:
           - --ping=true
           - --providers.kubernetescrd
           - --providers.kubernetesingress
-          # - --experimental.kubernetesgateway=true
-          # - --providers.kubernetesgateway=true
+          - --experimental.kubernetesgateway=true
+          - --providers.kubernetesgateway=true
           # - --certificatesresolvers.default.acme.email=letsencrypt-cluster31@seankhliao.com
           # - --certificatesresolvers.default.acme.storage=/data/letsencrypt.json
           # - --certificatesresolvers.default.acme.keyType=EC256

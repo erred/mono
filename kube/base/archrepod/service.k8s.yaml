@@ -7,5 +7,5 @@ spec:
     - name: http
       port: 80
       targetPort: 8080
-    - name: grpc
-      port: 8081
+    - name: admin
+      port: 8090

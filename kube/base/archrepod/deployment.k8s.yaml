@@ -13,13 +13,27 @@ spec:
       containers:
         - args:
             - -data=/data
+            - -otlp.endpoint=otelcol.otelcol.svc.cluster.local:4317
           name: archrepod
-          image: docker.seankhliao.com/archrepod:latest
+          image: europe-north1-docker.pkg.dev/com-seankhliao/kluster/archrepod
+          env:
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/name']
+          livenessProbe:
+            httpGet:
+              port: admin
+              path: /healthz
+          readinessProbe:
+            httpGet:
+              port: admin
+              path: /readyz
           ports:
             - name: http
               containerPort: 8080
-            - name: grpc
-              containerPort: 8081
+            - name: admin
+              containerPort: 8090
           volumeMounts:
             - mountPath: /data
               name: data

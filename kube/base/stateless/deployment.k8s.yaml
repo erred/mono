@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stateless
+spec:
+  replicas: 1
+  template:
+    spec:
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: stateless
+      enableServiceLinks: false
+      containers:
+      - name: stateless
+        image: docker.seankhliao.com/stateless:latest
+        args: []
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: admin
+          containerPort: 8081
+        env: []
+  revisionHistoryLimit: 1

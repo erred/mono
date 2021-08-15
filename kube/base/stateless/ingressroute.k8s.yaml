@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: w16
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`w16.seankhliao.com`)
+    services:
+    - name: w16
+      port: 80
+  tls:
+    certResolver: default
