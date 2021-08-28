@@ -1,5 +1,5 @@
 ---
-title: certificate transparency at work:
+title: certificate transparency at work
 description: public logs of things...
 ---
 
