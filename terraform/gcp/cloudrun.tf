@@ -97,6 +97,7 @@ resource "google_cloud_run_service" "publicruns" {
         image = "${local.ar_run_url}/${each.value.image}:latest"
 
         ports {
+          name           = "http1"
           container_port = 8080
         }
 

@@ -101,7 +101,7 @@ resource "google_monitoring_alert_policy" "https_check_failed" {
         | condition check_failed > 1 '1'
       EOT
       trigger {
-        count = 1
+        count = 2
       }
     }
   }
@@ -128,7 +128,7 @@ resource "google_monitoring_alert_policy" "https_check_latency" {
         | condition max_latency > 1500 'ms'
       EOT
       trigger {
-        count = 1
+        count = 2
       }
     }
   }
@@ -158,7 +158,7 @@ resource "google_monitoring_alert_policy" "https_check_cert" {
         | condition min_cert_expiry_time < 15 'd'
       EOT
       trigger {
-        count = 1
+        count = 2
       }
     }
   }
