@@ -4,21 +4,24 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"os"
 
 	"sigs.k8s.io/kustomize/kyaml/kio"
 	"sigs.k8s.io/kustomize/kyaml/kio/filters"
 )
 
-const (
-	FilenamePattern = "%k_%n.yaml"
-)
-
 func main() {
-	p := "."
-	if len(os.Args) > 1 {
-		p = os.Args[1]
+	var filenamePattern string
+	flag.StringVar(&filenamePattern, "filename-pattern", "%k.k8s.yaml", "pattern for filenames (%k: kind, %n: name, %s: namespace)")
+	flag.Parse()
+
+	p := flag.Arg(0)
+	if p == "" {
+		p = "."
 	}
+
 	rw := &kio.LocalPackageReadWriter{
 		PackagePath: p,
 	}
@@ -30,13 +33,14 @@ func main() {
 				UseSchema: true,
 			},
 			&filters.FileSetter{
-				FilenamePattern: FilenamePattern,
+				FilenamePattern: filenamePattern,
 				Override:        true,
 			},
 		},
 		Outputs: []kio.Writer{rw},
 	}.Execute()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
