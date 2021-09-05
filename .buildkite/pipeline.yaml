@@ -9,6 +9,6 @@ steps:
         -v ${GOMODCACHE}:/go/pkg/mod \
         -v ${GOCACHE}:/root/.cache/go-build \
         -v ${BUILDKITE_BUILD_CHECKOUT_PATH}:/workspace \
-        -w /workspace
+        -w /workspace \
         $GOIMAGE \
         go build ./...
