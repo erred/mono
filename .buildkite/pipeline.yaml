@@ -1,3 +1,7 @@
 steps:
   - label: "hello world"
     command: "echo hello world"
+  - command: "go build -o ./..."
+    plugins:
+      - docker#v3.8.0:
+          image: "golang:alpine"
