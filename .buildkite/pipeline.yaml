@@ -1,7 +1,14 @@
+env:
+  GOMODCACHE: /var/lib/buildkite-agent/gomodcache
+  GOCACHE: /var/lib/buildkite-agent/gobuildcache
+  GOIMAGE: golang:alpine
+
 steps:
-  - label: "hello world"
-    command: "echo hello world"
-  - command: "go build ./..."
-    plugins:
-      - docker#v3.8.0:
-          image: "golang:alpine"
+  - command: |
+      docker run --rm -it \
+        -v ${GOMODCACHE}:/go/pkg/mod \
+        -v ${GOCACHE}:/root/.cache/go-build \
+        -v ${BUILDKITE_BUILD_CHECKOUT_PATH}:/workspace \
+        -w /workspace
+        $GOIMAGE \
+        go build ./...
