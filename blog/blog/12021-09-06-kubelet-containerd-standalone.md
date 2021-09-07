@@ -87,6 +87,7 @@ cat << EOF > /etc/cni/cni.template
   "cniVersion": "0.4.0",
   "plugins": [{
     "type": "ptp",
+    "ipMasq": true,
     "ipam": {
       "type": "host-local",
       "subnet": "{{.PodCIDR}}",
