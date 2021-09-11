@@ -1,0 +1,38 @@
+# Maintainer: Sean Liao <mono-pkgbuild@seankhliao.com>
+
+_pkgname=w16
+pkgname=${_pkgname}-git
+pkgver=0.0.0
+pkgrel=1
+pkgdesc="main web server"
+arch=(x86_64)
+url="https://github.com/seankhliao/mono"
+license=(MIT)
+makedepends=(git go)
+provides=(w16)
+conflicts=(w16)
+source=("src::git+${url}"
+    ${_pkgname}.service)
+sha256sums=('SKIP'
+            'ca0911974e0f40619fe869c3b42bbe82f5fb387d8190a599f90c72e2a94e63b6')
+
+build() {
+  cd src
+  export CGO_ENABLED=0
+  export GOFLAGS='-trimpath -mod=readonly -modcacherw'
+  export GTM=GTM-TLVN7D6
+
+  go run ./go/cmd/webrender -src ./blog -dst ./go/internal/w16/static -gtm ${GTM}
+  go build -ldflags='-w -s' -o ./bin/${_pkgname} ./go/cmd/${_pkgname}
+}
+
+package() {
+  install -Dm755 src/bin/${_pkgname} ${pkgdir}/usr/bin/${_pkgname}
+  install -Dm644 src/LICENSE ${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE
+  install -Dm644 ${_pkgname}.service ${pkgdir}/usr/lib/systemd/system/${_pkgname}.service
+}
+
+pkgver() {
+    cd src
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
