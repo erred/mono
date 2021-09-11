@@ -2,15 +2,15 @@
 
 _pkgname=w16
 pkgname=${_pkgname}-git
-pkgver=0.0.0
+pkgver=r103.175c1b9
 pkgrel=1
 pkgdesc="main web server"
 arch=(x86_64)
 url="https://github.com/seankhliao/mono"
 license=(MIT)
 makedepends=(git go)
-provides=(w16)
-conflicts=(w16)
+provides=(${_pkgname})
+conflicts=(${_pkgname})
 source=("src::git+${url}"
     ${_pkgname}.service)
 sha256sums=('SKIP'

@@ -1,12 +1,12 @@
 [Unit]
-Description=w16 web server
+Description=singlepage web server -- medea
 Documentation=https://github.com/seankhliao/mono
 Requires=network-online.target
 After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/w16 -adm.addr=127.0.0.1:27001 -web.addr=:28001
+ExecStart=/usr/bin/singlepage-medea -adm.addr=127.0.0.1:27002 -web.addr=:28002 -canonical https://medea.seankhliao.com -file /etc/singlepage/medea.md
 RestartSec=10s
 Restart=always
 

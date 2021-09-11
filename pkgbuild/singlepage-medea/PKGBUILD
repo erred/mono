@@ -2,32 +2,35 @@
 
 _pkgname=singlepage-medea
 pkgname=${_pkgname}-git
-pkgver=0.0.0
+pkgver=r103.175c1b9
 pkgrel=1
-pkgdesc="main web server"
+pkgdesc="singlepage web server"
 arch=(x86_64)
 url="https://github.com/seankhliao/mono"
 license=(MIT)
 makedepends=(git go)
-provides=(w16)
-conflicts=(w16)
+provides=(${_pkgname})
+conflicts=(${_pkgname})
 source=("src::git+${url}"
-    ${_pkgname}.service)
+    ${_pkgname}.service
+    medea.md)
 sha256sums=('SKIP'
-            'b1346c9ae644d6f1b4cbbe56d0f3f7ddb923566e0fddafabbfa1bbe28b9d1a4f')
+            'd5ab24b03dba9f6f65f59ad27b03bed2fe74e3dadaf8dba5ee810bf960b5c8b0'
+            '5520df936967eea91d685469746eb8fc47115c7c951ef520602a7f3c0d0cf3f7')
 
 build() {
   cd src
   export CGO_ENABLED=0
   export GOFLAGS='-trimpath -mod=readonly -modcacherw'
 
-  go build -ldflags='-w -s' -o ./bin/singlepage ./go/cmd/${_pkgname}
+  go build -ldflags='-w -s' -o ./bin/${_pkgname} ./go/cmd/singlepage
 }
 
 package() {
   install -Dm755 src/bin/${_pkgname} ${pkgdir}/usr/bin/${_pkgname}
   install -Dm644 src/LICENSE ${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE
   install -Dm644 ${_pkgname}.service ${pkgdir}/usr/lib/systemd/system/${_pkgname}.service
+  install -Dm644 medea.md ${pkgdir}/etc/singlepage/medea.md
 }
 
 pkgver() {

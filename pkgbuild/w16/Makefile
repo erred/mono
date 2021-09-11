@@ -1,16 +1,17 @@
 APP := w16
+RSYNCHOST := medea
 
 .PHONY: all
-all: clean build
+all: clean build rsync
 
 .PHONY: build
 build:
 	makepkg -cfs
 
+.PHONY: rsync
+rsync:
+	rsync -rP *.pkg.tar.zst $(RSYNCHOST):pkgs/
+
 .PHONY: clean
 clean:
-	git restore PKGBUILD
 	-rm -rf src/ pkg/ $(APP)-*.pkg.tar.zst
-
-PKGBUILD: w16.service
-	updpkgsums
