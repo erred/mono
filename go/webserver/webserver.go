@@ -14,16 +14,16 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/go-logr/stdr"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.seankhliao.com/mono/go/webserver/stdlog"
-	"k8s.io/klog/v2/klogr"
 )
 
 func BaseContext() (context.Context, logr.Logger) {
 	ctx := context.Background()
 	ctx, _ = signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
-	l := klogr.New()
+	l := stdr.New(nil)
 	ctx = logr.NewContext(ctx, l)
 	return ctx, l
 }

@@ -4,8 +4,8 @@ import (
 	"flag"
 	"os"
 
+	"github.com/go-logr/stdr"
 	"go.seankhliao.com/mono/go/internal/w16/process"
-	"k8s.io/klog/v2/klogr"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	flag.BoolVar(&o.Raw, "raw", false, "skip markdown processing")
 	flag.Parse()
 
-	log := klogr.New()
+	log := stdr.New(nil)
 
 	fi, err := os.Stat(src)
 	if err != nil {
