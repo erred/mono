@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	_ "embed"
+	"encoding/base32"
 	"errors"
 	"flag"
 	"fmt"
@@ -11,13 +12,11 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
-	"go.seankhliao.com/mono/go/base20"
 	"go.seankhliao.com/mono/go/render"
 )
 
@@ -133,7 +132,7 @@ func (s *server) formHandler(w http.ResponseWriter, r *http.Request) {
 		l = l.WithValues("type", "upload")
 
 		_, span = s.t.Start(ctx, "uniq-dir")
-		ext := path.Ext(mph.Filename)
+		ext := filepath.Ext(mph.Filename)
 		f, err := uniqDir(s.dir, ext)
 		l = l.WithValues("file", f.Name())
 		span.End()
@@ -195,7 +194,9 @@ func (s *server) formHandler(w http.ResponseWriter, r *http.Request) {
 func uniqDir(dir, ext string) (*os.File, error) {
 	totalRetries := 3
 	for retries := totalRetries; retries > 0; retries-- {
-		fn := base20.Encode(rand.Int63()) + ext
+		b := make([]byte, 5)
+		rand.Read(b)
+		fn := base32.StdEncoding.EncodeToString(b) + ext
 		f, err := os.OpenFile(filepath.Join(dir, fn), os.O_RDWR|os.O_CREATE, 0o644)
 		switch {
 		case err == nil:

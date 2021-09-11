@@ -6,7 +6,7 @@ require (
 	github.com/bradleyfalzon/ghinstallation v1.1.2-0.20210508092528-3386a2062511
 	github.com/go-logr/logr v1.1.0
 	github.com/go-logr/stdr v1.1.0
-	github.com/google/go-github/v35 v35.3.0
+	github.com/google/go-github/v38 v38.1.0
 	github.com/gorilla/feeds v1.1.1
 	github.com/klauspost/compress v1.13.5
 	github.com/mmcdole/gofeed v1.1.3
@@ -45,6 +45,7 @@ require (
 	github.com/go-openapi/jsonreference v0.19.3 // indirect
 	github.com/go-openapi/swag v0.19.5 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-github/v35 v35.3.0 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
