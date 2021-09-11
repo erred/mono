@@ -1,0 +1,36 @@
+# Maintainer: Sean Liao <mono-pkgbuild@seankhliao.com>
+
+_pkgname=singlepage-medea
+pkgname=${_pkgname}-git
+pkgver=0.0.0
+pkgrel=1
+pkgdesc="main web server"
+arch=(x86_64)
+url="https://github.com/seankhliao/mono"
+license=(MIT)
+makedepends=(git go)
+provides=(w16)
+conflicts=(w16)
+source=("src::git+${url}"
+    ${_pkgname}.service)
+sha256sums=('SKIP'
+            'b1346c9ae644d6f1b4cbbe56d0f3f7ddb923566e0fddafabbfa1bbe28b9d1a4f')
+
+build() {
+  cd src
+  export CGO_ENABLED=0
+  export GOFLAGS='-trimpath -mod=readonly -modcacherw'
+
+  go build -ldflags='-w -s' -o ./bin/singlepage ./go/cmd/${_pkgname}
+}
+
+package() {
+  install -Dm755 src/bin/${_pkgname} ${pkgdir}/usr/bin/${_pkgname}
+  install -Dm644 src/LICENSE ${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE
+  install -Dm644 ${_pkgname}.service ${pkgdir}/usr/lib/systemd/system/${_pkgname}.service
+}
+
+pkgver() {
+    cd src
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}

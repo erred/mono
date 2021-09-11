@@ -1,4 +1,4 @@
-APP := w16
+APP := singlepage-medea
 
 .PHONY: all
 all: clean build
