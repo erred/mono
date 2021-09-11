@@ -29,7 +29,7 @@ func BaseContext() (context.Context, logr.Logger) {
 }
 
 func Run(ctx context.Context, o *Options) {
-	if o.Logger == nil {
+	if o.Logger == (logr.Logger{}) {
 		o.Logger = logr.FromContextOrDiscard(ctx)
 	}
 
