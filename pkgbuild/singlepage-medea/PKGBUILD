@@ -15,7 +15,7 @@ source=("src::git+${url}"
     ${_pkgname}.service
     medea.md)
 sha256sums=('SKIP'
-            'd7d4755ba2a1d143843873780caf8b65d38d76d6f2f1755f6282119ceda44055'
+            '4f3b5ca6959f2c2a3ecbe2ee550b02eea01e80d7e6e4f5a8fc98f3e0917bc1e1'
             '5520df936967eea91d685469746eb8fc47115c7c951ef520602a7f3c0d0cf3f7')
 
 build() {

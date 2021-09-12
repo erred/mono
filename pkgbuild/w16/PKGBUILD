@@ -14,7 +14,7 @@ conflicts=(${_pkgname})
 source=("src::git+${url}"
     ${_pkgname}.service)
 sha256sums=('SKIP'
-            'c47a2e1e4608de9626f0e7f33998ce6947555acd3122f95a56614a42226d46eb')
+            'c54b1a711dda81ebc25afd64b4ed93cc5574acc2e611bb5948b6e0eeb14f2307')
 
 build() {
   cd src
