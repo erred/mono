@@ -1,0 +1,14 @@
+[Unit]
+Description=envoy proxy
+Documentation=https://www.envoyproxy.io/
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/envoy --config-path /etc/envoy/config.yaml
+RestartSec=5s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

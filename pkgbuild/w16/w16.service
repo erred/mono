@@ -6,9 +6,9 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/w16 -adm.addr=127.0.0.1:27001 -web.addr=:28001
+ExecStart=/usr/bin/w16 -adm.addr=127.0.0.1:27001 -web.addr=127.0.0.1:28001
 RestartSec=10s
 Restart=always
 
 [Install]
-WantedBy=mult-user.target
+WantedBy=multi-user.target

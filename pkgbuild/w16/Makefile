@@ -6,6 +6,7 @@ all: clean build rsync
 
 .PHONY: build
 build:
+	updpkgsums
 	makepkg -cfs
 
 .PHONY: rsync

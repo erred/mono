@@ -2,7 +2,7 @@
 
 _pkgname=w16
 pkgname=${_pkgname}-git
-pkgver=r103.175c1b9
+pkgver=r106.76e4a36
 pkgrel=1
 pkgdesc="main web server"
 arch=(x86_64)
@@ -14,7 +14,7 @@ conflicts=(${_pkgname})
 source=("src::git+${url}"
     ${_pkgname}.service)
 sha256sums=('SKIP'
-            'b1346c9ae644d6f1b4cbbe56d0f3f7ddb923566e0fddafabbfa1bbe28b9d1a4f')
+            'c47a2e1e4608de9626f0e7f33998ce6947555acd3122f95a56614a42226d46eb')
 
 build() {
   cd src

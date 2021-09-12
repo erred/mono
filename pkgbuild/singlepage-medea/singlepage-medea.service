@@ -6,9 +6,9 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/singlepage-medea -adm.addr=127.0.0.1:27002 -web.addr=:28002 -canonical https://medea.seankhliao.com -file /etc/singlepage/medea.md
+ExecStart=/usr/bin/singlepage-medea -adm.addr=127.0.0.1:27002 -web.addr=127.0.0.1:28002 -canonical https://medea.seankhliao.com -file /etc/singlepage/medea.md
 RestartSec=10s
 Restart=always
 
 [Install]
-WantedBy=mult-user.target
+WantedBy=multi-user.target

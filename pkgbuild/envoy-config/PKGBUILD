@@ -1,0 +1,25 @@
+# Maintainer: Sean Liao <mono-pkgbuild@seankhliao.com>
+
+_pkgname=envoy-config
+pkgname=${_pkgname}-git
+pkgver=r2021.09.12
+pkgrel=10
+pkgdesc="envoyproxy config"
+arch=(x86_64)
+url="https://github.com/seankhliao/mono"
+license=(MIT)
+provides=(${_pkgname})
+conflicts=(${_pkgname})
+source=("config.yaml"
+    envoy.service)
+sha256sums=('b87ad994c7156ea49e11e72da615d8d85fdb52d302e8eda4b3efe616205091d5'
+            'c51b8053b264500f820c3bd36623f4fcd3c23d770d479525c18aa633d25d416a')
+
+package() {
+  install -Dm644 config.yaml ${pkgdir}/etc/envoy/config.yaml
+  install -Dm644 envoy.service ${pkgdir}/usr/lib/systemd/system/envoy.service
+}
+
+pkgver() {
+    printf "r%s" "$(date +%Y.%m.%d)"
+}

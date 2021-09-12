@@ -1,0 +1,127 @@
+admin:
+  address:
+    socket_address:
+      address: 127.0.0.1
+      port_value: 27000
+
+overload_manager:
+  refresh_interval: 0.25s
+  resource_monitors:
+    - name: envoy.resource_monitors.fixed_heap
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.resource_monitors.fixed_heap.v3.FixedHeapConfig
+        max_heap_size_bytes: 2147483648 # 2 GiB
+  actions:
+    - name: envoy.overload_actions.shrink_heap
+      triggers:
+        - name: envoy.resource_monitors.fixed_heap
+          threshold:
+            value: 0.95
+    - name: envoy.overload_actions.stop_accepting_requests
+      triggers:
+        - name: envoy.resource_monitors.fixed_heap
+          threshold:
+            value: 0.98
+
+static_resources:
+  listeners:
+    - name: http
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 80
+      per_connection_buffer_limit_bytes: 32768 # 32 KiB
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
+                use_remote_address: true
+                normalize_path: true
+                merge_slashes: true
+                path_with_escaped_slashes_action: REJECT_REQUEST
+                common_http_protocol_options:
+                  idle_timeout: 3600s # 1 hour
+                  headers_with_underscores_action: REJECT_REQUEST
+                # access_log:
+                #   - name: envoy.access_loggers.stdout
+                #     typed_config:
+                #       "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+
+                http_filters:
+                  - name: envoy.filters.http.router
+                route_config:
+                  virtual_hosts:
+                    - name: envoy
+                      domains:
+                        - envoy.seankhliao.com
+                      routes:
+                        match:
+                          prefix: /
+                        direct_response:
+                          status: 200
+                          body:
+                            inline_string: Hello Envoy
+                    - name: medea
+                      domains:
+                        - medea.seankhliao.com
+                      routes:
+                        match:
+                          prefix: /
+                        route:
+                          cluster: medea
+                    - name: w16
+                      domains:
+                        - w16.seankhliao.com
+                      routes:
+                        match:
+                          prefix: /
+                        route:
+                          cluster: w16
+
+  clusters:
+    - name: medea
+      per_connection_buffer_limit_bytes: 32768 # 32 KiB
+      load_assignment:
+        cluster_name: medea
+        endpoints:
+          lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 127.0.0.1
+                    port_value: 28002
+                health_check_config:
+                  port_value: 27002
+      health_checks:
+        - timeout:
+            seconds: 1
+          interval:
+            seconds: 10
+          unhealthy_threshold: 3
+          healthy_threshold: 1
+          http_health_check:
+            path: /healthz
+    - name: w16
+      per_connection_buffer_limit_bytes: 32768 # 32 KiB
+      load_assignment:
+        cluster_name: w16
+        endpoints:
+          lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 127.0.0.1
+                    port_value: 28001
+                health_check_config:
+                  port_value: 27001
+      health_checks:
+        - timeout:
+            seconds: 1
+          interval:
+            seconds: 10
+          unhealthy_threshold: 3
+          healthy_threshold: 1
+          http_health_check:
+            path: /healthz

@@ -2,7 +2,7 @@
 
 _pkgname=singlepage-medea
 pkgname=${_pkgname}-git
-pkgver=r103.175c1b9
+pkgver=r106.76e4a36
 pkgrel=1
 pkgdesc="singlepage web server"
 arch=(x86_64)
@@ -15,7 +15,7 @@ source=("src::git+${url}"
     ${_pkgname}.service
     medea.md)
 sha256sums=('SKIP'
-            'd5ab24b03dba9f6f65f59ad27b03bed2fe74e3dadaf8dba5ee810bf960b5c8b0'
+            'd7d4755ba2a1d143843873780caf8b65d38d76d6f2f1755f6282119ceda44055'
             '5520df936967eea91d685469746eb8fc47115c7c951ef520602a7f3c0d0cf3f7')
 
 build() {
