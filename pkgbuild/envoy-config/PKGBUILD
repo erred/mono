@@ -2,7 +2,7 @@
 
 _pkgname=envoy-config
 pkgname=${_pkgname}-git
-pkgver=r2021.09.18.22.54
+pkgver=r2021.09.18.23.18
 pkgrel=1
 pkgdesc="envoyproxy config"
 arch=(x86_64)
@@ -12,7 +12,7 @@ provides=(${_pkgname})
 conflicts=(${_pkgname})
 source=("config.yaml"
     envoy.service)
-sha256sums=('99e3bdf3c2658406af41671ac4d56c0e542bdef18e93d6f4a4e5bd79fd71563e'
+sha256sums=('b24097477be5187771c446071d78d6e796798607db27bce8f0966a4b4d171ae5'
             'c51b8053b264500f820c3bd36623f4fcd3c23d770d479525c18aa633d25d416a')
 
 package() {

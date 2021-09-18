@@ -72,6 +72,7 @@ static_resources:
               - ghdefaults.seankhliao.com
               - medea.seankhliao.com
               - paste.seankhliao.com
+              - stylesheet.seankhliao.com
               - w16.seankhliao.com
           transport_socket:
             name: envoy.transport_sockets.tls
@@ -146,6 +147,15 @@ static_resources:
                           prefix: /
                         route:
                           cluster: paste
+                    - name: stylesheet
+                      domains:
+                        - stylesheet.seankhliao.com
+                      response_headers_to_add: *quichdr
+                      routes:
+                        match:
+                          prefix: /
+                        route:
+                          cluster: stylesheet
                     - name: w16
                       domains:
                         - w16.seankhliao.com
@@ -245,6 +255,20 @@ static_resources:
                     port_value: 28004
                 health_check_config:
                   port_value: 27004
+      health_checks: *basichealth
+    - name: stylesheet
+      per_connection_buffer_limit_bytes: 32768 # 32 KiB
+      load_assignment:
+        cluster_name: stylesheet
+        endpoints:
+          lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 127.0.0.1
+                    port_value: 28005
+                health_check_config:
+                  port_value: 27005
       health_checks: *basichealth
     - name: w16
       per_connection_buffer_limit_bytes: 32768 # 32 KiB
