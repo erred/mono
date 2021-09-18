@@ -1,12 +1,13 @@
 [Unit]
-Description=singlepage web server -- medea
+Description=singlepage web server
 Documentation=https://github.com/seankhliao/mono
 Requires=network-online.target
 After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/singlepage-medea -adm.addr=127.0.0.1:27002 -web.addr=127.0.0.1:28002 -canonical https://medea.seankhliao.com -file /etc/singlepage/medea.md
+EnvironmentFile=-/etc/singlepage/%i.env
+ExecStart=/usr/bin/singlepage $SINGLEPAGE_ARGS
 RestartSec=10s
 Restart=always
 
