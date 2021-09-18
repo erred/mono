@@ -69,6 +69,7 @@ static_resources:
         - filter_chain_match:
             server_names:
               - envoy.seankhliao.com
+              - ghdefaults.seankhliao.com
               - medea.seankhliao.com
               - w16.seankhliao.com
           transport_socket:
@@ -117,6 +118,15 @@ static_resources:
                           status: 200
                           body:
                             inline_string: Hello Envoy
+                    - name: ghdefaults
+                      domains:
+                        - ghdefaults.seankhliao.com
+                      response_headers_to_add: *quichdr
+                      routes:
+                        match:
+                          prefix: /
+                        route:
+                          cluster: ghdefaults
                     - name: medea
                       domains:
                         - medea.seankhliao.com
@@ -176,6 +186,28 @@ static_resources:
                   virtual_hosts: *h2hosts
 
   clusters:
+    - name: ghdefaults
+      per_connection_buffer_limit_bytes: 32768 # 32 KiB
+      load_assignment:
+        cluster_name: ghdefaults
+        endpoints:
+          lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 127.0.0.1
+                    port_value: 28003
+                health_check_config:
+                  port_value: 27003
+      health_checks: &basichealth
+        - timeout:
+            seconds: 1
+          interval:
+            seconds: 10
+          unhealthy_threshold: 3
+          healthy_threshold: 1
+          http_health_check:
+            path: /healthz
     - name: medea
       per_connection_buffer_limit_bytes: 32768 # 32 KiB
       load_assignment:

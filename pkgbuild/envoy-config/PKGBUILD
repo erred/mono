@@ -2,8 +2,8 @@
 
 _pkgname=envoy-config
 pkgname=${_pkgname}-git
-pkgver=r2021.09.18
-pkgrel=10
+pkgver=r2021.09.18.22.30
+pkgrel=1
 pkgdesc="envoyproxy config"
 arch=(x86_64)
 url="https://github.com/seankhliao/mono"
@@ -12,7 +12,7 @@ provides=(${_pkgname})
 conflicts=(${_pkgname})
 source=("config.yaml"
     envoy.service)
-sha256sums=('aa7625ccce59370a1f42806abfad6e66064a77b32aadbe43c2f1b98ecc711726'
+sha256sums=('3b4c45fa41d2ff5f43b2393e12546ecbab8ca2803d9dfa010325bbc7b838fb41'
             'c51b8053b264500f820c3bd36623f4fcd3c23d770d479525c18aa633d25d416a')
 
 package() {
@@ -21,5 +21,5 @@ package() {
 }
 
 pkgver() {
-    printf "r%s" "$(date +%Y.%m.%d)"
+    printf "r%s" "$(date +%Y.%m.%d.%H.%M)"
 }
