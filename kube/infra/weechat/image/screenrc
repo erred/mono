@@ -1,4 +1,0 @@
-term screen-256color
-attrcolor b ".I"
-defbce "on"
-startup_message off

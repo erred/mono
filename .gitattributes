@@ -1,14 +1,4 @@
 data/fin/fin.prototext                              filter=ageencrypt
-kube/infra/athens/secrets/env                       filter=ageencrypt
-kube/infra/cert-manager/secrets/serviceaccount.json filter=ageencrypt
-kube/infra/grafana/secrets/env                      filter=ageencrypt
-kube/infra/skaffold/secrets/artifact-registry       filter=ageencrypt
-kube/infra/skaffold/secrets/config.json             filter=ageencrypt
-kube/infra/traefik/secrets/env                      filter=ageencrypt
-kube/infra/registry/secrets/htpasswd                filter=ageencrypt
-kube/overlays/cluster31/archrepod/secrets/env       filter=ageencrypt
-kube/overlays/cluster31/ghdefaults/secrets/webhook-secret filter=ageencrypt
-kube/overlays/cluster31/ghdefaults/secrets/private-key filter=ageencrypt
 terraform/medea/secrets/40-wg0.netdev               filter=ageencrypt
 terraform/medea/secrets/registries.yaml             filter=ageencrypt
 .terraform.lock.hcl                                 linguist-generated=true

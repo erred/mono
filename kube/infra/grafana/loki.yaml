@@ -1,8 +1,0 @@
-apiVersion: 1
-datasources:
-  - name: Loki
-    type: loki
-    access: proxy
-    url: http://loki.loki.svc.cluster.local
-    jsonData:
-      maxLines: 5000
