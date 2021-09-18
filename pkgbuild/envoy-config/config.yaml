@@ -71,6 +71,7 @@ static_resources:
               - envoy.seankhliao.com
               - ghdefaults.seankhliao.com
               - medea.seankhliao.com
+              - paste.seankhliao.com
               - w16.seankhliao.com
           transport_socket:
             name: envoy.transport_sockets.tls
@@ -136,6 +137,15 @@ static_resources:
                           prefix: /
                         route:
                           cluster: medea
+                    - name: paste
+                      domains:
+                        - paste.seankhliao.com
+                      response_headers_to_add: *quichdr
+                      routes:
+                        match:
+                          prefix: /
+                        route:
+                          cluster: paste
                     - name: w16
                       domains:
                         - w16.seankhliao.com
@@ -221,15 +231,21 @@ static_resources:
                     port_value: 28002
                 health_check_config:
                   port_value: 27002
-      health_checks: &basichealth
-        - timeout:
-            seconds: 1
-          interval:
-            seconds: 10
-          unhealthy_threshold: 3
-          healthy_threshold: 1
-          http_health_check:
-            path: /healthz
+      health_checks: *basichealth
+    - name: paste
+      per_connection_buffer_limit_bytes: 32768 # 32 KiB
+      load_assignment:
+        cluster_name: paste
+        endpoints:
+          lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 127.0.0.1
+                    port_value: 28004
+                health_check_config:
+                  port_value: 27004
+      health_checks: *basichealth
     - name: w16
       per_connection_buffer_limit_bytes: 32768 # 32 KiB
       load_assignment:
