@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"go.seankhliao.com/mono/go/internal/fin/run"
+	"go.seankhliao.com/mono/go/internal/fin/run/format"
 	"go.seankhliao.com/mono/go/internal/fin/run/importcsv"
 	"go.seankhliao.com/mono/go/internal/fin/run/summary"
 )
@@ -17,6 +18,7 @@ func main() {
 	subCommands := map[string]run.Cmd{
 		"importcsv": importcsv.Run,
 		"summary":   summary.Run,
+		"format":    format.Run,
 	}
 	commands := func() {
 		scs := make([]string, 0, len(subCommands))
