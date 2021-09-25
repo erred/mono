@@ -165,6 +165,51 @@ static_resources:
                           prefix: /
                         route:
                           cluster: w16
+        - filter_chain_match:
+            server_names:
+              - auth-test.seankhliao.com
+          transport_socket:
+            name: envoy.transport_sockets.tls
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+              common_tls_context: *commontls
+          filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
+                use_remote_address: true
+                normalize_path: true
+                merge_slashes: true
+                path_with_escaped_slashes_action: REJECT_REQUEST
+                common_http_protocol_options: *commonhttp
+                http2_protocol_options:
+                  max_concurrent_streams: 100
+                  initial_stream_window_size: 65536 # 64 KiB
+                  initial_connection_window_size: 1048576 # 1 MiB
+                http_filters:
+                  - name: envoy.filters.http.ext_authz
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+                      grpc_service:
+                        envoy_grpc:
+                          cluster_name: authd
+                      transport_api_version: V3
+                  - name: envoy.filters.http.router
+                route_config:
+                  virtual_hosts:
+                    - name: auth-test
+                      domains:
+                        - auth-test.seankhliao.com
+                      routes:
+                        match:
+                          prefix: /
+                        route:
+                          cluster: medea
+                        # direct_response:
+                        #   status: 200
+                        #   body:
+                        #     inline_string: Hello Auth test
     - name: http3
       address:
         socket_address:
@@ -206,6 +251,21 @@ static_resources:
                   virtual_hosts: *h2hosts
 
   clusters:
+    - name: authd
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options: {}
+      load_assignment:
+        cluster_name: authd
+        endpoints:
+          lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 127.0.0.1
+                    port_value: 28006
     - name: ghdefaults
       per_connection_buffer_limit_bytes: 32768 # 32 KiB
       load_assignment:
