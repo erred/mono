@@ -18,7 +18,7 @@ nft list table inet table_name
 ```
 
 _chains_ are triggered by _hooks_ or other chains,
-all 5 chains available for _ip_ / _ip5_ / _inet_ / _bridge_
+all 5 chains available for _ip_ / _ip6_ / _inet_ / _bridge_
 
 _chains_ have types (with self explanatory names): _filter_, _nat_, _route_
 
