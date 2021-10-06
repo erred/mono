@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/bradleyfalzon/ghinstallation"
+	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/go-logr/logr"
 	"github.com/google/go-github/v38/github"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
