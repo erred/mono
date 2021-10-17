@@ -72,6 +72,7 @@ static_resources:
               - ghdefaults.seankhliao.com
               - medea.seankhliao.com
               - paste.seankhliao.com
+              - prometheus.seankhliao.com
               - stylesheet.seankhliao.com
               - w16.seankhliao.com
           transport_socket:
@@ -147,6 +148,15 @@ static_resources:
                           prefix: /
                         route:
                           cluster: paste
+                    - name: prometheus
+                      domains:
+                        - prometheus.seankhliao.com
+                      response_headers_to_add: *quichdr
+                      routes:
+                        match:
+                          prefix: /
+                        route:
+                          cluster: prometheus
                     - name: stylesheet
                       domains:
                         - stylesheet.seankhliao.com
@@ -316,6 +326,28 @@ static_resources:
                 health_check_config:
                   port_value: 27004
       health_checks: *basichealth
+    - name: prometheus
+      per_connection_buffer_limit_bytes: 32768 # 32 KiB
+      load_assignment:
+        cluster_name: prometheus
+        endpoints:
+          lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 127.0.0.1
+                    port_value: 9090
+                health_check_config:
+                  port_value: 9090
+      health_checks:
+        - timeout:
+            seconds: 1
+          interval:
+            seconds: 10
+          unhealthy_threshold: 3
+          healthy_threshold: 1
+          http_health_check:
+            path: /-/ready
     - name: stylesheet
       per_connection_buffer_limit_bytes: 32768 # 32 KiB
       load_assignment:
