@@ -291,6 +291,12 @@ tbody tr:hover {
   background: #404040;
 }
 
+body > *:last-child::after {
+  margin: 0 0.5em;
+  content: "■";
+  color: #a06be0;
+}
+
 /* ===== gtm ===== */
 noscript iframe {
   height: 0;
