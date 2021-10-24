@@ -4,7 +4,7 @@ substitutions:
 
 steps:
   - id: build-push
-    name: gcr.io/kaniko-project/executor:latest
+    name: gcr.io/kaniko-project/executor:v1.6.0
     args:
       - -c=.
       - -f=ci/Dockerfile

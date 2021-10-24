@@ -57,24 +57,6 @@ data "google_iam_policy" "project" {
 
   binding {
     members = [
-      "serviceAccount:${google_service_account.hetzner_medea.email}"
-    ]
-    role = "roles/artifactregistry.reader"
-  }
-  binding {
-    members = [
-      "serviceAccount:${google_service_account.cluster31_kaniko.email}",
-    ]
-    role = "roles/artifactregistry.writer"
-  }
-  binding {
-    members = [
-      "serviceAccount:${google_service_account.cluster31_certmanager.email}"
-    ]
-    role = "roles/dns.admin"
-  }
-  binding {
-    members = [
       "serviceAccount:${local.cloudbuild_service_account}",
     ]
     role = "roles/cloudbuild.builds.builder"
@@ -99,9 +81,22 @@ data "google_iam_policy" "project" {
   }
   binding {
     members = [
+      "serviceAccount:${google_project_service_identity.svc["cloudbuild"].email}"
+    ]
+    role = "roles/artifactregistry.writer"
+  }
+  binding {
+    members = [
       "user:seankhliao@gmail.com",
     ]
     role = "roles/storage.admin"
+  }
+
+  binding {
+    members = [
+      "serviceAccount:service-330311169810@compute-system.iam.gserviceaccount.com"
+    ]
+    role = "roles/compute.serviceAgent"
   }
 
   dynamic "binding" {
