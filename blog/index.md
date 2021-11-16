@@ -51,7 +51,8 @@ _12014—12018_ National Taiwan University — programming, machine learning, bu
 - Belgium — 12019-10
 - Canada — 12019-04
 - Czechia — 12019-12
-- England — _12009—12011_, 12019-10, 12020-02
+- England — _12009—12011_, 12019-10, 12020-02, 12021-11
+- France — 12021-11
 - Germany — 12019-12
 - Hong Kong — 12017-08
 - India — 12015-08
