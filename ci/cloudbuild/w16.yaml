@@ -7,7 +7,7 @@ steps:
     name: us-central1-docker.pkg.dev/com-seankhliao/run/ko:v0.9.3
     args:
       - publish
-      - --preserve-import-path
+      - --preserve-import-paths
       - $_IMG
     env:
       - KO_DOCKER_REPO=$_REG
