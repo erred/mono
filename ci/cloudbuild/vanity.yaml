@@ -1,20 +1,16 @@
 substitutions:
-  _IMG: vanity
+  _IMG: go.seankhliao.com/mono/svc/cmd/vanity
   _REG: us-central1-docker.pkg.dev/com-seankhliao/run
 
 steps:
   - id: build-push
-    name: gcr.io/kaniko-project/executor:latest
+    name: us-central1-docker.pkg.dev/com-seankhliao/run/ko:v0.9.3
     args:
-      - -c=.
-      - -f=ci/Dockerfile
-      - -d=$_REG/$_IMG:latest
-      - --cache=true
-      - --reproducible
-      - --single-snapshot
-      - --skip-unused-stages
-      - --target=vanity
-      - --use-new-run
+      - publish
+      - --preserve-import-path
+      - $_IMG
+    env:
+      KO_DOCKER_REPO: $_REG
 
   - id: deploy
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine

@@ -1,5 +1,0 @@
-cluster-cidr: 10.241.0.0/16
-service-cidr: 10.240.0.0/16
-default-local-storage-path: /opt/k3s/cluster31
-disable:
-  - traefik

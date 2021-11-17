@@ -70,6 +70,7 @@ static_resources:
             server_names:
               - envoy.seankhliao.com
               - ghdefaults.seankhliao.com
+              - grafana.seankhliao.com
               - medea.seankhliao.com
               - paste.seankhliao.com
               - prometheus.seankhliao.com
@@ -130,6 +131,15 @@ static_resources:
                           prefix: /
                         route:
                           cluster: ghdefaults
+                    - name: grafana
+                      domains:
+                        - grafana.seankhliao.com
+                      response_headers_to_add: *quichdr
+                      routes:
+                        match:
+                          prefix: /
+                        route:
+                          cluster: grafana
                     - name: medea
                       domains:
                         - medea.seankhliao.com
@@ -298,6 +308,28 @@ static_resources:
           healthy_threshold: 1
           http_health_check:
             path: /healthz
+    - name: grafana
+      per_connection_buffer_limit_bytes: 32768 # 32 KiB
+      load_assignment:
+        cluster_name: grafana
+        endpoints:
+          lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 127.0.0.1
+                    port_value: 3000
+                health_check_config:
+                  port_value: 3000
+      health_checks:
+        - timeout:
+            seconds: 1
+          interval:
+            seconds: 10
+          unhealthy_threshold: 3
+          healthy_threshold: 1
+          http_health_check:
+            path: /api/health
     - name: medea
       per_connection_buffer_limit_bytes: 32768 # 32 KiB
       load_assignment:
