@@ -14,11 +14,10 @@ it's just one change now.
 - [`blog/`](blog) contains raw data for [seankhliao.com][seankhliaocom]
 - [`ci/`](ci) contains config for building things,
   except those that need to be at the root
-- [`go/cmd/`](go/cmd) contains runnable things
-- [`kube/`](kube) contains k8s deployment manifests for both infra and apps
+- [`svc/cmd/`](svc/cmd) runnable services (app servers)
+- [`cli/cmd/`](cli/cmd) runnable cli tools
 - [`proto/`](proto) hopefully i get better at writing gRPC service APIs that can live here
 - [`terraform/gcp`](terraform/gcp) contains the terraform code for almost everything in my main GCP project
-- [`terraform/medea/`](terraform/medea) contains a hacky terraform setup for a hetzner root server
 
 ## secrets
 

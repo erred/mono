@@ -1,4 +1,2 @@
 data/fin/fin.prototext                              filter=ageencrypt
-terraform/medea/secrets/40-wg0.netdev               filter=ageencrypt
-terraform/medea/secrets/registries.yaml             filter=ageencrypt
 .terraform.lock.hcl                                 linguist-generated=true
