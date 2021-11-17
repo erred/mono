@@ -10,7 +10,7 @@ steps:
       - --preserve-import-path
       - $_IMG
     env:
-      KO_DOCKER_REPO: $_REG
+      - KO_DOCKER_REPO=$_REG
 
   - id: deploy
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
