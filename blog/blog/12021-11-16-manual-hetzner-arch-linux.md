@@ -21,7 +21,7 @@ chroot into it and use that as our install environment.
 
 ```sh
 $ cd /tmp
-$ curl -LO https://mirror.example.com/archlinux-bootstrap-0000-00-00-x86_64.tar.gz | tar xzvf -
+$ curl -L https://mirror.example.com/archlinux-bootstrap-0000-00-00-x86_64.tar.gz | tar xzvf -
 
 # enable some mirrors
 $ vim root.x86_64/etc/pacman.d/mirrorlist
@@ -34,7 +34,7 @@ $ ./root.x86_64/bin/arch-chroot root.x86_64
 # pacman and some tools we need
 $ pacman-key --init
 $ pacman-key --populate archlinux
-$ pacman -Sy mdadm reflector
+$ pacman -Sy mdadm parted reflector
 $ reflector --save /etc/pacman.d/mirrorlist --threads 16 -p https -a 1 --score 5
 ```
 
@@ -51,6 +51,7 @@ The extra space is for GRUB.
 # cleanup previous mdadm setup, repeat for all /dev/md*
 $ mdadm --stop /dev/md0
 $ mdadm --remove /dev/md0
+$ mdadm --zero-superblock /dev/sda2
 
 # repartition disks, repeat for all disks
 $ parted /dev/sda
@@ -84,7 +85,8 @@ $ pacstrap /mnt \
   grub mdadm \                                        # boot
   arch-install-scripts \                              # nice to have arch-chroot when you mess up
   openssh \                                           # it's a server, it needs this
-  neovim zsh zsh-completions sudo git
+  neovim zsh zsh-completions sudo \
+  qemu-headless
 
 $ genfstab -U /mnt >> /mnt/etc/fstab
 $ mdadm --detail --scan >> /mnt/etc/mdadm.conf
@@ -93,7 +95,7 @@ $ arch-chroot /mnt
 
 # add mdadm hooks
 $ nvim /etc/mkinitcpio.conf
-$ mkinitcpio -p
+$ mkinitcpio -p linux
 ```
 
 #### _bootable_ install
@@ -123,9 +125,17 @@ $ systemctl enable systemd-timesyncd systemd-networkd
 We also want ssh
 
 ```sh
-# lock it down, use HostKeyAlgorithms to limit used keys
+# lock it down, change port, use HostKeyAlgorithms to limit used keys
 $ nvim /etc/ssh/sshd_config
 # disable generation of unused keys
+# /etc/systemd/system/sshdgenkeys.service.d/override.conf
+# [Unit]
+# ConditionPathExists=
+# ConditionPathExists=|!/etc/ssh/ssh_host_ed25519_key
+# ConditionPathExists=|!/etc/ssh/ssh_host_ed25519_key.pub
+#
+# [Service]
+# ExecStart=/usr/bin/ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key
 $ systemctl edit sshdgenkeys
 $ systemctl enable sshd
 
