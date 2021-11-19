@@ -150,6 +150,8 @@ $ nvim /root/.ssh/authorized_keys
 $ nvim /etc/locale-gen
 $ locale-gen
 
+$ timedatectl set-timezone UTC
+
 # set better defaults
 $ chsh -s /bin/zsh
 $ nvim /etc/default/useradd
