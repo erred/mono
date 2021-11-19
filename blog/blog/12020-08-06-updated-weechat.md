@@ -17,7 +17,7 @@ Use other certs (ex: ECDSA) if mobile apps are required.
 configure at least the important parts:
 server login/autojoin, secured data, relay
 
-generate a self signed ssh certificate,
+generate a self signed ssl certificate,
 adjust `DNS:...,IP:...` as appropriate
 
 ```sh
