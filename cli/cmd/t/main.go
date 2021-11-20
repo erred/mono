@@ -10,6 +10,10 @@ import (
 	"regexp"
 )
 
+const (
+	envLong = "T_LONG"
+)
+
 var (
 	lineNumberRe = regexp.MustCompile(`^(\d+):(\d+):.*`)
 	ansi         = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
@@ -32,8 +36,10 @@ func main() {
 	defer f.Close()
 
 	var (
-		curPath string
-		idx     int = 1
+		curPath  string
+		idx      = 1
+		long     = os.Getenv(envLong) == "1"
+		excluded int
 	)
 
 	cmd.Start()
@@ -46,6 +52,12 @@ func main() {
 		}
 
 		line := ansi.ReplaceAll(coloredLine, nil)
+
+		if !long && len(line) > 4096 {
+			excluded++
+			continue
+		}
+
 		if curPath == "" {
 			line = line[:len(line)-1]
 			curPath, err = filepath.Abs(string(line))
@@ -54,7 +66,6 @@ func main() {
 			}
 			fmt.Printf("%s", coloredLine)
 		} else if groupIdxs := lineNumberRe.FindSubmatchIndex(line); len(groupIdxs) > 0 {
-			// _, err := fmt.Fprintf(f, "alias e%d='nvim %s +%s'\n", idx, curPath, string(line[groupIdxs[2]:groupIdxs[3]]))
 			_, err := fmt.Fprintf(f, `alias e%d='nvim -c "call cursor(%s, %s)" "%s"'`+"\n", idx, string(line[groupIdxs[2]:groupIdxs[3]]), string(line[groupIdxs[4]:groupIdxs[5]]), curPath)
 			if err != nil {
 				log.Fatal(err)
@@ -65,5 +76,8 @@ func main() {
 			curPath = ""
 			fmt.Println()
 		}
+	}
+	if excluded > 0 {
+		fmt.Fprintf(os.Stderr, "%d results with long lines excluded, set %s=1 to include", excluded, envLong)
 	}
 }
