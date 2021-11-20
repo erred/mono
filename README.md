@@ -9,16 +9,6 @@ Why have a dozen repos when everything can live together in harmony?
 No more changes that span across all the repos when you cange one thing,
 it's just one change now.
 
-## layout
-
-- [`blog/`](blog) contains raw data for [seankhliao.com][seankhliaocom]
-- [`ci/`](ci) contains config for building things,
-  except those that need to be at the root
-- [`svc/cmd/`](svc/cmd) runnable services (app servers)
-- [`cli/cmd/`](cli/cmd) runnable cli tools
-- [`proto/`](proto) hopefully i get better at writing gRPC service APIs that can live here
-- [`terraform/gcp`](terraform/gcp) contains the terraform code for almost everything in my main GCP project
-
 ## secrets
 
 secrets are hidden through a git filter:
