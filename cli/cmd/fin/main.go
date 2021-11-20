@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"go.seankhliao.com/mono/internal/fin/run"
-	"go.seankhliao.com/mono/internal/fin/run/format"
-	"go.seankhliao.com/mono/internal/fin/run/importcsv"
-	"go.seankhliao.com/mono/internal/fin/run/summary"
+	"go.seankhliao.com/mono/cli/cmd/fin/internal/run"
+	"go.seankhliao.com/mono/cli/cmd/fin/internal/run/format"
+	"go.seankhliao.com/mono/cli/cmd/fin/internal/run/importcsv"
+	"go.seankhliao.com/mono/cli/cmd/fin/internal/run/summary"
 )
 
 func main() {

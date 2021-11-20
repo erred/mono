@@ -4,8 +4,8 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/internal/ghdefaults"
-	"go.seankhliao.com/mono/internal/webserver"
+	"go.seankhliao.com/mono/svc/webserver"
+	ghdefaults "go.seankhliao.com/mono/svc/cmd/ghdefaults/internal"
 )
 
 func main() {

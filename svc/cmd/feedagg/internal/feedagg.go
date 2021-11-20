@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/feeds"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
-	"go.seankhliao.com/mono/internal/render"
+	"go.seankhliao.com/mono/internal/web/render"
 )
 
 type Options struct {

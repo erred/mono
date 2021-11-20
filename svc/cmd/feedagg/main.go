@@ -4,8 +4,8 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/internal/feedagg"
-	"go.seankhliao.com/mono/internal/webserver"
+	"go.seankhliao.com/mono/svc/webserver"
+	feedagg "go.seankhliao.com/mono/svc/cmd/feedagg/internal"
 )
 
 func main() {

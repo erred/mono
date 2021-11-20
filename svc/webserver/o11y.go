@@ -15,12 +15,13 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
-	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
+	selector "go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
 type stopper interface {
@@ -75,16 +76,16 @@ func o11y(ctx context.Context, endpoint string) (*shutdown, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create otlptrace exporter: %w", err)
 	}
-	traceProvider := sdktrace.NewTracerProvider(
-		sdktrace.WithResource(res),
-		sdktrace.WithBatcher(traceExporter),
+	traceProvider := trace.NewTracerProvider(
+		trace.WithResource(res),
+		trace.WithBatcher(traceExporter),
 	)
-	otel.SetTracerProvider(traceProvider)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
 		propagation.Baggage{},
 		propagation.TraceContext{},
 		jaeger.Jaeger{},
 	))
+	otel.SetTracerProvider(traceProvider)
 
 	// metric
 	metricExporter, err := otlpmetric.New(ctx, otlpmetricgrpc.NewClient(
@@ -94,15 +95,22 @@ func o11y(ctx context.Context, endpoint string) (*shutdown, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create otlpmetric exporter: %w", err)
 	}
-	pusher := controller.New(
-		processor.New(
-			simple.NewWithExactDistribution(),
-			metricExporter,
+	metricProvider := controller.New(
+		processor.NewFactory(
+			selector.NewWithExactDistribution(),
+			aggregation.CumulativeTemporalitySelector(),
 		),
 		controller.WithExporter(metricExporter),
 		controller.WithCollectPeriod(2*time.Second),
+		controller.WithResource(res),
 	)
-	global.SetMeterProvider(pusher.MeterProvider())
+	metricProvider.Start(ctx)
+	global.SetMeterProvider(metricProvider)
 
-	return &shutdown{[]shutdowner{traceExporter, traceProvider, metricExporter}, []stopper{pusher}}, nil
+	return &shutdown{
+		[]shutdowner{
+			traceExporter, traceProvider, metricExporter,
+		},
+		[]stopper{metricProvider},
+	}, nil
 }

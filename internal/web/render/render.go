@@ -19,7 +19,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
-	"go.seankhliao.com/mono/internal/w16/picture"
+	"go.seankhliao.com/mono/internal/web/picture"
 	"sigs.k8s.io/yaml"
 )
 

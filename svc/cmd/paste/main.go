@@ -4,8 +4,8 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/internal/paste"
-	"go.seankhliao.com/mono/internal/webserver"
+	"go.seankhliao.com/mono/svc/webserver"
+	paste "go.seankhliao.com/mono/svc/cmd/paste/internal"
 )
 
 func main() {

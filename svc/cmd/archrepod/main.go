@@ -4,8 +4,8 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/internal/archrepo/server"
-	"go.seankhliao.com/mono/internal/webserver"
+	"go.seankhliao.com/mono/svc/webserver"
+	"go.seankhliao.com/mono/svc/cmd/archrepod/internal/server"
 )
 
 func main() {

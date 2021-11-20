@@ -15,7 +15,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"go.seankhliao.com/mono/internal/w16/static"
+	"go.seankhliao.com/mono/static"
 )
 
 type server struct {

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/go-logr/stdr"
-	"go.seankhliao.com/mono/internal/w16/process"
+	"go.seankhliao.com/mono/internal/web/process"
 )
 
 func main() {

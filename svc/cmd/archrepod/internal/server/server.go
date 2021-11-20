@@ -16,7 +16,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"go.seankhliao.com/mono/internal/pacmandb"
+	"go.seankhliao.com/mono/svc/cmd/archrepod/internal/pacmandb"
 )
 
 const envBearerToken = "AR_TOKENS" // comma separated list of allowed bearer tokens

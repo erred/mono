@@ -9,11 +9,11 @@ variable "publicruns" {
   }))
   default = {
     "go-seankhliao-com" = {
-      image = "vanity"
+      image = "go.seankhliao.com/mono/svc/cmd/vanity"
       url   = "go.seankhliao.com"
     }
     "seankhliao-com" = {
-      image = "w16"
+      image = "go.seankhliao.com/mono/svc/cmd/w16"
       url   = "seankhliao.com"
     }
   }

@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel"
-	"go.seankhliao.com/mono/internal/render"
-	"go.seankhliao.com/mono/internal/webserver"
+	"go.seankhliao.com/mono/internal/web/render"
+	"go.seankhliao.com/mono/svc/webserver"
 )
 
 func main() {

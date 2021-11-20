@@ -17,7 +17,7 @@ import (
 	"github.com/go-logr/stdr"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.seankhliao.com/mono/internal/webserver/stdlog"
+	"go.seankhliao.com/mono/svc/webserver/stdlog"
 )
 
 func BaseContext() (context.Context, logr.Logger) {

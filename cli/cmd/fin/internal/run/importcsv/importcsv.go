@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"go.seankhliao.com/mono/internal/fin/run"
-	"go.seankhliao.com/mono/internal/fin/store"
+	"go.seankhliao.com/mono/cli/cmd/fin/internal/run"
+	"go.seankhliao.com/mono/cli/cmd/fin/internal/store"
 	fin "go.seankhliao.com/mono/proto/seankhliao/fin/v1alpha1"
 )
 

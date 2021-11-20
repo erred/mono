@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"go.seankhliao.com/mono/internal/fin/run"
-	"go.seankhliao.com/mono/internal/fin/store"
+	"go.seankhliao.com/mono/cli/cmd/fin/internal/run"
+	"go.seankhliao.com/mono/cli/cmd/fin/internal/store"
 )
 
 func Run(o run.Options, args []string) error {

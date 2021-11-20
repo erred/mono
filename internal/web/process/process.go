@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"go.seankhliao.com/mono/internal/render"
+	"go.seankhliao.com/mono/internal/web/render"
 )
 
 type Options struct {
