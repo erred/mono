@@ -1,8 +1,0 @@
-#!/bin/sh
-
-post_upgrade() {
-    d=/etc/ghdefaults
-    for f in webhook-secret private-key ; do
-        age --decrypt --identity /etc/age/age.key --output $d/$f $d/$f.age
-    done
-}

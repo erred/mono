@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	//go:embed root/*
+	//go:embed seankhliao.com/*
 	s    embed.FS
-	S, _ = fs.Sub(s, "root")
+	S, _ = fs.Sub(s, "seankhliao.com")
 )
