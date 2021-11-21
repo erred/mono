@@ -185,5 +185,5 @@ func (o *Options) sitemap(mux *http.ServeMux, pis []pageInfo) {
 		fmt.Fprintf(&buf, "https://%s%s\n", o.Hostname, pi.path)
 	}
 
-	o.handleBytes(mux, "/sitemap.txt", "map.txt", buf.Bytes())
+	o.handleBytes(mux, "/sitemap.txt", "sitemap.txt", buf.Bytes())
 }
