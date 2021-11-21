@@ -8,7 +8,7 @@ steps:
     args:
       - go
       - run
-      - go.seankhliao.com/cli/cmd/webrender
+      - go.seankhliao.com/mono/cli/cmd/webrender
       - -src=content/seankhliao.com
       - -dst=static/seankhliao.com
       - -gtm=GTM-TLVN7D6
