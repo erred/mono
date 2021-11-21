@@ -93,6 +93,7 @@ type PageData struct {
 	Style       string
 
 	// Filled
+	Head string
 	Main string
 }
 

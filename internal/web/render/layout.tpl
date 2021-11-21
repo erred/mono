@@ -4,6 +4,8 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <title>{{ .Title }}</title>
 
+  {{ .Head }}
+
   {{- if ne .GTMID "" }}
   <script>
     (function (w, d, s, l, i) {

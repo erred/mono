@@ -1,15 +1,18 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	_ "embed"
 	"flag"
+	"fmt"
 	"net/http"
 	"strings"
-	"text/template"
+	"time"
 
 	"github.com/go-logr/logr"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/trace"
+	"go.seankhliao.com/mono/content"
+	"go.seankhliao.com/mono/internal/web/render"
 	"go.seankhliao.com/mono/svc/httpsvr"
 	"go.seankhliao.com/mono/svc/o11y"
 )
@@ -26,45 +29,67 @@ func main() {
 	ctx := oo.New()
 	ho.BaseContext = ctx
 
-	ho.Handler = New()
+	ho.Handler = New(ctx)
 
 	ho.Run()
 }
 
-//go:embed index.gohtml
-var tmplStr string
+func New(ctx context.Context) http.Handler {
+	l := logr.FromContextOrDiscard(ctx).WithName("vanity")
 
-type server struct {
-	// config
-	tmpl *template.Template
-	t    trace.Tracer
-}
-
-func New() *server {
-	return &server{
-		tmpl: template.Must(template.New("page").Parse(tmplStr)),
-		t:    otel.Tracer("vanity"),
-	}
-}
-
-func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	ctx, span := s.t.Start(ctx, "dispatch")
-	defer span.End()
-	l := logr.FromContextOrDiscard(ctx)
-	// filter paths
-	if r.URL.Path == "/" {
-		l.Info("redirected")
-		http.Redirect(w, r, redirectURL, http.StatusFound)
-		return
-	}
-
-	repo := strings.Split(r.URL.Path, "/")[1]
-	err := s.tmpl.Execute(w, map[string]string{"Repo": repo})
+	indexF, _ := content.Content.Open("go.seankhliao.com/index.md")
+	defer indexF.Close()
+	var buf bytes.Buffer
+	err := render.Render(&render.Options{
+		Data: render.PageData{
+			URLCanonical: "https://go.seankhliao.com/",
+			Compact:      true,
+			Title:        "go.seankhliao.com",
+		},
+	}, &buf, indexF)
 	if err != nil {
-		l.Error(err, "exec template", "path", r.URL.Path)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
+		l.Error(err, "render index")
 	}
-	l.Info("served")
+
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			http.ServeContent(rw, r, "index.html", time.Time{}, bytes.NewReader(buf.Bytes()))
+			return
+		}
+
+		repo := strings.Split(r.URL.Path, "/")[1]
+		err := render.Render(
+			&render.Options{
+				MarkdownSkip: true,
+				Data: render.PageData{
+					URLCanonical: "https://go.seankhliao.com/" + repo,
+					Compact:      true,
+					Title:        "go.seankhliao.com/" + repo,
+					Head: fmt.Sprintf(`
+<meta
+  name="go-import"
+  content="go.seankhliao.com/%[1]s git https://github.com/seankhliao/%[1]s">
+<meta
+  name="go-source"
+  content="go.seankhliao.com/%[1]s
+    https://github.com/seankhliao/%[1]s
+    https://github.com/seankhliao/%[1]s/tree/master{/dir}
+    https://github.com/seankhliao/%[1]s/blob/master{/dir}/{file}#L{line}">
+<meta http-equiv="refresh" content="5;url=https://pkg.go.dev/go.seankhliao.com/%[1]s" />`, repo),
+				},
+			},
+			rw,
+			strings.NewReader(fmt.Sprintf(`
+<h3><em>go.seankhliao.com/</em>%[1]s</h3>
+
+<p><em>source:</em>
+  <a href="https://github.com/seankhliao/%[1]s">github</a>
+<p><em>docs:</em>
+  <a href="https://pkg.go.dev/go.seankhliao.com/%[1]s">pkg.go.dev</a>
+`, repo)),
+		)
+		if err != nil {
+			l.Error(err, "render")
+		}
+	})
 }
