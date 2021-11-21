@@ -3,20 +3,6 @@ substitutions:
   _REG: us-central1-docker.pkg.dev/com-seankhliao/run
 
 steps:
-  - id: generate
-    name: us-central1-docker.pkg.dev/com-seankhliao/run/ko
-    entrypoint: go
-    args:
-      - run
-      - go.seankhliao.com/mono/cli/cmd/webrender
-      - -src=content/seankhliao.com
-      - -dst=static/seankhliao.com
-      - -gtm=GTM-TLVN7D6
-    volumes: &govols
-      - name: gomodcache
-        path: /gomodcache
-      - name: gobuildcache
-        path: /gocache
   - id: build-push
     name: us-central1-docker.pkg.dev/com-seankhliao/run/ko
     entrypoint: ko
@@ -26,7 +12,6 @@ steps:
       - $_IMG
     env:
       - KO_DOCKER_REPO=$_REG
-    volumes: *govols
 
   - id: deploy
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
@@ -38,3 +23,4 @@ steps:
       - --image=$_REG/$_IMG:latest
       - --region=us-central1
       - --platform=managed
+      - --args=-gtm=GTM-TLVN7D6
