@@ -26,7 +26,36 @@ func TestRun(t *testing.T) {
 	}
 
 	go o.Run()
-	time.Sleep(time.Millisecond) // force deschedule?
+
+	var startCount int
+	interval := 100 * time.Millisecond
+	for range time.NewTicker(interval).C {
+		startCount++
+		if startCount > 20 {
+			t.Errorf("server taking too long to start time=%v", time.Duration(startCount)*interval)
+			return
+		}
+		ok := func() bool {
+			ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+			defer cancel()
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://127.0.0.1:57890/readyz", nil)
+			if err != nil {
+				t.Errorf("prepare request err=%v", err)
+				return false
+			}
+			res, err := http.DefaultClient.Do(req)
+			if err != nil {
+				return false
+			}
+			if res.StatusCode != 200 {
+				return false
+			}
+			return true
+		}()
+		if ok {
+			break
+		}
+	}
 
 	testhttp.Expect(t, http.DefaultClient, "admin",
 		http.MethodGet, "http://127.0.0.1:57890/readyz", http.StatusOK,
