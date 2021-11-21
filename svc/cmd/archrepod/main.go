@@ -4,23 +4,27 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/svc/webserver"
+	"github.com/go-logr/logr"
 	"go.seankhliao.com/mono/svc/cmd/archrepod/internal/server"
+	"go.seankhliao.com/mono/svc/httpsvr"
+	"go.seankhliao.com/mono/svc/o11y"
 )
 
 func main() {
+	oo := o11y.NewOptions(flag.CommandLine)
+	ho := httpsvr.NewOptions(flag.CommandLine)
 	so := server.NewOptions(flag.CommandLine)
-	wo := webserver.NewOptions(flag.CommandLine)
 	flag.Parse()
 
-	ctx, l := webserver.BaseContext()
+	ctx := oo.New()
+	ho.BaseContext = ctx
 
 	var err error
-	wo.Handler, err = server.New(ctx, so)
+	ho.Handler, err = server.New(ctx, so)
 	if err != nil {
-		l.Error(err, "setup")
+		logr.FromContextOrDiscard(ctx).Error(err, "setup archrepod")
 		os.Exit(1)
 	}
 
-	webserver.Run(ctx, wo)
+	ho.Run()
 }

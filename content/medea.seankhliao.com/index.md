@@ -1,6 +1,7 @@
 ---
 title: medea
 description: why are you here?
+compact: true
 ---
 
 ### _medea_

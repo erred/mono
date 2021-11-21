@@ -10,7 +10,8 @@ import (
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
-	"go.seankhliao.com/mono/svc/webserver"
+	"go.seankhliao.com/mono/svc/httpsvr"
+	"go.seankhliao.com/mono/svc/o11y"
 )
 
 const (
@@ -18,14 +19,16 @@ const (
 )
 
 func main() {
-	wo := webserver.NewOptions(flag.CommandLine)
+	oo := o11y.NewOptions(flag.CommandLine)
+	ho := httpsvr.NewOptions(flag.CommandLine)
 	flag.Parse()
 
-	ctx, _ := webserver.BaseContext()
+	ctx := oo.New()
+	ho.BaseContext = ctx
 
-	wo.Handler = New()
+	ho.Handler = New()
 
-	webserver.Run(ctx, wo)
+	ho.Run()
 }
 
 //go:embed index.gohtml

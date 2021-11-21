@@ -4,23 +4,27 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/svc/webserver"
+	"github.com/go-logr/logr"
 	paste "go.seankhliao.com/mono/svc/cmd/paste/internal"
+	"go.seankhliao.com/mono/svc/httpsvr"
+	"go.seankhliao.com/mono/svc/o11y"
 )
 
 func main() {
-	wo := webserver.NewOptions(flag.CommandLine)
 	so := paste.NewOptions(flag.CommandLine)
+	oo := o11y.NewOptions(flag.CommandLine)
+	ho := httpsvr.NewOptions(flag.CommandLine)
 	flag.Parse()
 
-	ctx, l := webserver.BaseContext()
+	ctx := oo.New()
+	ho.BaseContext = ctx
 
 	var err error
-	wo.Handler, err = paste.New(ctx, so)
+	ho.Handler, err = paste.New(ctx, so)
 	if err != nil {
-		l.Error(err, "setup")
+		logr.FromContextOrDiscard(ctx).Error(err, "setup paste")
 		os.Exit(1)
 	}
 
-	webserver.Run(ctx, wo)
+	ho.Run()
 }

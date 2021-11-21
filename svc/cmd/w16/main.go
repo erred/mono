@@ -4,22 +4,26 @@ import (
 	"flag"
 	"os"
 
-	server "go.seankhliao.com/mono/svc/cmd/w16/internal"
-	"go.seankhliao.com/mono/svc/webserver"
+	"github.com/go-logr/logr"
+	"go.seankhliao.com/mono/svc/httpsvr"
+	"go.seankhliao.com/mono/svc/o11y"
 )
 
 func main() {
-	wo := webserver.NewOptions(flag.CommandLine)
+	oo := o11y.NewOptions(flag.CommandLine)
+	ho := httpsvr.NewOptions(flag.CommandLine)
+	wo := NewOptions(flag.CommandLine)
 	flag.Parse()
 
-	ctx, l := webserver.BaseContext()
+	ctx := oo.New()
+	ho.BaseContext = ctx
 
 	var err error
-	wo.Handler, err = server.New(ctx)
+	ho.Handler, err = wo.Handler(ctx)
 	if err != nil {
-		l.Error(err, "setup")
+		logr.FromContextOrDiscard(ctx).Error(err, "setup w16")
 		os.Exit(1)
 	}
 
-	webserver.Run(ctx, wo)
+	ho.Run()
 }

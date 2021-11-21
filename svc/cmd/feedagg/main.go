@@ -4,23 +4,27 @@ import (
 	"flag"
 	"os"
 
-	"go.seankhliao.com/mono/svc/webserver"
+	"github.com/go-logr/logr"
 	feedagg "go.seankhliao.com/mono/svc/cmd/feedagg/internal"
+	"go.seankhliao.com/mono/svc/httpsvr"
+	"go.seankhliao.com/mono/svc/o11y"
 )
 
 func main() {
 	so := feedagg.NewOptions(flag.CommandLine)
-	wo := webserver.NewOptions(flag.CommandLine)
+	oo := o11y.NewOptions(flag.CommandLine)
+	ho := httpsvr.NewOptions(flag.CommandLine)
 	flag.Parse()
 
-	ctx, l := webserver.BaseContext()
+	ctx := oo.New()
+	ho.BaseContext = ctx
 
 	var err error
-	wo.Handler, err = feedagg.New(ctx, so)
+	ho.Handler, err = feedagg.New(ctx, so)
 	if err != nil {
-		l.Error(err, "setup")
+		logr.FromContextOrDiscard(ctx).Error(err, "setup feedagg")
 		os.Exit(1)
 	}
 
-	webserver.Run(ctx, wo)
+	ho.Run()
 }
