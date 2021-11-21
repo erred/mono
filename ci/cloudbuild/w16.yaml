@@ -4,37 +4,28 @@ substitutions:
 
 steps:
   - id: generate
-    name: golang:alpine
+    name: us-central1-docker.pkg.dev/com-seankhliao/run/ko
+    entrypoint: go
     args:
-      - go
       - run
       - go.seankhliao.com/mono/cli/cmd/webrender
       - -src=content/seankhliao.com
       - -dst=static/seankhliao.com
       - -gtm=GTM-TLVN7D6
-    dir: /workspace
-    env:
-      - CGO_ENABLED=0
-      - GOFLAGS=-trimpath
-      - GOMODCACHE=/gomodcache
-      - GOCACHE=/gocache
     volumes: &govols
       - name: gomodcache
         path: /gomodcache
       - name: gobuildcache
         path: /gocache
   - id: build-push
-    name: us-central1-docker.pkg.dev/com-seankhliao/run/ko:v0.9.3
+    name: us-central1-docker.pkg.dev/com-seankhliao/run/ko
+    entrypoint: ko
     args:
       - publish
       - --preserve-import-paths
       - $_IMG
     env:
       - KO_DOCKER_REPO=$_REG
-      - CGO_ENABLED=0
-      - GOFLAGS=-trimpath
-      - GOMODCACHE=/gomodcache
-      - GOCACHE=/gocache
     volumes: *govols
 
   - id: deploy

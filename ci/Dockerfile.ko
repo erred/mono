@@ -1,0 +1,10 @@
+FROM golang:alpine
+WORKDIR /workspace
+
+ENV GOMODCACHE=/gomodcache \
+    GOCACHE=/gocache \
+    CGO_ENABLED=0 \
+    GOGLAGS=-trimpath
+
+RUN GOBIN=/usr/local/bin go install -ldflags="-s -w" github.com/google/ko@latest && \
+    rm -rf /gomodcache/* /gocache/*
