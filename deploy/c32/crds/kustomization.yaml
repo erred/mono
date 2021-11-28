@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- certificates.networking.internal.knative.dev.k8s.yaml
+- clusterdomainclaims.networking.internal.knative.dev.k8s.yaml
+- configurations.serving.knative.dev.k8s.yaml
+- customresourcedefinition.extensionservices.projectcontour.io.k8s.yaml
+- customresourcedefinition.httpproxies.projectcontour.io.k8s.yaml
+- customresourcedefinition.tlscertificatedelegations.projectcontour.io.k8s.yaml
+- domainmappings.serving.knative.dev.k8s.yaml
+- images.caching.internal.knative.dev.k8s.yaml
+- ingresses.networking.internal.knative.dev.k8s.yaml
+- metrics.autoscaling.internal.knative.dev.k8s.yaml
+- podautoscalers.autoscaling.internal.knative.dev.k8s.yaml
+- revisions.serving.knative.dev.k8s.yaml
+- routes.serving.knative.dev.k8s.yaml
+- serverlessservices.networking.internal.knative.dev.k8s.yaml
+- services.serving.knative.dev.k8s.yaml

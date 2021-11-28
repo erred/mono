@@ -1,0 +1,1205 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: httpproxies.projectcontour.io
+  labels:
+    networking.knative.dev/ingress-provider: contour
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.5.0
+  creationTimestamp: null
+spec:
+  group: projectcontour.io
+  names:
+    kind: HTTPProxy
+    listKind: HTTPProxyList
+    plural: httpproxies
+    shortNames:
+    - proxy
+    - proxies
+    singular: httpproxy
+  preserveUnknownFields: false
+  scope: Namespaced
+  versions:
+  - name: v1
+    additionalPrinterColumns:
+    - name: FQDN
+      type: string
+      description: Fully qualified domain name
+      jsonPath: .spec.virtualhost.fqdn
+    - name: TLS Secret
+      type: string
+      description: Secret with TLS credentials
+      jsonPath: .spec.virtualhost.tls.secretName
+    - name: Status
+      type: string
+      description: The current status of the HTTPProxy
+      jsonPath: .status.currentStatus
+    - name: Status Description
+      type: string
+      description: Description of the current status
+      jsonPath: .status.description
+    schema:
+      openAPIV3Schema:
+        type: object
+        description: HTTPProxy is an Ingress CRD specification.
+        properties:
+          apiVersion:
+            type: string
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          kind:
+            type: string
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          metadata:
+            type: object
+          spec:
+            type: object
+            description: HTTPProxySpec defines the spec of the CRD.
+            properties:
+              includes:
+                type: array
+                description: Includes allow for specific routing configuration to be included from another HTTPProxy, possibly in another namespace.
+                items:
+                  type: object
+                  description: Include describes a set of policies that can be applied to an HTTPProxy in a namespace.
+                  properties:
+                    name:
+                      type: string
+                      description: Name of the HTTPProxy
+                    namespace:
+                      type: string
+                      description: Namespace of the HTTPProxy to include. Defaults to the current namespace if not supplied.
+                    conditions:
+                      type: array
+                      description: 'Conditions are a set of rules that are applied to included HTTPProxies. In effect, they are added onto the Conditions of included HTTPProxy Route structs. When applied, they are merged using AND, with one exception: There can be only one Prefix MatchCondition per Conditions slice. More than one Prefix, or contradictory Conditions, will make the include invalid.'
+                      items:
+                        type: object
+                        description: MatchCondition are a general holder for matching rules for HTTPProxies. One of Prefix or Header must be provided.
+                        properties:
+                          prefix:
+                            type: string
+                            description: Prefix defines a prefix match for a request.
+                          header:
+                            type: object
+                            description: Header specifies the header condition to match.
+                            properties:
+                              name:
+                                type: string
+                                description: Name is the name of the header to match against. Name is required. Header names are case insensitive.
+                              contains:
+                                type: string
+                                description: Contains specifies a substring that must be present in the header value.
+                              exact:
+                                type: string
+                                description: Exact specifies a string that the header value must be equal to.
+                              notcontains:
+                                type: string
+                                description: NotContains specifies a substring that must not be present in the header value.
+                              notexact:
+                                type: string
+                                description: NoExact specifies a string that the header value must not be equal to. The condition is true if the header has any other value.
+                              notpresent:
+                                type: boolean
+                                description: NotPresent specifies that condition is true when the named header is not present. Note that setting NotPresent to false does not make the condition true if the named header is present.
+                              present:
+                                type: boolean
+                                description: Present specifies that condition is true when the named header is present, regardless of its value. Note that setting Present to false does not make the condition true if the named header is absent.
+                            required:
+                            - name
+                  required:
+                  - name
+              ingressClassName:
+                type: string
+                description: IngressClassName optionally specifies the ingress class to use for this HTTPProxy. This replaces the deprecated `kubernetes.io/ingress.class` annotation. For backwards compatibility, when that annotation is set, it is given precedence over this field.
+              routes:
+                type: array
+                description: Routes are the ingress routes. If TCPProxy is present, Routes is ignored.
+                items:
+                  type: object
+                  description: Route contains the set of routes for a virtual host.
+                  properties:
+                    authPolicy:
+                      type: object
+                      description: AuthPolicy updates the authorization policy that was set on the root HTTPProxy object for client requests that match this route.
+                      properties:
+                        context:
+                          type: object
+                          additionalProperties:
+                            type: string
+                          description: Context is a set of key/value pairs that are sent to the authentication server in the check request. If a context is provided at an enclosing scope, the entries are merged such that the inner scope overrides matching keys from the outer scope.
+                        disabled:
+                          type: boolean
+                          description: When true, this field disables client request authentication for the scope of the policy.
+                    conditions:
+                      type: array
+                      description: 'Conditions are a set of rules that are applied to a Route. When applied, they are merged using AND, with one exception: There can be only one Prefix MatchCondition per Conditions slice. More than one Prefix, or contradictory Conditions, will make the route invalid.'
+                      items:
+                        type: object
+                        description: MatchCondition are a general holder for matching rules for HTTPProxies. One of Prefix or Header must be provided.
+                        properties:
+                          prefix:
+                            type: string
+                            description: Prefix defines a prefix match for a request.
+                          header:
+                            type: object
+                            description: Header specifies the header condition to match.
+                            properties:
+                              name:
+                                type: string
+                                description: Name is the name of the header to match against. Name is required. Header names are case insensitive.
+                              contains:
+                                type: string
+                                description: Contains specifies a substring that must be present in the header value.
+                              exact:
+                                type: string
+                                description: Exact specifies a string that the header value must be equal to.
+                              notcontains:
+                                type: string
+                                description: NotContains specifies a substring that must not be present in the header value.
+                              notexact:
+                                type: string
+                                description: NoExact specifies a string that the header value must not be equal to. The condition is true if the header has any other value.
+                              notpresent:
+                                type: boolean
+                                description: NotPresent specifies that condition is true when the named header is not present. Note that setting NotPresent to false does not make the condition true if the named header is present.
+                              present:
+                                type: boolean
+                                description: Present specifies that condition is true when the named header is present, regardless of its value. Note that setting Present to false does not make the condition true if the named header is absent.
+                            required:
+                            - name
+                    enableWebsockets:
+                      type: boolean
+                      description: Enables websocket support for the route.
+                    healthCheckPolicy:
+                      type: object
+                      description: The health check policy for this route.
+                      properties:
+                        healthyThresholdCount:
+                          type: integer
+                          description: The number of healthy health checks required before a host is marked healthy
+                          format: int64
+                          minimum: 0
+                        host:
+                          type: string
+                          description: The value of the host header in the HTTP health check request. If left empty (default value), the name "contour-envoy-healthcheck" will be used.
+                        intervalSeconds:
+                          type: integer
+                          description: The interval (seconds) between health checks
+                          format: int64
+                        path:
+                          type: string
+                          description: HTTP endpoint used to perform health checks on upstream service
+                        timeoutSeconds:
+                          type: integer
+                          description: The time to wait (seconds) for a health check response
+                          format: int64
+                        unhealthyThresholdCount:
+                          type: integer
+                          description: The number of unhealthy health checks required before a host is marked unhealthy
+                          format: int64
+                          minimum: 0
+                      required:
+                      - path
+                    loadBalancerPolicy:
+                      type: object
+                      description: The load balancing policy for this route.
+                      properties:
+                        strategy:
+                          type: string
+                          description: Strategy specifies the policy used to balance requests across the pool of backend pods. Valid policy names are `Random`, `RoundRobin`, `WeightedLeastRequest`, `Cookie`, and `RequestHash`. If an unknown strategy name is specified or no policy is supplied, the default `RoundRobin` policy is used.
+                        requestHashPolicies:
+                          type: array
+                          description: RequestHashPolicies contains a list of hash policies to apply when the `RequestHash` load balancing strategy is chosen. If an element of the supplied list of hash policies is invalid, it will be ignored. If the list of hash policies is empty after validation, the load balancing strategy will fall back the the default `RoundRobin`.
+                          items:
+                            type: object
+                            description: RequestHashPolicy contains configuration for an individual hash policy on a request attribute.
+                            properties:
+                              headerHashOptions:
+                                type: object
+                                description: HeaderHashOptions should be set when request header hash based load balancing is desired. It must be the only hash option field set, otherwise this request hash policy object will be ignored.
+                                properties:
+                                  headerName:
+                                    type: string
+                                    description: HeaderName is the name of the HTTP request header that will be used to calculate the hash key. If the header specified is not present on a request, no hash will be produced.
+                                    minLength: 1
+                              terminal:
+                                type: boolean
+                                description: Terminal is a flag that allows for short-circuiting computing of a hash for a given request. If set to true, and the request attribute specified in the attribute hash options is present, no further hash policies will be used to calculate a hash for the request.
+                    pathRewritePolicy:
+                      type: object
+                      description: The policy for rewriting the path of the request URL after the request has been routed to a Service.
+                      properties:
+                        replacePrefix:
+                          type: array
+                          description: ReplacePrefix describes how the path prefix should be replaced.
+                          items:
+                            type: object
+                            description: ReplacePrefix describes a path prefix replacement.
+                            properties:
+                              prefix:
+                                type: string
+                                description: "Prefix specifies the URL path prefix to be replaced. \n If Prefix is specified, it must exactly match the MatchCondition prefix that is rendered by the chain of including HTTPProxies and only that path prefix will be replaced by Replacement. This allows HTTPProxies that are included through multiple roots to only replace specific path prefixes, leaving others unmodified. \n If Prefix is not specified, all routing prefixes rendered by the include chain will be replaced."
+                                minLength: 1
+                              replacement:
+                                type: string
+                                description: Replacement is the string that the routing path prefix will be replaced with. This must not be empty.
+                                minLength: 1
+                            required:
+                            - replacement
+                    permitInsecure:
+                      type: boolean
+                      description: Allow this path to respond to insecure requests over HTTP which are normally not permitted when a `virtualhost.tls` block is present.
+                    rateLimitPolicy:
+                      type: object
+                      description: The policy for rate limiting on the route.
+                      properties:
+                        global:
+                          type: object
+                          description: Global defines global rate limiting parameters, i.e. parameters defining descriptors that are sent to an external rate limit service (RLS) for a rate limit decision on each request.
+                          properties:
+                            descriptors:
+                              type: array
+                              description: Descriptors defines the list of descriptors that will be generated and sent to the rate limit service. Each descriptor contains 1+ key-value pair entries.
+                              items:
+                                type: object
+                                description: RateLimitDescriptor defines a list of key-value pair generators.
+                                properties:
+                                  entries:
+                                    type: array
+                                    description: Entries is the list of key-value pair generators.
+                                    items:
+                                      type: object
+                                      description: RateLimitDescriptorEntry is a key-value pair generator. Exactly one field on this struct must be non-nil.
+                                      properties:
+                                        genericKey:
+                                          type: object
+                                          description: GenericKey defines a descriptor entry with a static key and value.
+                                          properties:
+                                            value:
+                                              type: string
+                                              description: Value defines the value of the descriptor entry.
+                                              minLength: 1
+                                            key:
+                                              type: string
+                                              description: Key defines the key of the descriptor entry. If not set, the key is set to "generic_key".
+                                        remoteAddress:
+                                          type: object
+                                          description: RemoteAddress defines a descriptor entry with a key of "remote_address" and a value equal to the client's IP address (from x-forwarded-for).
+                                        requestHeader:
+                                          type: object
+                                          description: RequestHeader defines a descriptor entry that's populated only if a given header is present on the request. The descriptor key is static, and the descriptor value is equal to the value of the header.
+                                          properties:
+                                            descriptorKey:
+                                              type: string
+                                              description: DescriptorKey defines the key to use on the descriptor entry.
+                                              minLength: 1
+                                            headerName:
+                                              type: string
+                                              description: HeaderName defines the name of the header to look for on the request.
+                                              minLength: 1
+                                        requestHeaderValueMatch:
+                                          type: object
+                                          description: RequestHeaderValueMatch defines a descriptor entry that's populated if the request's headers match a set of 1+ match criteria. The descriptor key is "header_match", and the descriptor value is static.
+                                          properties:
+                                            value:
+                                              type: string
+                                              description: Value defines the value of the descriptor entry.
+                                              minLength: 1
+                                            expectMatch:
+                                              type: boolean
+                                              default: true
+                                              description: ExpectMatch defines whether the request must positively match the match criteria in order to generate a descriptor entry (i.e. true), or not match the match criteria in order to generate a descriptor entry (i.e. false). The default is true.
+                                            headers:
+                                              type: array
+                                              description: Headers is a list of 1+ match criteria to apply against the request to determine whether to populate the descriptor entry or not.
+                                              items:
+                                                type: object
+                                                description: HeaderMatchCondition specifies how to conditionally match against HTTP headers. The Name field is required, but only one of the remaining fields should be be provided.
+                                                properties:
+                                                  name:
+                                                    type: string
+                                                    description: Name is the name of the header to match against. Name is required. Header names are case insensitive.
+                                                  contains:
+                                                    type: string
+                                                    description: Contains specifies a substring that must be present in the header value.
+                                                  exact:
+                                                    type: string
+                                                    description: Exact specifies a string that the header value must be equal to.
+                                                  notcontains:
+                                                    type: string
+                                                    description: NotContains specifies a substring that must not be present in the header value.
+                                                  notexact:
+                                                    type: string
+                                                    description: NoExact specifies a string that the header value must not be equal to. The condition is true if the header has any other value.
+                                                  notpresent:
+                                                    type: boolean
+                                                    description: NotPresent specifies that condition is true when the named header is not present. Note that setting NotPresent to false does not make the condition true if the named header is present.
+                                                  present:
+                                                    type: boolean
+                                                    description: Present specifies that condition is true when the named header is present, regardless of its value. Note that setting Present to false does not make the condition true if the named header is absent.
+                                                required:
+                                                - name
+                                              minItems: 1
+                                    minItems: 1
+                              minItems: 1
+                        local:
+                          type: object
+                          description: Local defines local rate limiting parameters, i.e. parameters for rate limiting that occurs within each Envoy pod as requests are handled.
+                          properties:
+                            burst:
+                              type: integer
+                              description: Burst defines the number of requests above the requests per unit that should be allowed within a short period of time.
+                              format: int32
+                            requests:
+                              type: integer
+                              description: Requests defines how many requests per unit of time should be allowed before rate limiting occurs.
+                              format: int32
+                              minimum: 1
+                            responseHeadersToAdd:
+                              type: array
+                              description: ResponseHeadersToAdd is an optional list of response headers to set when a request is rate-limited.
+                              items:
+                                type: object
+                                description: HeaderValue represents a header name/value pair
+                                properties:
+                                  name:
+                                    type: string
+                                    description: Name represents a key of a header
+                                    minLength: 1
+                                  value:
+                                    type: string
+                                    description: Value represents the value of a header specified by a key
+                                    minLength: 1
+                                required:
+                                - name
+                                - value
+                            responseStatusCode:
+                              type: integer
+                              description: ResponseStatusCode is the HTTP status code to use for responses to rate-limited requests. Codes must be in the 400-599 range (inclusive). If not specified, the Envoy default of 429 (Too Many Requests) is used.
+                              format: int32
+                              maximum: 599
+                              minimum: 400
+                            unit:
+                              type: string
+                              description: Unit defines the period of time within which requests over the limit will be rate limited. Valid values are "second", "minute" and "hour".
+                              enum:
+                              - second
+                              - minute
+                              - hour
+                          required:
+                          - requests
+                          - unit
+                    requestHeadersPolicy:
+                      type: object
+                      description: The policy for managing request headers during proxying.
+                      properties:
+                        remove:
+                          type: array
+                          description: Remove specifies a list of HTTP header names to remove.
+                          items:
+                            type: string
+                        set:
+                          type: array
+                          description: Set specifies a list of HTTP header values that will be set in the HTTP header. If the header does not exist it will be added, otherwise it will be overwritten with the new value.
+                          items:
+                            type: object
+                            description: HeaderValue represents a header name/value pair
+                            properties:
+                              name:
+                                type: string
+                                description: Name represents a key of a header
+                                minLength: 1
+                              value:
+                                type: string
+                                description: Value represents the value of a header specified by a key
+                                minLength: 1
+                            required:
+                            - name
+                            - value
+                    responseHeadersPolicy:
+                      type: object
+                      description: The policy for managing response headers during proxying. Rewriting the 'Host' header is not supported.
+                      properties:
+                        remove:
+                          type: array
+                          description: Remove specifies a list of HTTP header names to remove.
+                          items:
+                            type: string
+                        set:
+                          type: array
+                          description: Set specifies a list of HTTP header values that will be set in the HTTP header. If the header does not exist it will be added, otherwise it will be overwritten with the new value.
+                          items:
+                            type: object
+                            description: HeaderValue represents a header name/value pair
+                            properties:
+                              name:
+                                type: string
+                                description: Name represents a key of a header
+                                minLength: 1
+                              value:
+                                type: string
+                                description: Value represents the value of a header specified by a key
+                                minLength: 1
+                            required:
+                            - name
+                            - value
+                    retryPolicy:
+                      type: object
+                      description: The retry policy for this route.
+                      properties:
+                        count:
+                          type: integer
+                          description: NumRetries is maximum allowed number of retries. If not supplied, the number of retries is one.
+                          format: int64
+                          minimum: 0
+                        perTryTimeout:
+                          type: string
+                          description: PerTryTimeout specifies the timeout per retry attempt. Ignored if NumRetries is not supplied.
+                          pattern: ^(((\d*(\.\d*)?h)|(\d*(\.\d*)?m)|(\d*(\.\d*)?s)|(\d*(\.\d*)?ms)|(\d*(\.\d*)?us)|(\d*(\.\d*)?µs)|(\d*(\.\d*)?ns))+|infinity|infinite)$
+                        retriableStatusCodes:
+                          type: array
+                          description: "RetriableStatusCodes specifies the HTTP status codes that should be retried. \n This field is only respected when you include `retriable-status-codes` in the `RetryOn` field."
+                          items:
+                            type: integer
+                            format: int32
+                        retryOn:
+                          type: array
+                          description: "RetryOn specifies the conditions on which to retry a request. \n Supported [HTTP conditions](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on): \n - `5xx` - `gateway-error` - `reset` - `connect-failure` - `retriable-4xx` - `refused-stream` - `retriable-status-codes` - `retriable-headers` \n Supported [gRPC conditions](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-grpc-on): \n - `cancelled` - `deadline-exceeded` - `internal` - `resource-exhausted` - `unavailable`"
+                          items:
+                            type: string
+                            description: RetryOn is a string type alias with validation to ensure that the value is valid.
+                            enum:
+                            - 5xx
+                            - gateway-error
+                            - reset
+                            - connect-failure
+                            - retriable-4xx
+                            - refused-stream
+                            - retriable-status-codes
+                            - retriable-headers
+                            - cancelled
+                            - deadline-exceeded
+                            - internal
+                            - resource-exhausted
+                            - unavailable
+                    services:
+                      type: array
+                      description: Services are the services to proxy traffic.
+                      items:
+                        type: object
+                        description: Service defines an Kubernetes Service to proxy traffic.
+                        properties:
+                          name:
+                            type: string
+                            description: Name is the name of Kubernetes service to proxy traffic. Names defined here will be used to look up corresponding endpoints which contain the ips to route.
+                          protocol:
+                            type: string
+                            description: Protocol may be used to specify (or override) the protocol used to reach this Service. Values may be tls, h2, h2c. If omitted, protocol-selection falls back on Service annotations.
+                            enum:
+                            - h2
+                            - h2c
+                            - tls
+                          port:
+                            type: integer
+                            description: Port (defined as Integer) to proxy traffic to since a service can have multiple defined.
+                            exclusiveMaximum: true
+                            maximum: 65536
+                            minimum: 1
+                          mirror:
+                            type: boolean
+                            description: If Mirror is true the Service will receive a read only mirror of the traffic for this route.
+                          requestHeadersPolicy:
+                            type: object
+                            description: The policy for managing request headers during proxying. Rewriting the 'Host' header is not supported.
+                            properties:
+                              remove:
+                                type: array
+                                description: Remove specifies a list of HTTP header names to remove.
+                                items:
+                                  type: string
+                              set:
+                                type: array
+                                description: Set specifies a list of HTTP header values that will be set in the HTTP header. If the header does not exist it will be added, otherwise it will be overwritten with the new value.
+                                items:
+                                  type: object
+                                  description: HeaderValue represents a header name/value pair
+                                  properties:
+                                    name:
+                                      type: string
+                                      description: Name represents a key of a header
+                                      minLength: 1
+                                    value:
+                                      type: string
+                                      description: Value represents the value of a header specified by a key
+                                      minLength: 1
+                                  required:
+                                  - name
+                                  - value
+                          responseHeadersPolicy:
+                            type: object
+                            description: The policy for managing response headers during proxying. Rewriting the 'Host' header is not supported.
+                            properties:
+                              remove:
+                                type: array
+                                description: Remove specifies a list of HTTP header names to remove.
+                                items:
+                                  type: string
+                              set:
+                                type: array
+                                description: Set specifies a list of HTTP header values that will be set in the HTTP header. If the header does not exist it will be added, otherwise it will be overwritten with the new value.
+                                items:
+                                  type: object
+                                  description: HeaderValue represents a header name/value pair
+                                  properties:
+                                    name:
+                                      type: string
+                                      description: Name represents a key of a header
+                                      minLength: 1
+                                    value:
+                                      type: string
+                                      description: Value represents the value of a header specified by a key
+                                      minLength: 1
+                                  required:
+                                  - name
+                                  - value
+                          validation:
+                            type: object
+                            description: UpstreamValidation defines how to verify the backend service's certificate
+                            properties:
+                              caSecret:
+                                type: string
+                                description: Name or namespaced name of the Kubernetes secret used to validate the certificate presented by the backend
+                              subjectName:
+                                type: string
+                                description: Key which is expected to be present in the 'subjectAltName' of the presented certificate
+                            required:
+                            - caSecret
+                            - subjectName
+                          weight:
+                            type: integer
+                            description: Weight defines percentage of traffic to balance traffic
+                            format: int64
+                            minimum: 0
+                        required:
+                        - name
+                        - port
+                      minItems: 1
+                    timeoutPolicy:
+                      type: object
+                      description: The timeout policy for this route.
+                      properties:
+                        idle:
+                          type: string
+                          description: Timeout after which, if there are no active requests for this route, the connection between Envoy and the backend or Envoy and the external client will be closed. If not specified, there is no per-route idle timeout, though a connection manager-wide stream_idle_timeout default of 5m still applies.
+                          pattern: ^(((\d*(\.\d*)?h)|(\d*(\.\d*)?m)|(\d*(\.\d*)?s)|(\d*(\.\d*)?ms)|(\d*(\.\d*)?us)|(\d*(\.\d*)?µs)|(\d*(\.\d*)?ns))+|infinity|infinite)$
+                        response:
+                          type: string
+                          description: Timeout for receiving a response from the server after processing a request from client. If not supplied, Envoy's default value of 15s applies.
+                          pattern: ^(((\d*(\.\d*)?h)|(\d*(\.\d*)?m)|(\d*(\.\d*)?s)|(\d*(\.\d*)?ms)|(\d*(\.\d*)?us)|(\d*(\.\d*)?µs)|(\d*(\.\d*)?ns))+|infinity|infinite)$
+                  required:
+                  - services
+              tcpproxy:
+                type: object
+                description: TCPProxy holds TCP proxy information.
+                properties:
+                  healthCheckPolicy:
+                    type: object
+                    description: The health check policy for this tcp proxy
+                    properties:
+                      healthyThresholdCount:
+                        type: integer
+                        description: The number of healthy health checks required before a host is marked healthy
+                        format: int32
+                      intervalSeconds:
+                        type: integer
+                        description: The interval (seconds) between health checks
+                        format: int64
+                      timeoutSeconds:
+                        type: integer
+                        description: The time to wait (seconds) for a health check response
+                        format: int64
+                      unhealthyThresholdCount:
+                        type: integer
+                        description: The number of unhealthy health checks required before a host is marked unhealthy
+                        format: int32
+                  include:
+                    type: object
+                    description: Include specifies that this tcpproxy should be delegated to another HTTPProxy.
+                    properties:
+                      name:
+                        type: string
+                        description: Name of the child HTTPProxy
+                      namespace:
+                        type: string
+                        description: Namespace of the HTTPProxy to include. Defaults to the current namespace if not supplied.
+                    required:
+                    - name
+                  includes:
+                    type: object
+                    description: "IncludesDeprecated allow for specific routing configuration to be appended to another HTTPProxy in another namespace. \n Exists due to a mistake when developing HTTPProxy and the field was marked plural when it should have been singular. This field should stay to not break backwards compatibility to v1 users."
+                    properties:
+                      name:
+                        type: string
+                        description: Name of the child HTTPProxy
+                      namespace:
+                        type: string
+                        description: Namespace of the HTTPProxy to include. Defaults to the current namespace if not supplied.
+                    required:
+                    - name
+                  loadBalancerPolicy:
+                    type: object
+                    description: The load balancing policy for the backend services. Note that the `Cookie` and `RequestHash` load balancing strategies cannot be used here.
+                    properties:
+                      strategy:
+                        type: string
+                        description: Strategy specifies the policy used to balance requests across the pool of backend pods. Valid policy names are `Random`, `RoundRobin`, `WeightedLeastRequest`, `Cookie`, and `RequestHash`. If an unknown strategy name is specified or no policy is supplied, the default `RoundRobin` policy is used.
+                      requestHashPolicies:
+                        type: array
+                        description: RequestHashPolicies contains a list of hash policies to apply when the `RequestHash` load balancing strategy is chosen. If an element of the supplied list of hash policies is invalid, it will be ignored. If the list of hash policies is empty after validation, the load balancing strategy will fall back the the default `RoundRobin`.
+                        items:
+                          type: object
+                          description: RequestHashPolicy contains configuration for an individual hash policy on a request attribute.
+                          properties:
+                            headerHashOptions:
+                              type: object
+                              description: HeaderHashOptions should be set when request header hash based load balancing is desired. It must be the only hash option field set, otherwise this request hash policy object will be ignored.
+                              properties:
+                                headerName:
+                                  type: string
+                                  description: HeaderName is the name of the HTTP request header that will be used to calculate the hash key. If the header specified is not present on a request, no hash will be produced.
+                                  minLength: 1
+                            terminal:
+                              type: boolean
+                              description: Terminal is a flag that allows for short-circuiting computing of a hash for a given request. If set to true, and the request attribute specified in the attribute hash options is present, no further hash policies will be used to calculate a hash for the request.
+                  services:
+                    type: array
+                    description: Services are the services to proxy traffic
+                    items:
+                      type: object
+                      description: Service defines an Kubernetes Service to proxy traffic.
+                      properties:
+                        name:
+                          type: string
+                          description: Name is the name of Kubernetes service to proxy traffic. Names defined here will be used to look up corresponding endpoints which contain the ips to route.
+                        protocol:
+                          type: string
+                          description: Protocol may be used to specify (or override) the protocol used to reach this Service. Values may be tls, h2, h2c. If omitted, protocol-selection falls back on Service annotations.
+                          enum:
+                          - h2
+                          - h2c
+                          - tls
+                        port:
+                          type: integer
+                          description: Port (defined as Integer) to proxy traffic to since a service can have multiple defined.
+                          exclusiveMaximum: true
+                          maximum: 65536
+                          minimum: 1
+                        mirror:
+                          type: boolean
+                          description: If Mirror is true the Service will receive a read only mirror of the traffic for this route.
+                        requestHeadersPolicy:
+                          type: object
+                          description: The policy for managing request headers during proxying. Rewriting the 'Host' header is not supported.
+                          properties:
+                            remove:
+                              type: array
+                              description: Remove specifies a list of HTTP header names to remove.
+                              items:
+                                type: string
+                            set:
+                              type: array
+                              description: Set specifies a list of HTTP header values that will be set in the HTTP header. If the header does not exist it will be added, otherwise it will be overwritten with the new value.
+                              items:
+                                type: object
+                                description: HeaderValue represents a header name/value pair
+                                properties:
+                                  name:
+                                    type: string
+                                    description: Name represents a key of a header
+                                    minLength: 1
+                                  value:
+                                    type: string
+                                    description: Value represents the value of a header specified by a key
+                                    minLength: 1
+                                required:
+                                - name
+                                - value
+                        responseHeadersPolicy:
+                          type: object
+                          description: The policy for managing response headers during proxying. Rewriting the 'Host' header is not supported.
+                          properties:
+                            remove:
+                              type: array
+                              description: Remove specifies a list of HTTP header names to remove.
+                              items:
+                                type: string
+                            set:
+                              type: array
+                              description: Set specifies a list of HTTP header values that will be set in the HTTP header. If the header does not exist it will be added, otherwise it will be overwritten with the new value.
+                              items:
+                                type: object
+                                description: HeaderValue represents a header name/value pair
+                                properties:
+                                  name:
+                                    type: string
+                                    description: Name represents a key of a header
+                                    minLength: 1
+                                  value:
+                                    type: string
+                                    description: Value represents the value of a header specified by a key
+                                    minLength: 1
+                                required:
+                                - name
+                                - value
+                        validation:
+                          type: object
+                          description: UpstreamValidation defines how to verify the backend service's certificate
+                          properties:
+                            caSecret:
+                              type: string
+                              description: Name or namespaced name of the Kubernetes secret used to validate the certificate presented by the backend
+                            subjectName:
+                              type: string
+                              description: Key which is expected to be present in the 'subjectAltName' of the presented certificate
+                          required:
+                          - caSecret
+                          - subjectName
+                        weight:
+                          type: integer
+                          description: Weight defines percentage of traffic to balance traffic
+                          format: int64
+                          minimum: 0
+                      required:
+                      - name
+                      - port
+              virtualhost:
+                type: object
+                description: Virtualhost appears at most once. If it is present, the object is considered to be a "root" HTTPProxy.
+                properties:
+                  authorization:
+                    type: object
+                    description: This field configures an extension service to perform authorization for this virtual host. Authorization can only be configured on virtual hosts that have TLS enabled. If the TLS configuration requires client certificate validation, the client certificate is always included in the authentication check request.
+                    properties:
+                      authPolicy:
+                        type: object
+                        description: AuthPolicy sets a default authorization policy for client requests. This policy will be used unless overridden by individual routes.
+                        properties:
+                          context:
+                            type: object
+                            additionalProperties:
+                              type: string
+                            description: Context is a set of key/value pairs that are sent to the authentication server in the check request. If a context is provided at an enclosing scope, the entries are merged such that the inner scope overrides matching keys from the outer scope.
+                          disabled:
+                            type: boolean
+                            description: When true, this field disables client request authentication for the scope of the policy.
+                      extensionRef:
+                        type: object
+                        description: ExtensionServiceRef specifies the extension resource that will authorize client requests.
+                        properties:
+                          name:
+                            type: string
+                            description: "Name of the referent. \n More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+                            minLength: 1
+                          namespace:
+                            type: string
+                            description: "Namespace of the referent. If this field is not specifies, the namespace of the resource that targets the referent will be used. \n More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/"
+                            minLength: 1
+                          apiVersion:
+                            type: string
+                            description: API version of the referent. If this field is not specified, the default "projectcontour.io/v1alpha1" will be used
+                            minLength: 1
+                      failOpen:
+                        type: boolean
+                        description: If FailOpen is true, the client request is forwarded to the upstream service even if the authorization server fails to respond. This field should not be set in most cases. It is intended for use only while migrating applications from internal authorization to Contour external authorization.
+                      responseTimeout:
+                        type: string
+                        description: ResponseTimeout configures maximum time to wait for a check response from the authorization server. Timeout durations are expressed in the Go [Duration format](https://godoc.org/time#ParseDuration). Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". The string "infinity" is also a valid input and specifies no timeout.
+                        pattern: ^(((\d*(\.\d*)?h)|(\d*(\.\d*)?m)|(\d*(\.\d*)?s)|(\d*(\.\d*)?ms)|(\d*(\.\d*)?us)|(\d*(\.\d*)?µs)|(\d*(\.\d*)?ns))+|infinity|infinite)$
+                    required:
+                    - extensionRef
+                  corsPolicy:
+                    type: object
+                    description: Specifies the cross-origin policy to apply to the VirtualHost.
+                    properties:
+                      allowCredentials:
+                        type: boolean
+                        description: Specifies whether the resource allows credentials.
+                      allowHeaders:
+                        type: array
+                        description: AllowHeaders specifies the content for the *access-control-allow-headers* header.
+                        items:
+                          type: string
+                          description: CORSHeaderValue specifies the value of the string headers returned by a cross-domain request.
+                          pattern: ^[a-zA-Z0-9!#$%&'*+.^_`|~-]+$
+                      allowMethods:
+                        type: array
+                        description: AllowMethods specifies the content for the *access-control-allow-methods* header.
+                        items:
+                          type: string
+                          description: CORSHeaderValue specifies the value of the string headers returned by a cross-domain request.
+                          pattern: ^[a-zA-Z0-9!#$%&'*+.^_`|~-]+$
+                      allowOrigin:
+                        type: array
+                        description: AllowOrigin specifies the origins that will be allowed to do CORS requests. "*" means allow any origin.
+                        items:
+                          type: string
+                      exposeHeaders:
+                        type: array
+                        description: ExposeHeaders Specifies the content for the *access-control-expose-headers* header.
+                        items:
+                          type: string
+                          description: CORSHeaderValue specifies the value of the string headers returned by a cross-domain request.
+                          pattern: ^[a-zA-Z0-9!#$%&'*+.^_`|~-]+$
+                      maxAge:
+                        type: string
+                        description: MaxAge indicates for how long the results of a preflight request can be cached. MaxAge durations are expressed in the Go [Duration format](https://godoc.org/time#ParseDuration). Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". Only positive values are allowed while 0 disables the cache requiring a preflight OPTIONS check for all cross-origin requests.
+                    required:
+                    - allowMethods
+                    - allowOrigin
+                  fqdn:
+                    type: string
+                    description: The fully qualified domain name of the root of the ingress tree all leaves of the DAG rooted at this object relate to the fqdn.
+                  rateLimitPolicy:
+                    type: object
+                    description: The policy for rate limiting on the virtual host.
+                    properties:
+                      global:
+                        type: object
+                        description: Global defines global rate limiting parameters, i.e. parameters defining descriptors that are sent to an external rate limit service (RLS) for a rate limit decision on each request.
+                        properties:
+                          descriptors:
+                            type: array
+                            description: Descriptors defines the list of descriptors that will be generated and sent to the rate limit service. Each descriptor contains 1+ key-value pair entries.
+                            items:
+                              type: object
+                              description: RateLimitDescriptor defines a list of key-value pair generators.
+                              properties:
+                                entries:
+                                  type: array
+                                  description: Entries is the list of key-value pair generators.
+                                  items:
+                                    type: object
+                                    description: RateLimitDescriptorEntry is a key-value pair generator. Exactly one field on this struct must be non-nil.
+                                    properties:
+                                      genericKey:
+                                        type: object
+                                        description: GenericKey defines a descriptor entry with a static key and value.
+                                        properties:
+                                          value:
+                                            type: string
+                                            description: Value defines the value of the descriptor entry.
+                                            minLength: 1
+                                          key:
+                                            type: string
+                                            description: Key defines the key of the descriptor entry. If not set, the key is set to "generic_key".
+                                      remoteAddress:
+                                        type: object
+                                        description: RemoteAddress defines a descriptor entry with a key of "remote_address" and a value equal to the client's IP address (from x-forwarded-for).
+                                      requestHeader:
+                                        type: object
+                                        description: RequestHeader defines a descriptor entry that's populated only if a given header is present on the request. The descriptor key is static, and the descriptor value is equal to the value of the header.
+                                        properties:
+                                          descriptorKey:
+                                            type: string
+                                            description: DescriptorKey defines the key to use on the descriptor entry.
+                                            minLength: 1
+                                          headerName:
+                                            type: string
+                                            description: HeaderName defines the name of the header to look for on the request.
+                                            minLength: 1
+                                      requestHeaderValueMatch:
+                                        type: object
+                                        description: RequestHeaderValueMatch defines a descriptor entry that's populated if the request's headers match a set of 1+ match criteria. The descriptor key is "header_match", and the descriptor value is static.
+                                        properties:
+                                          value:
+                                            type: string
+                                            description: Value defines the value of the descriptor entry.
+                                            minLength: 1
+                                          expectMatch:
+                                            type: boolean
+                                            default: true
+                                            description: ExpectMatch defines whether the request must positively match the match criteria in order to generate a descriptor entry (i.e. true), or not match the match criteria in order to generate a descriptor entry (i.e. false). The default is true.
+                                          headers:
+                                            type: array
+                                            description: Headers is a list of 1+ match criteria to apply against the request to determine whether to populate the descriptor entry or not.
+                                            items:
+                                              type: object
+                                              description: HeaderMatchCondition specifies how to conditionally match against HTTP headers. The Name field is required, but only one of the remaining fields should be be provided.
+                                              properties:
+                                                name:
+                                                  type: string
+                                                  description: Name is the name of the header to match against. Name is required. Header names are case insensitive.
+                                                contains:
+                                                  type: string
+                                                  description: Contains specifies a substring that must be present in the header value.
+                                                exact:
+                                                  type: string
+                                                  description: Exact specifies a string that the header value must be equal to.
+                                                notcontains:
+                                                  type: string
+                                                  description: NotContains specifies a substring that must not be present in the header value.
+                                                notexact:
+                                                  type: string
+                                                  description: NoExact specifies a string that the header value must not be equal to. The condition is true if the header has any other value.
+                                                notpresent:
+                                                  type: boolean
+                                                  description: NotPresent specifies that condition is true when the named header is not present. Note that setting NotPresent to false does not make the condition true if the named header is present.
+                                                present:
+                                                  type: boolean
+                                                  description: Present specifies that condition is true when the named header is present, regardless of its value. Note that setting Present to false does not make the condition true if the named header is absent.
+                                              required:
+                                              - name
+                                            minItems: 1
+                                  minItems: 1
+                            minItems: 1
+                      local:
+                        type: object
+                        description: Local defines local rate limiting parameters, i.e. parameters for rate limiting that occurs within each Envoy pod as requests are handled.
+                        properties:
+                          burst:
+                            type: integer
+                            description: Burst defines the number of requests above the requests per unit that should be allowed within a short period of time.
+                            format: int32
+                          requests:
+                            type: integer
+                            description: Requests defines how many requests per unit of time should be allowed before rate limiting occurs.
+                            format: int32
+                            minimum: !!float 1
+                          responseHeadersToAdd:
+                            type: array
+                            description: ResponseHeadersToAdd is an optional list of response headers to set when a request is rate-limited.
+                            items:
+                              type: object
+                              description: HeaderValue represents a header name/value pair
+                              properties:
+                                name:
+                                  type: string
+                                  description: Name represents a key of a header
+                                  minLength: 1
+                                value:
+                                  type: string
+                                  description: Value represents the value of a header specified by a key
+                                  minLength: 1
+                              required:
+                              - name
+                              - value
+                          responseStatusCode:
+                            type: integer
+                            description: ResponseStatusCode is the HTTP status code to use for responses to rate-limited requests. Codes must be in the 400-599 range (inclusive). If not specified, the Envoy default of 429 (Too Many Requests) is used.
+                            format: int32
+                            maximum: !!float 599
+                            minimum: !!float 400
+                          unit:
+                            type: string
+                            description: Unit defines the period of time within which requests over the limit will be rate limited. Valid values are "second", "minute" and "hour".
+                            enum:
+                            - second
+                            - minute
+                            - hour
+                        required:
+                        - requests
+                        - unit
+                  tls:
+                    type: object
+                    description: If present the fields describes TLS properties of the virtual host. The SNI names that will be matched on are described in fqdn, the tls.secretName secret must contain a certificate that itself contains a name that matches the FQDN.
+                    properties:
+                      clientValidation:
+                        type: object
+                        description: "ClientValidation defines how to verify the client certificate when an external client establishes a TLS connection to Envoy. \n This setting: \n 1. Enables TLS client certificate validation. 2. Specifies how the client certificate will be validated (i.e.    validation required or skipped). \n Note: Setting client certificate validation to be skipped should be only used in conjunction with an external authorization server that performs client validation as Contour will ensure client certificates are passed along."
+                        properties:
+                          caSecret:
+                            type: string
+                            description: Name of a Kubernetes secret that contains a CA certificate bundle. The client certificate must validate against the certificates in the bundle. If specified and SkipClientCertValidation is true, client certificates will be required on requests.
+                            minLength: 1
+                          skipClientCertValidation:
+                            type: boolean
+                            description: SkipClientCertValidation disables downstream client certificate validation. Defaults to false. This field is intended to be used in conjunction with external authorization in order to enable the external authorization server to validate client certificates. When this field is set to true, client certificates are requested but not verified by Envoy. If CACertificate is specified, client certificates are required on requests, but not verified. If external authorization is in use, they are presented to the external authorization server.
+                      enableFallbackCertificate:
+                        type: boolean
+                        description: EnableFallbackCertificate defines if the vhost should allow a default certificate to be applied which handles all requests which don't match the SNI defined in this vhost.
+                      minimumProtocolVersion:
+                        type: string
+                        description: MinimumProtocolVersion is the minimum TLS version this vhost should negotiate. Valid options are `1.2` (default) and `1.3`. Any other value defaults to TLS 1.2.
+                      passthrough:
+                        type: boolean
+                        description: Passthrough defines whether the encrypted TLS handshake will be passed through to the backing cluster. Either Passthrough or SecretName must be specified, but not both.
+                      secretName:
+                        type: string
+                        description: SecretName is the name of a TLS secret in the current namespace. Either SecretName or Passthrough must be specified, but not both. If specified, the named secret must contain a matching certificate for the virtual host's FQDN.
+                required:
+                - fqdn
+          status:
+            type: object
+            description: Status is a container for computed information about the HTTPProxy.
+            properties:
+              conditions:
+                type: array
+                description: "Conditions contains information about the current status of the HTTPProxy, in an upstream-friendly container. \n Contour will update a single condition, `Valid`, that is in normal-true polarity. That is, when `currentStatus` is `valid`, the `Valid` condition will be `status: true`, and vice versa. \n Contour will leave untouched any other Conditions set in this block, in case some other controller wants to add a Condition. \n If you are another controller owner and wish to add a condition, you *should* namespace your condition with a label, like `controller.domain.com/ConditionName`."
+                items:
+                  type: object
+                  description: "DetailedCondition is an extension of the normal Kubernetes conditions, with two extra fields to hold sub-conditions, which provide more detailed reasons for the state (True or False) of the condition. \n `errors` holds information about sub-conditions which are fatal to that condition and render its state False. \n `warnings` holds information about sub-conditions which are not fatal to that condition and do not force the state to be False. \n Remember that Conditions have a type, a status, and a reason. \n The type is the type of the condition, the most important one in this CRD set is `Valid`. `Valid` is a positive-polarity condition: when it is `status: true` there are no problems. \n In more detail, `status: true` means that the object is has been ingested into Contour with no errors. `warnings` may still be present, and will be indicated in the Reason field. There must be zero entries in the `errors` slice in this case. \n `Valid`, `status: false` means that the object has had one or more fatal errors during processing into Contour.  The details of the errors will be present under the `errors` field. There must be at least one error in the `errors` slice if `status` is `false`. \n For DetailedConditions of types other than `Valid`, the Condition must be in the negative polarity. When they have `status` `true`, there is an error. There must be at least one entry in the `errors` Subcondition slice. When they have `status` `false`, there are no serious errors, and there must be zero entries in the `errors` slice. In either case, there may be entries in the `warnings` slice. \n Regardless of the polarity, the `reason` and `message` fields must be updated with either the detail of the reason (if there is one and only one entry in total across both the `errors` and `warnings` slices), or `MultipleReasons` if there is more than one entry."
+                  properties:
+                    type:
+                      type: string
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                    status:
+                      type: string
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                    errors:
+                      type: array
+                      description: "Errors contains a slice of relevant error subconditions for this object. \n Subconditions are expected to appear when relevant (when there is a error), and disappear when not relevant. An empty slice here indicates no errors."
+                      items:
+                        type: object
+                        description: "SubCondition is a Condition-like type intended for use as a subcondition inside a DetailedCondition. \n It contains a subset of the Condition fields. \n It is intended for warnings and errors, so `type` names should use abnormal-true polarity, that is, they should be of the form \"ErrorPresent: true\". \n The expected lifecycle for these errors is that they should only be present when the error or warning is, and should be removed when they are not relevant."
+                        properties:
+                          type:
+                            type: string
+                            description: "Type of condition in `CamelCase` or in `foo.example.com/CamelCase`. \n This must be in abnormal-true polarity, that is, `ErrorFound` or `controller.io/ErrorFound`. \n The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)"
+                            maxLength: 316
+                            pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                          status:
+                            type: string
+                            description: Status of the condition, one of True, False, Unknown.
+                            enum:
+                            - "True"
+                            - "False"
+                            - Unknown
+                          message:
+                            type: string
+                            description: "Message is a human readable message indicating details about the transition. \n This may be an empty string."
+                            maxLength: 32768
+                          reason:
+                            type: string
+                            description: "Reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. \n The value should be a CamelCase string. \n This field may not be empty."
+                            maxLength: 1024
+                            minLength: 1
+                            pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                        required:
+                        - message
+                        - reason
+                        - status
+                        - type
+                    lastTransitionTime:
+                      type: string
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                    message:
+                      type: string
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
+                    observedGeneration:
+                      type: integer
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                    reason:
+                      type: string
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                    warnings:
+                      type: array
+                      description: "Warnings contains a slice of relevant warning subconditions for this object. \n Subconditions are expected to appear when relevant (when there is a warning), and disappear when not relevant. An empty slice here indicates no warnings."
+                      items:
+                        type: object
+                        description: "SubCondition is a Condition-like type intended for use as a subcondition inside a DetailedCondition. \n It contains a subset of the Condition fields. \n It is intended for warnings and errors, so `type` names should use abnormal-true polarity, that is, they should be of the form \"ErrorPresent: true\". \n The expected lifecycle for these errors is that they should only be present when the error or warning is, and should be removed when they are not relevant."
+                        properties:
+                          type:
+                            type: string
+                            description: "Type of condition in `CamelCase` or in `foo.example.com/CamelCase`. \n This must be in abnormal-true polarity, that is, `ErrorFound` or `controller.io/ErrorFound`. \n The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)"
+                            maxLength: 316
+                            pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                          status:
+                            type: string
+                            description: Status of the condition, one of True, False, Unknown.
+                            enum:
+                            - "True"
+                            - "False"
+                            - Unknown
+                          message:
+                            type: string
+                            description: "Message is a human readable message indicating details about the transition. \n This may be an empty string."
+                            maxLength: 32768
+                          reason:
+                            type: string
+                            description: "Reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. \n The value should be a CamelCase string. \n This field may not be empty."
+                            maxLength: 1024
+                            minLength: 1
+                            pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                        required:
+                        - message
+                        - reason
+                        - status
+                        - type
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              currentStatus:
+                type: string
+              description:
+                type: string
+              loadBalancer:
+                type: object
+                description: LoadBalancer contains the current status of the load balancer.
+                properties:
+                  ingress:
+                    type: array
+                    description: Ingress is a list containing ingress points for the load-balancer. Traffic intended for the service should be sent to these ingress points.
+                    items:
+                      type: object
+                      description: 'LoadBalancerIngress represents the status of a load-balancer ingress point: traffic intended for the service should be sent to an ingress point.'
+                      properties:
+                        hostname:
+                          type: string
+                          description: Hostname is set for load-balancer ingress points that are DNS based (typically AWS load-balancers)
+                        ports:
+                          type: array
+                          description: Ports is a list of records of service ports If used, every port defined in the service should have an entry in it
+                          items:
+                            type: object
+                            properties:
+                              protocol:
+                                type: string
+                                default: TCP
+                                description: 'Protocol is the protocol of the service port of which status is recorded here The supported values are: "TCP", "UDP", "SCTP"'
+                              port:
+                                type: integer
+                                description: Port is the port number of the service port of which status is recorded here
+                                format: int32
+                              error:
+                                type: string
+                                description: 'Error is to record the problem with the service port The format of the error shall comply with the following rules: - built-in error values shall be specified in this file and those shall use   CamelCase names - cloud provider specific error values must have names that comply with the   format foo.example.com/CamelCase. --- The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)'
+                                maxLength: 316
+                                pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                            required:
+                            - port
+                            - protocol
+                          x-kubernetes-list-type: atomic
+                        ip:
+                          type: string
+                          description: IP is set for load-balancer ingress points that are IP based (typically GCE or OpenStack load-balancers)
+        required:
+        - metadata
+        - spec
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

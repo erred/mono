@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - clusterrole.knative-contour.k8s.yaml
+  - clusterrolebinding.knative-contour-external.k8s.yaml
+  - configmap.contour.k8s.yaml
+  - daemonset.envoy.k8s.yaml
+  - deployment.contour.k8s.yaml
+  - job.contour-certgen-v1.18.2.k8s.yaml
+  - namespace.contour-external.k8s.yaml
+  - role.contour-certgen.k8s.yaml
+  - rolebinding.contour.k8s.yaml
+  - service.contour.k8s.yaml
+  - service.envoy.k8s.yaml
+  - serviceaccount.contour-certgen.k8s.yaml
+  - serviceaccount.contour.k8s.yaml
+  - serviceaccount.envoy.k8s.yaml

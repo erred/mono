@@ -1,0 +1,50 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: knative-serving
+resources:
+  - clusterrole.knative-serving-addressable-resolver.k8s.yaml
+  - clusterrole.knative-serving-admin.k8s.yaml
+  - clusterrole.knative-serving-aggregated-addressable-resolver.k8s.yaml
+  - clusterrole.knative-serving-core.k8s.yaml
+  - clusterrole.knative-serving-namespaced-admin.k8s.yaml
+  - clusterrole.knative-serving-namespaced-edit.k8s.yaml
+  - clusterrole.knative-serving-namespaced-view.k8s.yaml
+  - clusterrole.knative-serving-podspecable-binding.k8s.yaml
+  - clusterrolebinding.knative-serving-controller-addressable-resolver.k8s.yaml
+  - clusterrolebinding.knative-serving-controller-admin.k8s.yaml
+  - configmap.config-autoscaler.k8s.yaml
+  - configmap.config-defaults.k8s.yaml
+  - configmap.config-deployment.k8s.yaml
+  - configmap.config-domain.k8s.yaml
+  - configmap.config-features.k8s.yaml
+  - configmap.config-gc.k8s.yaml
+  - configmap.config-leader-election.k8s.yaml
+  - configmap.config-logging.k8s.yaml
+  - configmap.config-network.k8s.yaml
+  - configmap.config-observability.k8s.yaml
+  - configmap.config-tracing.k8s.yaml
+  - deployment.activator.k8s.yaml
+  - deployment.autoscaler.k8s.yaml
+  - deployment.controller.k8s.yaml
+  - deployment.domain-mapping.k8s.yaml
+  - deployment.domainmapping-webhook.k8s.yaml
+  - deployment.webhook.k8s.yaml
+  - horizontalpodautoscaler.activator.k8s.yaml
+  - horizontalpodautoscaler.webhook.k8s.yaml
+  - image.queue-proxy.k8s.yaml
+  - mutatingwebhookconfiguration.webhook.domainmapping.serving.knative.dev.k8s.yaml
+  - mutatingwebhookconfiguration.webhook.serving.knative.dev.k8s.yaml
+  - namespace.knative-serving.k8s.yaml
+  - poddisruptionbudget.activator-pdb.k8s.yaml
+  - poddisruptionbudget.webhook-pdb.k8s.yaml
+  - secret.domainmapping-webhook-certs.k8s.yaml
+  - secret.webhook-certs.k8s.yaml
+  - service.activator-service.k8s.yaml
+  - service.autoscaler.k8s.yaml
+  - service.controller.k8s.yaml
+  - service.domainmapping-webhook.k8s.yaml
+  - service.webhook.k8s.yaml
+  - serviceaccount.controller.k8s.yaml
+  - validatingwebhookconfiguration.config.webhook.serving.knative.dev.k8s.yaml
+  - validatingwebhookconfiguration.validation.webhook.domainmapping.serving.knative.dev.k8s.yaml
+  - validatingwebhookconfiguration.validation.webhook.serving.knative.dev.k8s.yaml

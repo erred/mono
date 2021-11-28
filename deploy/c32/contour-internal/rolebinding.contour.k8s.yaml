@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: contour
+  namespace: contour-internal
+  labels:
+    networking.knative.dev/ingress-provider: contour
+roleRef:
+  name: contour-certgen
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- name: contour-certgen
+  namespace: contour-internal
+  kind: ServiceAccount
