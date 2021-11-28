@@ -1,0 +1,13 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: medea
+spec:
+  template:
+    spec:
+      containers:
+        # - image: ko://go.seankhliao.com/mono/svc/cmd/w16
+        - image: index.docker.io/seankhliao/w16
+          args:
+            - -compact
+            - -hostname=medea.seankhliao.com

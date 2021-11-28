@@ -61,7 +61,7 @@ func New(ctx context.Context, o *Options) (http.Handler, error) {
 		MarkdownSkip: true,
 		Data: render.PageData{
 			Compact:      true,
-			URLCanonical: "https://p.seankhliao.com",
+			URLCanonical: "https://paste.seankhliao.com",
 			Title:        `paste`,
 			Description:  `simple paste service`,
 			H1:           `paste`,

@@ -14,7 +14,7 @@ import (
 
 func main() {
 	var filenamePattern string
-	flag.StringVar(&filenamePattern, "filename-pattern", "%k.k8s.yaml", "pattern for filenames (%k: kind, %n: name, %s: namespace)")
+	flag.StringVar(&filenamePattern, "filename-pattern", "%k.%n.k8s.yaml", "pattern for filenames (%k: kind, %n: name, %s: namespace)")
 	flag.Parse()
 
 	p := flag.Arg(0)

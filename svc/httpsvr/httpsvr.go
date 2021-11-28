@@ -2,11 +2,14 @@ package httpsvr
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"flag"
 	"net"
 	"net/http"
 	"net/http/pprof"
+	"os"
 	"os/signal"
 	"runtime/debug"
 	"sync"
@@ -68,6 +71,32 @@ func (o *Options) Run() {
 		},
 	}
 
+	if o.HTTPServerKeyFile != "" {
+		cert, err := tls.LoadX509KeyPair(o.HTTPServerCrtFile, o.HTTPServerKeyFile)
+		if err != nil {
+			l.Error(err, "load http certs", "crt_file", o.HTTPServerCrtFile, "key_file", o.HTTPServerKeyFile)
+			return
+		}
+
+		httpsvr.TLSConfig = &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			ClientCAs:    x509.NewCertPool(),
+		}
+
+		if o.HTTPClientCAFile != "" {
+			b, err := os.ReadFile(o.HTTPClientCAFile)
+			if err != nil {
+				l.Error(err, "load http client ca", "ca_file", o.HTTPClientCAFile)
+				return
+			}
+			ok := httpsvr.TLSConfig.ClientCAs.AppendCertsFromPEM(b)
+			if !ok {
+				l.Error(err, "adding client ca")
+				return
+			}
+		}
+	}
+
 	o.Shutdowners = append(o.Shutdowners, admsvr, httpsvr)
 
 	ctx, cancel := context.WithCancel(o.BaseContext)
@@ -91,8 +120,14 @@ func runServer(l logr.Logger, svr *http.Server, wg *sync.WaitGroup, cancel func(
 	defer wg.Done()
 	defer cancel()
 
-	l.Info("starting", "addr", svr.Addr, "tls", svr.TLSConfig != nil)
-	err := svr.ListenAndServe()
+	run := svr.ListenAndServe
+	if svr.TLSConfig != nil {
+		l = l.WithValues("tls", true)
+		run = func() error { return svr.ListenAndServeTLS("", "") }
+	}
+
+	l.Info("starting", "addr", svr.Addr)
+	err := run()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		l.Error(err, "shutdown")
 	}
