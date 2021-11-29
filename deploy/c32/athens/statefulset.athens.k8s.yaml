@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: athens
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: athens
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: athens
+    spec:
+      containers:
+        - name: athens
+          image: gomods/athens:v0.9.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: ATHENS_PORT
+              value: ":3000"
+            - name: ATHENS_STORAGE_TYPE
+              value: disk
+            - name: ATHENS_DISK_STORAGE_ROOT
+              value: /var/lib/athens
+          volumeMounts:
+            - name: gitconfig
+              mountPath: /root/.gitconfig
+              subPath: .gitconfig
+            - name: ssh
+              mountPath: /root/.ssh
+            - name: data
+              mountPath: /var/lib/athens
+      volumes:
+        - name: data
+          hostPath:
+            path: /opt/c32/athens
+        - name: gitconfig
+          configMap:
+            name: athens-git
+        - name: ssh
+          secret:
+            secretName: athens-ssh
+            defaultMode: 384 #0600
+
+  serviceName: athens

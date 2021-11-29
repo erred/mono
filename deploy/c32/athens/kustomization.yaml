@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: athens
+resources:
+  - httpproxy.athens.k8s.yaml
+  - namespace.athens.k8s.yaml
+  - service.athens.k8s.yaml
+  - statefulset.athens.k8s.yaml
+configMapGenerator:
+  - name: athens-git
+    files:
+      - .gitconfig=gitconfig
+secretGenerator:
+  - name: athens-ssh
+    files:
+      - config=sshconfig
+      - id_ed25519
+      - id_ed25519.pub
