@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -40,7 +39,7 @@ func main() {
 	flag.StringVar(&save, "s", "/etc/pacman.d/mirrorlist", "output file location")
 	flag.IntVar(&parallel, "p", 10, "parallel downloads")
 	flag.IntVar(&limit, "l", 5, "limit output")
-	flag.Func("e", "exclude string", func(s string) error {
+	flag.Func("e", "exclude string (repeatable)", func(s string) error {
 		exclude[s] = struct{}{}
 		return nil
 	})
@@ -78,7 +77,8 @@ func main() {
 
 		r, err := client.Get(u.String())
 		if err != nil {
-			log.Fatalf("ERROR  GET=%q err=%q", u.String(), err)
+			Log("ERR", err, "mirrorlist_source", u.String())
+			return
 		}
 		defer r.Body.Close()
 		rawMirrorlist = r.Body
@@ -86,7 +86,8 @@ func main() {
 		var err error
 		rawMirrorlist, err = os.Open(file)
 		if err != nil {
-			log.Fatalf("ERROR  file=%q err=%q", file, err)
+			Log("ERR", err, "mirrorlist_file", file)
+			return
 		}
 	}
 
@@ -109,7 +110,7 @@ loop:
 		}
 		rawMirrors = append(rawMirrors, mirror)
 	}
-	log.Printf("INFO   mirrors=%d", len(rawMirrors))
+	Log("INF", "candidates", "mirrors", len(rawMirrors))
 
 	// rank mirrors
 	collect := make(chan Mirror)
@@ -123,8 +124,7 @@ loop:
 		done <- mirrors
 	}()
 	ch := make(chan struct{}, parallel)
-	var cnt, total int64
-	total = int64(len(rawMirrors))
+	var cnt int64
 	var wg sync.WaitGroup
 	replacer := strings.NewReplacer("$repo", "community", "$arch", "x86_64")
 	for i := range rawMirrors {
@@ -143,7 +143,7 @@ loop:
 				if strings.Contains(err.Error(), "context deadline exceeded") {
 					err = errors.New("timeout")
 				}
-				log.Printf("WARN   %3d/%3d err=%q mirror=%q", c, total, err, u)
+				Log("WRN", c, "err", err, "mirror", m)
 				return
 			}
 			defer r.Body.Close()
@@ -153,13 +153,13 @@ loop:
 				if strings.Contains(err.Error(), "context deadline exceeded") {
 					err = errors.New("timeout")
 				}
-				log.Printf("WARN   %3d/%3d err=%q mirror=%q", c, total, err, u)
+				Log("WRN", c, "err", err, "mirror", m)
 				return
 			}
 			s := time.Since(t)
 			collect <- Mirror{u: m, d: s}
 			c := atomic.AddInt64(&cnt, 1)
-			log.Printf("DEBUG  %3d/%3d t=%v mirror=%q", c, total, s, m)
+			Log("DBG", c, "time", s.Round(time.Millisecond), "mirror", m)
 		}(rawMirrors[i])
 	}
 	wg.Wait()
@@ -177,6 +177,11 @@ loop:
 	}
 	err := ioutil.WriteFile(save, b.Bytes(), 0o644)
 	if err != nil {
-		log.Fatalf("ERROR  file=%q err=%q", save, err)
+		Log("ERR", err, "file", save)
+		return
 	}
+}
+
+func Log(kvs ...interface{}) {
+	fmt.Fprintf(os.Stderr, strings.TrimSpace(strings.Repeat("%v=%v\t", len(kvs)/2))+"\n", kvs...)
 }
