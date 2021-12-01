@@ -2,7 +2,19 @@ syntax = "proto3";
 
 package seankhliao.fin.v1alpha1;
 
-option go_package = "go.seankhliao.com/mono/proto/seankhliao/fin/v1alpha1;fin";
+option go_package = "go.seankhliao.com/mono/proto/finpb";
+
+message All {
+  string name = 1;
+  string currency = 2;
+  repeated Month months = 3;
+}
+
+message Month {
+  int32 year = 1;
+  int32 month = 2;
+  repeated Transaction transactions = 3;
+}
 
 message Transaction {
   enum Category {
@@ -10,7 +22,7 @@ message Transaction {
 
     CASH = 10;
     ING = 11;
-    TRANSFERWISE = 12;
+    WISE = 12;
     REVOLUT = 13;
     DEGIRO = 14;
     BITTREX = 15;
@@ -38,17 +50,4 @@ message Transaction {
   Category src = 2;
   Category dst = 3;
   string note = 4;
-}
-
-message Month {
-  int32 year = 1;
-  int32 month = 2;
-  repeated Transaction transactions = 3;
-  // Summary summary = 4;
-}
-
-message All {
-  string name = 1;
-  string currency = 2;
-  repeated Month months = 3;
 }

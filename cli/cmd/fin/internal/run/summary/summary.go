@@ -7,7 +7,7 @@ import (
 
 	"go.seankhliao.com/mono/cli/cmd/fin/internal/run"
 	"go.seankhliao.com/mono/cli/cmd/fin/internal/store"
-	fin "go.seankhliao.com/mono/proto/seankhliao/fin/v1alpha1"
+	"go.seankhliao.com/mono/proto/finpb"
 )
 
 type Options struct {
@@ -43,7 +43,7 @@ func Run(o run.Options, args []string) error {
 		return fmt.Errorf("read %s: %w", o.File, err)
 	}
 
-	var months []*fin.Month
+	var months []*finpb.Month
 	for i, m := range all.Months {
 		if (so.Year == 0 || so.Year == int(m.Year)) && (so.Month == 0 || so.Month == int(m.Month)) {
 			months = append(months, all.Months[i])
@@ -87,7 +87,7 @@ type MonthSummary struct {
 	Income      GroupSummary
 	Exppenses   GroupSummary
 
-	Delta map[fin.Transaction_Category]int64
+	Delta map[finpb.Transaction_Category]int64
 }
 
 type GroupSummary struct {
@@ -128,8 +128,8 @@ func (s MonthSummary) String() string {
 	return b.String()
 }
 
-func summarize(m *fin.Month) MonthSummary {
-	delta := make(map[fin.Transaction_Category]int64)
+func summarize(m *finpb.Month) MonthSummary {
+	delta := make(map[finpb.Transaction_Category]int64)
 	for _, tr := range m.Transactions {
 		delta[tr.Src] += tr.Amount
 		delta[tr.Dst] -= tr.Amount
@@ -138,14 +138,14 @@ func summarize(m *fin.Month) MonthSummary {
 	return MonthSummary{
 		Year:      int(m.Year),
 		Month:     int(m.Month),
-		Holdings:  group("Holdings", fin.Transaction_CASH, fin.Transaction_BITTREX, delta),
-		Income:    group("Income", fin.Transaction_SALARY, fin.Transaction_IN_OTHER, delta),
-		Exppenses: group("Expenses", fin.Transaction_FOOD, fin.Transaction_EDUCATION, delta),
+		Holdings:  group("Holdings", finpb.Transaction_CASH, finpb.Transaction_BITTREX, delta),
+		Income:    group("Income", finpb.Transaction_SALARY, finpb.Transaction_IN_OTHER, delta),
+		Exppenses: group("Expenses", finpb.Transaction_FOOD, finpb.Transaction_EDUCATION, delta),
 		Delta:     delta,
 	}
 }
 
-func group(name string, first, last fin.Transaction_Category, delta map[fin.Transaction_Category]int64) GroupSummary {
+func group(name string, first, last finpb.Transaction_Category, delta map[finpb.Transaction_Category]int64) GroupSummary {
 	s := GroupSummary{
 		Name: name,
 	}

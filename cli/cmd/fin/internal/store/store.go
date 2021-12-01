@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 
-	fin "go.seankhliao.com/mono/proto/seankhliao/fin/v1alpha1"
+	"go.seankhliao.com/mono/proto/finpb"
 	"google.golang.org/protobuf/encoding/prototext"
 )
 
-func ReadFile(name string) (*fin.All, error) {
+func ReadFile(name string) (*finpb.All, error) {
 	f, err := os.Open(name)
 	if err != nil {
 		return nil, fmt.Errorf("open %s: %w", name, err)
@@ -23,13 +24,13 @@ func ReadFile(name string) (*fin.All, error) {
 	return trs, nil
 }
 
-func Read(r io.Reader) (*fin.All, error) {
+func Read(r io.Reader) (*finpb.All, error) {
 	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, fmt.Errorf("readall: %w", err)
 	}
 
-	var all fin.All
+	var all finpb.All
 	err = prototext.Unmarshal(b, &all)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal: %w", err)
@@ -37,7 +38,7 @@ func Read(r io.Reader) (*fin.All, error) {
 	return &all, nil
 }
 
-func WriteFile(name string, all *fin.All) error {
+func WriteFile(name string, all *finpb.All) error {
 	f, err := os.Create(name)
 	if err != nil {
 		return fmt.Errorf("create %s: %w", name, err)
@@ -51,7 +52,7 @@ func WriteFile(name string, all *fin.All) error {
 	return nil
 }
 
-func Write(w io.Writer, all *fin.All) error {
+func Write(w io.Writer, all *finpb.All) error {
 	o := prototext.MarshalOptions{
 		Multiline: true,
 	}
@@ -59,6 +60,9 @@ func Write(w io.Writer, all *fin.All) error {
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
+	// collapse transactions onto single line
+	b = regexp.MustCompile(`\n    `).ReplaceAll(b, []byte("\t"))
+	b = regexp.MustCompile(`\n  }`).ReplaceAll(b, []byte(` }`))
 	_, err = w.Write(b)
 	if err != nil {
 		return fmt.Errorf("write: %w", err)
