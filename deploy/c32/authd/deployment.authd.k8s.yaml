@@ -14,6 +14,8 @@ spec:
       containers:
         - name: authd
           image: index.docker.io/seankhliao/authd
+          args:
+            - -realm=seankhliao.com authd
           ports:
             - name: h2c
               containerPort: 8080
