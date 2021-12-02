@@ -3,8 +3,8 @@ kind: Service
 metadata:
   name: earbug
 spec:
-  ports:
-    - port: 80
-      targetPort: 8080
   selector:
     app.kubernetes.io/name: earbug
+  ports:
+  - port: 80
+    targetPort: 8080

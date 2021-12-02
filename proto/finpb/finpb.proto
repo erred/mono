@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package seankhliao.fin.v1alpha1;
+package seankhliao.finpb;
 
 option go_package = "go.seankhliao.com/mono/proto/finpb";
 

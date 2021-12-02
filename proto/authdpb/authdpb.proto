@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package seankhliao.authdpb;
+
+option go_package = "go.seankhliao.com/mono/proto/authdpb";
+
+message Config {
+  // host: path regex
+  map<string,AllowedPaths> allowlist = 1;
+
+  // host:
+  map<string, Tokens> tokens = 2;
+
+  map<string, string> htpasswd = 3;
+  // entire file, lower priority
+  string htpasswd_file =4;
+}
+
+message AllowedPaths {
+  repeated string path_re = 1;
+}
+
+message Tokens {
+  repeated Token tokens = 1;
+}
+
+message Token {
+  // token used in "authorization: Bearer $token"
+  string token = 1;
+  // name used to identify it
+  string id = 2;
+}

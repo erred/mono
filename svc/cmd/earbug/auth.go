@@ -30,7 +30,6 @@ func (s *Server) authPage(rw http.ResponseWriter, r *http.Request) {
 			Compact:      true,
 			Title:        "earbug auth",
 			Description:  "allow earbug access to your spotify account",
-			H1:           "authorize earbug",
 		},
 	}
 	err := render.Render(ro, rw,
@@ -43,7 +42,7 @@ func (s *Server) authPage(rw http.ResponseWriter, r *http.Request) {
 }
 
 const authPageMsg = `
-# _authorize_ earbug
+### _authorize_ earbug
 
 _earbug_ needs access to yur spotify account to get your listening data.
 Grant authorization via[link](%s)
@@ -89,7 +88,6 @@ func (s *Server) authCallback(rw http.ResponseWriter, r *http.Request) {
 			Compact:      true,
 			Title:        "earbug authorized",
 			Description:  "earbug has been successfully authorized",
-			H1:           "auth success",
 		},
 	}
 	err = render.Render(ro, rw,
@@ -102,7 +100,7 @@ func (s *Server) authCallback(rw http.ResponseWriter, r *http.Request) {
 }
 
 const authCallbackMsg = `
-# auth _success_
+### auth _success_
 
 Welcome! _earbug_ has been authorized for _%s_
 `

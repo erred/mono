@@ -3,117 +3,108 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
-	"io"
+	"io/fs"
 	"os"
-	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
-	var user, pass, file string
-	flag.StringVar(&user, "user", "", "username")
-	flag.StringVar(&pass, "pass", "", "password")
-	flag.StringVar(&file, "file", "htpasswd", "htpasswd file")
-	var add, del, stdin bool
-	flag.BoolVar(&add, "add", false, "add a user/pass")
-	flag.BoolVar(&del, "del", false, "delete a user")
-	flag.BoolVar(&stdin, "pass-stdin", false, "read password form stdin")
-	flag.Parse()
+	fl := flag.NewFlagSet("htpasswd", flag.ExitOnError)
+	fl.Usage = func() {
+		fmt.Fprintf(os.Stderr,
+			`htpasswd sets/deletes username/password entries from an htpasswd file.
+The only supported algorithm is bcrypt.
 
-	if (add && del) || (!add && !del) {
-		fmt.Fprintln(os.Stderr, "please specify one of -add / -del")
+Usage:
+        htpasswd [-file htpasswdfile] set   -user username -pass password
+        htpasswd [-file htpasswdfile] set   -user username -pass-stdin
+        htpasswd [-file htpasswdfile] check -user username -pass password
+        htpasswd [-file htpasswdfile] check -user username -pass-stdin
+        htpasswd [-file htpasswdfile] del   -user username
+`)
+	}
+
+	var filename string
+	fl.StringVar(&filename, "file", "htpasswd", "htpasswd file to update")
+	fl.Parse(os.Args[1:])
+	action := fl.Arg(0)
+
+	f2 := flag.NewFlagSet(fl.Arg(0), flag.ExitOnError)
+	f2.Usage = fl.Usage
+	var username, pass string
+	var passStdin bool
+	f2.StringVar(&username, "user", "", "username")
+	switch action {
+	case "set", "check":
+		f2.StringVar(&pass, "pass", "", "password")
+		f2.BoolVar(&passStdin, "pass-stdin", false, "read password from stdin")
+	case "del":
+	default:
+		fl.Usage()
+		os.Exit(1)
+	}
+	f2.Parse(fl.Args()[1:])
+	if len(f2.Args()) > 0 {
+		f2.Usage()
 		os.Exit(1)
 	}
 
-	entries, err := readFile(file)
-	if err != nil && !add {
-		fmt.Fprintf(os.Stderr, "read %s: %v\n", file, err)
-		os.Exit(1)
+	var newEntry []byte
+	switch action {
+	case "set", "check":
+		if passStdin {
+			sc := bufio.NewScanner(os.Stdin)
+			if !sc.Scan() {
+				checkErr("reading passwd", sc.Err())
+			}
+			pass = sc.Text()
+		}
+		hashed, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+		checkErr("hashing passwd", err)
+		newEntry = append([]byte(username+":"), hashed...)
 	}
 
-	user = strings.TrimSpace(user)
-	if stdin {
-		b, err := io.ReadAll(os.Stdin)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "read passwd from stdin: %v\n", err)
-			os.Exit(1)
-		}
-		pass = string(bytes.TrimSpace(b))
+	var out bytes.Buffer
+	old, err := os.ReadFile(filename)
+	if !errors.Is(err, fs.ErrNotExist) { // ignore not exist errors
+		checkErr("reading file", err)
 	}
 
-	if add {
-		hashedPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "hash passed: %v\n", err)
-			os.Exit(1)
-		}
-		for _, entry := range entries {
-			if entry[0] == user {
-				fmt.Fprintln(os.Stderr, "entry already exists for user")
-				os.Exit(1)
+	sc := bufio.NewScanner(bytes.NewReader(old))
+	var found bool
+	for sc.Scan() {
+		b := sc.Bytes()
+		if pre := append([]byte(username), ':'); bytes.HasPrefix(b, pre) {
+			found = true
+			switch action {
+			case "add":
+				b = newEntry
+			case "check":
+				err = bcrypt.CompareHashAndPassword(bytes.TrimPrefix(b, pre), []byte(pass))
+				checkErr("mismatched passwd", err)
+			case "del":
+				continue
 			}
 		}
-		entries = append(entries, []string{user, string(hashedPass)})
-	} else { // del
-		for i, entry := range entries {
-			if entry[0] == user {
-				entries = append(entries[:i], entries[i+1:]...)
-				break
-			}
-		}
+		out.Write(b)
+		out.WriteRune('\n')
+	}
+	if !found {
+		out.Write(newEntry)
+		out.WriteRune('\n')
 	}
 
-	err = writeFile(file, entries)
+	err = os.WriteFile(filename, out.Bytes(), 0o644)
+	checkErr("writing file", err)
+}
+
+func checkErr(msg string, err error) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "write file: %v\n", err)
+		fmt.Fprintf(os.Stderr, msg+": %v\n", err)
 		os.Exit(1)
 	}
-}
-
-func writeFile(fn string, entries [][]string) error {
-	f, err := os.Create(fn + ".tmp")
-	if err != nil {
-		return fmt.Errorf("create file: %w", err)
-	}
-	defer f.Close()
-	for i, entry := range entries {
-		_, err = fmt.Fprintf(f, "%s:%s\n", entry[0], entry[1])
-		if err != nil {
-			return fmt.Errorf("write entru %d: %w", i, err)
-		}
-	}
-	f.Close()
-	err = os.Rename(fn+".tmp", fn)
-	if err != nil {
-		return fmt.Errorf("rename: %w", err)
-	}
-	return nil
-}
-
-func readFile(fn string) ([][]string, error) {
-	f, err := os.Open(fn)
-	if err != nil {
-		return nil, fmt.Errorf("open file: %w", err)
-	}
-	defer f.Close()
-
-	var entries [][]string
-	users := make(map[string]struct{})
-	sc := bufio.NewScanner(f)
-	for i := 0; sc.Scan(); i++ {
-
-		bb := bytes.SplitN(sc.Bytes(), []byte(":"), 2)
-		if len(bb) != 2 {
-			return nil, fmt.Errorf("invalid entry: %d", i)
-		}
-		u := bytes.TrimSpace(bb[0])
-		if _, ok := users[string(u)]; ok {
-			return nil, fmt.Errorf("duplicate entry for %s", string(u))
-		}
-		entries = append(entries, []string{string(u), string(bytes.TrimSpace(bb[1]))})
-	}
-	return entries, nil
 }

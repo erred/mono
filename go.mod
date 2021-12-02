@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.3
+	github.com/envoyproxy/go-control-plane v0.9.10-0.20210907150352-cf90f659a021
 	github.com/go-logr/logr v1.2.0
 	github.com/go-logr/stdr v1.2.0
 	github.com/google/go-github/v38 v38.1.0
@@ -29,6 +30,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v0.25.0
 	go.opentelemetry.io/otel/trace v1.2.0
 	golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8
+	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5
 	google.golang.org/grpc v1.42.0
 	google.golang.org/protobuf v1.27.1
 	modernc.org/sqlite v1.14.1
@@ -42,9 +44,11 @@ require (
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
+	github.com/cncf/xds/go v0.0.0-20211011173535-cb28da3451f1 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/envoyproxy/protoc-gen-validate v0.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.3 // indirect
@@ -81,7 +85,6 @@ require (
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/net v0.0.0-20211116231205-47ca1ff31462 // indirect
-	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5 // indirect
 	golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.7 // indirect

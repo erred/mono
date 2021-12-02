@@ -6,7 +6,6 @@ spec:
   template:
     spec:
       containers:
-        # - image: ko://go.seankhliao.com/mono/svc/cmd/w16
         - image: index.docker.io/seankhliao/w16
           args:
             - -compact

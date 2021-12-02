@@ -1,0 +1,9 @@
+apiVersion: projectcontour.io/v1alpha1
+kind: ExtensionService
+metadata:
+  name: authd
+spec:
+  protocol: h2c
+  services:
+    - name: authd
+      port: 80

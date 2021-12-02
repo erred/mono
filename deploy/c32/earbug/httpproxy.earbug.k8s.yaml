@@ -15,3 +15,7 @@ spec:
     fqdn: earbug.seankhliao.com
     tls:
       secretName: knative-serving/tls-wildcard
+    authorization:
+      extensionRef:
+        namespace: authd
+        name: authd

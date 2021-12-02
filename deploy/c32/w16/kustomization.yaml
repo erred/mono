@@ -1,8 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: web
+namespace: w16
 resources:
   - namespace.web.k8s.yaml
   - service.medea.k8s.yaml
-  - service.paste.k8s.yaml
   - service.stylesheet.k8s.yaml

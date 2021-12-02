@@ -4,14 +4,6 @@ metadata:
   name: w16
 build:
   artifacts:
-    - image: index.docker.io/seankhliao/w16
-      ko:
-        main: ./svc/cmd/w16
-        flags:
-          - -trimpath
-        ldflags:
-          - -s
-          - -w
     - image: index.docker.io/seankhliao/paste
       ko:
         main: ./svc/cmd/paste
@@ -27,4 +19,4 @@ build:
 deploy:
   kustomize:
     paths:
-      - ./deploy/c32/web
+      - ./deploy/c32/paste

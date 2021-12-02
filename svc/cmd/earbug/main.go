@@ -100,9 +100,9 @@ func (s *Server) index(rw http.ResponseWriter, r *http.Request) {
 
 	ro := &render.Options{
 		Data: render.PageData{
-			Title: "earbug",
-			H1:    "earbug",
-			H2:    "spotify logger",
+			Compact:     true,
+			Title:       "earbug",
+			Description: "spotify logger",
 		},
 	}
 	err := render.Render(ro, rw, strings.NewReader(indexMsg))
@@ -112,7 +112,7 @@ func (s *Server) index(rw http.ResponseWriter, r *http.Request) {
 }
 
 const indexMsg = `
-# _earbug_
+### _earbug_
 
 A simple spotify history logger
 `

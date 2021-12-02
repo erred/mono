@@ -14,9 +14,9 @@ spec:
       containers:
         - name: earbug
           image: index.docker.io/seankhliao/earbug
+          ports:
+            - name: http
+              containerPort: 8080
           envFrom:
             - secretRef:
                 name: earbug
-          ports:
-            - containerPort: 8080
-              name: http

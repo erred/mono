@@ -1,0 +1,11 @@
+allowlist: {
+  key: "earbug.seankhliao.com"
+  value: {
+    path_re: "^/$"
+    path_re: "^/auth/callback$"
+  }
+}
+htpasswd: {
+  key: "seankhliao"
+  value: "$2a$10$bCAwKjaK05x0JpOqBsi.Ceb3TuFIGm0BS0rW0bHES7NeV5jSpkqfO"
+}
