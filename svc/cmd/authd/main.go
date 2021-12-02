@@ -24,6 +24,7 @@ func main() {
 	var s Server
 	flag.StringVar(&s.configFile, "config", "/authd/config.prototext", "path to config file")
 	flag.StringVar(&s.addr, "grpc.addr", ":8080", "listen address")
+	flag.StringVar(&s.realm, "realm", "authd", "displayed realm")
 	flag.Parse()
 
 	ctx := oo.New()
@@ -98,6 +99,6 @@ func (s *Server) Check(ctx context.Context, r *envoy_service_auth_v3.CheckReques
 		return okResponse(user, headers)
 	}
 
-	l.Info("denied", "headers", headers)
+	l.Info("denied")
 	return deniedResponse(s.realm)
 }
