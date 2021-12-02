@@ -1,0 +1,23 @@
+---
+apiVersion: skaffold/v2beta26
+kind: Config
+metadata:
+  name: earbug
+build:
+  artifacts:
+    - image: index.docker.io/seankhliao/earbug
+      ko:
+        main: ./svc/cmd/earbug
+        flags:
+          - -trimpath
+        ldflags:
+          - -s
+          - -w
+  local:
+    concurrency: 0
+  tagPolicy:
+    sha256: {}
+deploy:
+  kustomize:
+    paths:
+      - ./deploy/c32/earbug

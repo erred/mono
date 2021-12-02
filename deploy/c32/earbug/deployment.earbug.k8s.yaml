@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: earbug
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: earbug
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: earbug
+    spec:
+      containers:
+        - name: earbug
+          image: index.docker.io/seankhliao/earbug
+          envFrom:
+            - secretRef:
+                name: earbug
+          ports:
+            - containerPort: 8080
+              name: http

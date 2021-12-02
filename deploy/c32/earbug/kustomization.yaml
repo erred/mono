@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: earbug
+resources:
+  - deployment.earbug.k8s.yaml
+  - httpproxy.earbug.k8s.yaml
+  - namespace.earbug.k8s.yaml
+  - service.earbug.k8s.yaml
+secretGenerator:
+  - name: earbug
+    files:
+      - env/SPOTIFY_ID
+      - env/SPOTIFY_SECRET
