@@ -96,4 +96,11 @@ func (s *Server) putHistory(ctx context.Context, user string, item spotify.Recen
 		l.Error(err, "put recently played", "path", p)
 		return
 	}
+
+	trackP := path.Join(s.StorePrefix, "tracks", user, string(item.Track.ID))
+	_, err = s.Store.Put(ctx, trackP, item.PlayedAt.Format(time.RFC3339Nano))
+	if err != nil {
+		l.Error(err, "put unique tracks", "path", trackP)
+		// continue on error
+	}
 }
