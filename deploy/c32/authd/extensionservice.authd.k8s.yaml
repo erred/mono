@@ -5,5 +5,5 @@ metadata:
 spec:
   protocol: h2c
   services:
-    - name: authd
-      port: 80
+  - name: authd
+    port: 80

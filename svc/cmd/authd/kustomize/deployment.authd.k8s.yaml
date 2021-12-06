@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: authd
-          image: index.docker.io/seankhliao/authd
+          image: ko://go.seankhliao.com/mono/svc/cmd/authd
           args:
             - -realm=seankhliao.com authd
           ports:

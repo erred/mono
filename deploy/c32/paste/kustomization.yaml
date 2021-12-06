@@ -1,11 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: earbug
+namespace: paste
 resources:
-  - ../../../secret/kustomize/earbug
-  - ../../../svc/cmd/earbug/kustomize
+  - ../../../svc/cmd/paste/kustomize
   - ../../base/etcd
-  - namespace.earbug.k8s.yaml
+  - namespace.paste.k8s.yaml
 replacements:
   - source:
       kind: Namespace

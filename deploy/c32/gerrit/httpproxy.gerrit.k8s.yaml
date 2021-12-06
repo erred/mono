@@ -1,7 +1,7 @@
 apiVersion: projectcontour.io/v1
 kind: HTTPProxy
 metadata:
-  name: earbug
+  name: gerrit
   annotations:
     projectcontour.io/ingress.class: contour-external
 spec:
@@ -9,13 +9,13 @@ spec:
     - conditions:
         - prefix: /
       services:
-        - name: earbug
+        - name: gerrit
           port: 80
   virtualhost:
-    fqdn: earbug.seankhliao.com
+    fqdn: gerrit.seankhliao.com
     tls:
       secretName: knative-serving/tls-wildcard
     authorization:
       extensionRef:
-        namespace: authd
-        name: authd
+        name: contour-authserver
+        namespace: contour-authserver

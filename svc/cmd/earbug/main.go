@@ -22,7 +22,7 @@ func main() {
 	ho := httpsvr.NewOptions(flag.CommandLine)
 	var server Server
 	flag.StringVar(&server.CanonicalURL, "url", "https://earbug.seankhliao.com", "url app is hosted on")
-	flag.StringVar(&server.StoreURL, "store", "http://etcd-0.etcd.etcd.svc.cluster.local:2379", "etcd url")
+	flag.StringVar(&server.StoreURL, "store", "http://etcd-0.etcd:2379", "etcd url")
 	flag.StringVar(&server.StorePrefix, "store-prefix", "earbug", "key prefix in etcd")
 	flag.DurationVar(&server.PollInterval, "poll-interval", 5*time.Minute, "time between spotify polls")
 	flag.Parse()

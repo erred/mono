@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: earbug
-          image: index.docker.io/seankhliao/earbug
+          image: ko://go.seankhliao.com/mono/svc/cmd/earbug
           ports:
             - name: http
               containerPort: 8080

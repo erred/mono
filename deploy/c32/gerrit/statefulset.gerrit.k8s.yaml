@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: gerrit
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gerrit
+  serviceName: gerrit
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gerrit
+    spec:
+      containers:
+        - name: gerrit
+          image: index.docker.io/gerritcodereview/gerrit:3.4.2
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 29418
+              name: ssh
+              hostPort: 29418
+          volumeMounts:
+            - mountPath: /var/gerrit/etc
+              name: etc
+            - mountPath: /var/gerrit/db
+              name: db
+            - mountPath: /var/gerrit/index
+              name: index
+            - mountPath: /var/gerrit/git
+              name: git
+            - mountPath: /var/gerrit/cache
+              name: cache
+      volumes:
+        - name: etc
+          hostPath:
+            path: /opt/c32/gerrit/etc
+        - name: cache
+          hostPath:
+            path: /opt/c32/gerrit/cache
+        - name: db
+          hostPath:
+            path: /opt/c32/gerrit/db
+        - name: index
+          hostPath:
+            path: /opt/c32/gerrit/index
+        - name: git
+          hostPath:
+            path: /opt/c32/gerrit/git

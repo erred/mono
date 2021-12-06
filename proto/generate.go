@@ -1,5 +1,5 @@
 //go:build generate
 
-package root
+package proto
 
 //go:generate buf generate

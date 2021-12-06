@@ -1,0 +1,60 @@
+apiVersion: skaffold/v2beta26
+kind: Config
+metadata:
+  name: mono-ko
+build:
+  artifacts:
+    - image: ko://replace-me
+      ko:
+        flags:
+          - -trimpath
+        ldflags:
+          - -s
+          - -w
+      hooks:
+        after:
+          - command:
+              - sh
+              - -c
+              - COSIGN_PASSWORD= cosign sign --key secret/cosign/cosign.key $SKAFFOLD_IMAGE
+  local:
+    concurrency: 0
+  tagPolicy:
+    sha256: {}
+deploy:
+  kustomize:
+    paths:
+      - ./deploy/replace-me
+profiles:
+  - name: authd
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: ko://go.seankhliao.com/mono/svc/cmd/authd
+      - op: replace
+        path: /deploy/kustomize/paths/0
+        value: ./deploy/c32/authd
+  - name: earbug
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: ko://go.seankhliao.com/mono/svc/cmd/earbug
+      - op: replace
+        path: /deploy/kustomize/paths/0
+        value: ./deploy/c32/earbug
+  - name: paste
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: ko://go.seankhliao.com/mono/svc/cmd/paste
+      - op: replace
+        path: /deploy/kustomize/paths/0
+        value: ./deploy/c32/paste
+  - name: w16
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: ko://go.seankhliao.com/mono/svc/cmd/w16
+      - op: replace
+        path: /deploy/kustomize/paths/0
+        value: ./deploy/c32/w16

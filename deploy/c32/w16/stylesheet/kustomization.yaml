@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../../svc/cmd/w16/kustomize
+patches:
+  - patch: |
+      - op: replace
+        path: /metadata/name
+        value: stylesheet
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: -hostname=stylesheet.seankhliao.com
+    target:
+      group: serving.knative.dev
+      version: v1
+      kind: Service
