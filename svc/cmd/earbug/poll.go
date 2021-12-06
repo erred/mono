@@ -54,9 +54,9 @@ func (s *Server) pollUser(ctx context.Context, user string, token *oauth2.Token)
 	defer t.Stop()
 
 	for {
+		s.updateHistory(ctx, user, c)
 		select {
 		case <-t.C:
-			s.updateHistory(ctx, user, c)
 		case <-s.pollWorkerShutdown:
 			return
 		}
@@ -84,23 +84,34 @@ func (s *Server) updateHistory(ctx context.Context, user string, c *spotify.Clie
 func (s *Server) putHistory(ctx context.Context, user string, item spotify.RecentlyPlayedItem) {
 	l := logr.FromContextOrDiscard(ctx)
 
-	ts := item.PlayedAt.Format(time.RFC3339Nano)
-	b, err := json.Marshal(item)
+	playedP := path.Join(s.StorePrefix, "history", user, "playback", item.PlayedAt.Format(time.RFC3339Nano))
+	playedB, err := json.Marshal(map[string]interface{}{
+		"track_id":  item.Track.ID,
+		"track_uri": item.Track.URI,
+		"context":   item.PlaybackContext,
+	})
 	if err != nil {
-		l.Error(err, "marhsal recently played")
+		l.Error(err, "marshal playback")
 		return
 	}
-	p := path.Join(s.StorePrefix, "history", user, ts)
-	_, err = s.Store.Put(ctx, p, string(b))
+	_, err = s.Store.Put(ctx, playedP, string(playedB))
 	if err != nil {
-		l.Error(err, "put recently played", "path", p)
-		return
+		l.Error(err, "put user playback", "key", playedP)
 	}
 
-	trackP := path.Join(s.StorePrefix, "tracks", user, string(item.Track.ID))
-	_, err = s.Store.Put(ctx, trackP, item.PlayedAt.Format(time.RFC3339Nano))
+	uniqTrackP := path.Join(s.StorePrefix, "history", user, "track", string(item.Track.ID))
+	_, err = s.Store.Put(ctx, uniqTrackP, item.PlayedAt.Format(time.RFC3339Nano))
 	if err != nil {
-		l.Error(err, "put unique tracks", "path", trackP)
-		// continue on error
+		l.Error(err, "put user track", "key", uniqTrackP)
+	}
+
+	trackP := path.Join(s.StorePrefix, "track", string(item.Track.ID))
+	trackB, err := json.Marshal(item.Track)
+	if err != nil {
+		l.Error(err, "marshal track info")
+	}
+	_, err = s.Store.Put(ctx, trackP, string(trackB))
+	if err != nil {
+		l.Error(err, "put global track info", "key", trackP)
 	}
 }
