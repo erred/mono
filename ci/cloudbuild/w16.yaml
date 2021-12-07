@@ -1,26 +1,21 @@
 substitutions:
   _IMG: go.seankhliao.com/mono/svc/cmd/w16
   _REG: us-central1-docker.pkg.dev/com-seankhliao/run
+  _GTM: GTM-TLVN7D6
 
 steps:
-  - id: build-push
+  - id: build-push-deploy
     name: us-central1-docker.pkg.dev/com-seankhliao/run/ko
-    entrypoint: ko
+    entrypoint: sh
     args:
-      - publish
-      - --preserve-import-paths
-      - $_IMG
+      - -c
+      - >
+        set -ex
+        && img=$(ko publish --preserve-import-paths $_IMG)
+        && gcloud run deploy seankhliao-com
+            --image=${img}
+            --region=us-central1
+            --platform=managed
+            --args=-gtm=$_GTM
     env:
       - KO_DOCKER_REPO=$_REG
-
-  - id: deploy
-    name: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
-    entrypoint: gcloud
-    args:
-      - run
-      - deploy
-      - seankhliao-com
-      - --image=$_REG/$_IMG:latest
-      - --region=us-central1
-      - --platform=managed
-      - --args=-gtm=GTM-TLVN7D6

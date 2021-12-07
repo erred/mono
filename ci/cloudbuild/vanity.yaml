@@ -3,22 +3,17 @@ substitutions:
   _REG: us-central1-docker.pkg.dev/com-seankhliao/run
 
 steps:
-  - id: build-push
-    name: us-central1-docker.pkg.dev/com-seankhliao/run/ko:v0.9.3
+  - id: build-push-deploy
+    name: us-central1-docker.pkg.dev/com-seankhliao/run/ko
+    entrypoint: sh
     args:
-      - publish
-      - --preserve-import-paths
-      - $_IMG
+      - -c
+      - >
+        set -ex
+        && img=$(ko publish --preserve-import-paths $_IMG)
+        && gcloud run deploy seankhliao-com
+            --image=${img}
+            --region=us-central1
+            --platform=managed
     env:
       - KO_DOCKER_REPO=$_REG
-
-  - id: deploy
-    name: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
-    entrypoint: gcloud
-    args:
-      - run
-      - deploy
-      - go-seankhliao-com
-      - --image=$_REG/$_IMG:latest
-      - --region=us-central1
-      - --platform=managed

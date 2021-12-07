@@ -1,10 +1,16 @@
-FROM golang:alpine
+FROM gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
+
+ARG GO=go1.17.4
+ARG KO=0.9.3
+
+ENV CGO_ENABLED=0 \
+    GOBIN=/usr/local/bin \
+    GOFLAGS=-trimpath \
+    PATH=/usr/local/go/bin:$PATH
+
+RUN curl -sL https://github.com/google/ko/releases/download/v${KO}/ko_${KO}_Linux_x86_64.tar.gz \
+    | tar xzvf - -C /usr/local/bin ko \
+    && curl -sL https://go.dev/dl/${GO}.linux-amd64.tar.gz \
+    | tar xzvf - -C /usr/local
+
 WORKDIR /workspace
-
-ENV GOMODCACHE=/gomodcache \
-    GOCACHE=/gocache \
-    CGO_ENABLED=0 \
-    GOGLAGS=-trimpath
-
-RUN GOBIN=/usr/local/bin go install -ldflags="-s -w" github.com/google/ko@latest && \
-    rm -rf /gomodcache/* /gocache/*
