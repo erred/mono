@@ -76,7 +76,6 @@ func (o *Options) renderAndRegister(mux *http.ServeMux, fsys fs.FS) error {
 }
 
 func (o *Options) renderFile(fsys fs.FS, p string) ([]byte, pageInfo, error) {
-	var buf bytes.Buffer
 	f, _ := fsys.Open(p)
 	defer f.Close()
 
@@ -99,6 +98,7 @@ func (o *Options) renderFile(fsys fs.FS, p string) ([]byte, pageInfo, error) {
 		},
 	}
 
+	var buf bytes.Buffer
 	err := render.Render(&ro, &buf, f)
 	if err != nil {
 		return nil, pageInfo{}, err
@@ -147,7 +147,6 @@ maybe someone will find this useful</p>
 	body.WriteString(`</ul>`)
 
 	ro := render.Options{
-		MarkdownSkip: true,
 		Data: render.PageData{
 			URLCanonical: fmt.Sprintf("https://%s/blog/", o.Hostname),
 			GTMID:        o.GTMID,
@@ -162,11 +161,12 @@ ul li {
         overflow: hidden;
         text-overflow: ellipsis;
 }`,
+			Main: body.String(),
 		},
 	}
 
 	var buf bytes.Buffer
-	err := render.Render(&ro, &buf, &body)
+	err := render.RenderBytes(&ro, &buf, nil)
 	if err != nil {
 		return pageInfo{}, fmt.Errorf("render blog index: %w", err)
 	}

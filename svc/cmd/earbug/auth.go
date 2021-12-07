@@ -24,16 +24,12 @@ func (s *Server) authPage(rw http.ResponseWriter, r *http.Request) {
 	}
 	user := parts[3]
 
-	ro := &render.Options{
-		Data: render.PageData{
-			URLCanonical: s.CanonicalURL + "/auth/user/" + user,
-			Compact:      true,
-			Title:        "earbug auth",
-			Description:  "allow earbug access to your spotify account",
-		},
-	}
-	err := render.Render(ro, rw,
-		strings.NewReader(fmt.Sprintf(authPageMsg, s.Auth.AuthURL(user))),
+	err := render.Compact(
+		rw,
+		"earbug auth",
+		"allow earbug access to your spotify account",
+		s.CanonicalURL+"/auth/user/"+user,
+		[]byte(fmt.Sprintf(authPageMsg, s.Auth.AuthURL(user))),
 	)
 	if err != nil {
 		l.Error(err, "render")
@@ -82,16 +78,12 @@ func (s *Server) authCallback(rw http.ResponseWriter, r *http.Request) {
 	l.Info("authorized")
 
 	s.addPollWorker(ctx, user, token)
-	ro := &render.Options{
-		Data: render.PageData{
-			URLCanonical: s.CanonicalURL + "/auth/callback",
-			Compact:      true,
-			Title:        "earbug authorized",
-			Description:  "earbug has been successfully authorized",
-		},
-	}
-	err = render.Render(ro, rw,
-		strings.NewReader(fmt.Sprintf(authCallbackMsg, user)),
+	err = render.Compact(
+		rw,
+		"earbug authorized",
+		"earbug has been successfully authorized",
+		s.CanonicalURL+"/auth/callback",
+		[]byte(fmt.Sprintf(authCallbackMsg, user)),
 	)
 	if err != nil {
 		l.Error(err, "render")

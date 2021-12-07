@@ -5,32 +5,39 @@ import (
 	"os"
 
 	"github.com/go-logr/stdr"
-	"go.seankhliao.com/mono/internal/web/process"
+	"go.seankhliao.com/mono/internal/web/render"
 )
 
 func main() {
-	var o process.Options
+	var o render.Options
 	var src, dst string
-	flag.StringVar(&src, "src", "content", "source directory or file")
-	flag.StringVar(&dst, "dst", "public", "destination directory or file")
-	flag.StringVar(&o.Canonical, "url", "https://seankhliao.com", "base url for canonicalization")
-	flag.StringVar(&o.GTMID, "gtm", "", "Google Tag Manager ID to enable analytics")
-	flag.BoolVar(&o.Compact, "compact", false, "compact header")
-	flag.BoolVar(&o.Raw, "raw", false, "skip markdown processing")
+	flag.BoolVar(&o.Data.Compact, "compact", true, "compact header")
+	flag.StringVar(&src, "src", "index.md", "source file")
+	flag.StringVar(&dst, "dst", "index.html", "destination file")
+	flag.StringVar(
+		&o.Data.URLCanonical,
+		"url",
+		"https://seankhliao.com",
+		"base url for canonicalization",
+	)
 	flag.Parse()
 
 	log := stdr.New(nil)
 
-	fi, err := os.Stat(src)
+	fi, err := os.Open(src)
 	if err != nil {
-		log.Error(err, "stat", "src", src)
+		log.Error(err, "open src", "file", src)
 		os.Exit(1)
 	}
-	if fi.IsDir() {
-		err = process.Dir(o, dst, src)
-	} else {
-		err = process.File(o, dst, src)
+	defer fi.Close()
+	fo, err := os.Create(dst)
+	if err != nil {
+		log.Error(err, "open dst", "file", dst)
+		os.Exit(1)
 	}
+	defer fo.Close()
+
+	err = render.Render(&o, fo, fi)
 	if err != nil {
 		log.Error(err, "render")
 		os.Exit(1)

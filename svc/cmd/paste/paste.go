@@ -20,6 +20,8 @@ import (
 )
 
 type Server struct {
+	host string
+
 	storeURL    string
 	storePrefix string
 	store       *clientv3.Client
@@ -33,6 +35,7 @@ func New(flags *flag.FlagSet) *Server {
 	var s Server
 	flags.StringVar(&s.storeURL, "store.url", "http://etcd-0.etcd:2379", "etcd url")
 	flags.StringVar(&s.storePrefix, "store.prefix", "paste", "key prefix in etcd")
+	flag.StringVar(&s.host, "paste.host", "paste.seankhliao.com", "canonical hostname")
 
 	return &s
 }
@@ -44,48 +47,23 @@ func (s *Server) Handler() (http.Handler, error) {
 		return nil, err
 	}
 
-	pasteRaw, err := content.Content.Open("paste.seankhliao.com/paste.html")
+	pasteRaw, err := content.Content.ReadFile(path.Join(s.host, "paste.html"))
 	if err != nil {
 		return nil, err
 	}
-	defer pasteRaw.Close()
-	styleRaw, err := content.Content.ReadFile("paste.seankhliao.com/style.css")
+	s.pastePage, err = render.CompactBytes("paste", "upload", fmt.Sprintf("https://%s/paste/", s.host), pasteRaw)
 	if err != nil {
 		return nil, err
 	}
-	pasteRo := &render.Options{
-		MarkdownSkip: true,
-		Data: render.PageData{
-			Compact:      true,
-			URLCanonical: "https://paste.seankhliao.com/paste",
-			Title:        `paste`,
-			Description:  `upload`,
-			Style:        string(styleRaw),
-		},
-	}
-	var pasteBuf bytes.Buffer
-	err = render.Render(pasteRo, &pasteBuf, pasteRaw)
-	if err != nil {
-		return nil, err
-	}
-	s.pastePage = pasteBuf.Bytes()
 
-	indexRaw, err := content.Content.Open("paste.seankhliao.com/index.md")
+	indexRaw, err := content.Content.ReadFile(path.Join(s.host, "index.html"))
 	if err != nil {
 		return nil, err
 	}
-	indexRo := &render.Options{
-		Data: render.PageData{
-			Compact:      true,
-			URLCanonical: "https://paste.seankhliao.com/",
-		},
-	}
-	var indexBuf bytes.Buffer
-	err = render.Render(indexRo, &indexBuf, indexRaw)
+	s.indexPage, err = render.CompactBytes("paste", "simple paste host", fmt.Sprintf("https://%s/", s.host), indexRaw)
 	if err != nil {
 		return nil, err
 	}
-	s.indexPage = indexBuf.Bytes()
 
 	s.startTime = time.Now()
 

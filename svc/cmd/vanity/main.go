@@ -58,23 +58,24 @@ func main() {
 func New(ctx context.Context) http.Handler {
 	l := logr.FromContextOrDiscard(ctx).WithName("vanity")
 
-	indexF, _ := content.Content.Open("go.seankhliao.com/index.md")
-	defer indexF.Close()
-	var buf bytes.Buffer
-	err := render.Render(&render.Options{
-		Data: render.PageData{
-			URLCanonical: "https://go.seankhliao.com/",
-			Compact:      true,
-			Title:        "go.seankhliao.com",
-		},
-	}, &buf, indexF)
+	indexRaw, err := content.Content.ReadFile("go.seankhliao.com/index.md")
+	if err != nil {
+		l.Error(err, "read index")
+	}
+
+	indexBytes, err := render.CompactBytes(
+		"go.seankhliao.com",
+		"Go custom import path server",
+		"https://go.seankhliao.com",
+		indexRaw,
+	)
 	if err != nil {
 		l.Error(err, "render index")
 	}
 
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
-			http.ServeContent(rw, r, "index.html", time.Time{}, bytes.NewReader(buf.Bytes()))
+			http.ServeContent(rw, r, "index.html", time.Time{}, bytes.NewReader(indexBytes))
 			return
 		}
 

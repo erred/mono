@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -55,11 +57,26 @@ type Server struct {
 	Auth  *spotifyauth.Authenticator
 	Store *clientv3.Client
 
+	indexPage []byte
+	startTime time.Time
+
 	pollWorkerShutdown chan struct{}
 	pollWorkerWg       sync.WaitGroup
 }
 
 func (s *Server) Handler(ctx context.Context) (http.Handler, error) {
+	s.startTime = time.Now()
+	var err error
+	s.indexPage, err = render.CompactBytes(
+		"earbug",
+		"spotify listen tracker",
+		"https://earbug.seankhliao.com/",
+		[]byte(indexMsg),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("render index: %w", err)
+	}
+
 	s.Auth = spotifyauth.New(
 		spotifyauth.WithRedirectURL(s.CanonicalURL+"/auth/callback"),
 		spotifyauth.WithScopes(
@@ -71,7 +88,6 @@ func (s *Server) Handler(ctx context.Context) (http.Handler, error) {
 
 	s.pollWorkerShutdown = make(chan struct{})
 
-	var err error
 	s.Store, err = clientv3.NewFromURL(s.StoreURL)
 	if err != nil {
 		return nil, err
@@ -90,25 +106,12 @@ func (s *Server) Handler(ctx context.Context) (http.Handler, error) {
 }
 
 func (s *Server) index(rw http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	l := logr.FromContextOrDiscard(ctx).WithName("index")
-
 	if r.URL.Path != "/" {
 		http.Error(rw, "not found", http.StatusNotFound)
 		return
 	}
 
-	ro := &render.Options{
-		Data: render.PageData{
-			Compact:     true,
-			Title:       "earbug",
-			Description: "spotify logger",
-		},
-	}
-	err := render.Render(ro, rw, strings.NewReader(indexMsg))
-	if err != nil {
-		l.Error(err, "render index page")
-	}
+	http.ServeContent(rw, r, "index.html", s.startTime, bytes.NewReader(s.indexPage))
 }
 
 const indexMsg = `
