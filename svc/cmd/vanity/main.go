@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"strings"
 	"time"
@@ -58,7 +59,7 @@ func main() {
 func New(ctx context.Context) http.Handler {
 	l := logr.FromContextOrDiscard(ctx).WithName("vanity")
 
-	indexRaw, err := content.Content.ReadFile("go.seankhliao.com/index.md")
+	indexRaw, err := fs.ReadFile(content.Vanity, "index.md")
 	if err != nil {
 		l.Error(err, "read index")
 	}

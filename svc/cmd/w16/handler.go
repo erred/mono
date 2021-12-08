@@ -38,14 +38,24 @@ func (o *Options) Handler(ctx context.Context) (http.Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("generating static sub fs for %s: %w", o.Hostname, err)
 	}
-	contentFys, err := fs.Sub(content.Content, o.Hostname)
-	if err != nil {
-		return nil, fmt.Errorf("generating content sub fs for %s: %w", o.Hostname, err)
+
+	var contentFsys fs.FS
+	switch o.Hostname {
+	case "go.seankhliao.com":
+		contentFsys = content.Vanity
+	case "medea.seankhliao.com":
+		contentFsys = content.Medea
+	case "seankhliao.com":
+		contentFsys = content.W16
+	case "stylesheet.seankhliao.com":
+		contentFsys = content.Stylesheet
+	default:
+		return nil, fmt.Errorf("no matching embedded fs: %s", o.Hostname)
 	}
 
 	mux := http.NewServeMux()
 	o.registerStatic(mux, staticFsys)
-	o.renderAndRegister(mux, contentFys)
+	o.renderAndRegister(mux, contentFsys)
 
 	return defaultHandler(mux), nil
 }

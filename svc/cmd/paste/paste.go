@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"path"
 	"strings"
@@ -47,7 +48,7 @@ func (s *Server) Handler() (http.Handler, error) {
 		return nil, err
 	}
 
-	pasteRaw, err := content.Content.ReadFile(path.Join(s.host, "paste.html"))
+	pasteRaw, err := fs.ReadFile(content.Paste, "paste.html")
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +57,7 @@ func (s *Server) Handler() (http.Handler, error) {
 		return nil, err
 	}
 
-	indexRaw, err := content.Content.ReadFile(path.Join(s.host, "index.html"))
+	indexRaw, err := fs.ReadFile(content.Paste, "index.html")
 	if err != nil {
 		return nil, err
 	}
