@@ -4,8 +4,8 @@ go 1.17
 
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.3
-	github.com/envoyproxy/go-control-plane v0.9.10-0.20210907150352-cf90f659a021
-	github.com/go-logr/logr v1.2.0
+	github.com/envoyproxy/go-control-plane v0.10.1
+	github.com/go-logr/logr v1.2.1
 	github.com/go-logr/stdr v1.2.0
 	github.com/google/go-containerregistry v0.7.0
 	github.com/google/go-github/v38 v38.1.0
@@ -27,9 +27,10 @@ require (
 	go.opentelemetry.io/otel/sdk/export/metric v0.25.0
 	go.opentelemetry.io/otel/sdk/metric v0.25.0
 	go.opentelemetry.io/otel/trace v1.2.0
-	golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8
+	go.opentelemetry.io/proto/otlp v0.11.0
+	golang.org/x/crypto v0.0.0-20211209193657-4570a0811e8b
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
-	google.golang.org/genproto v0.0.0-20211117155847-120650a500bb
+	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa
 	google.golang.org/grpc v1.42.0
 	google.golang.org/protobuf v1.27.1
 	sigs.k8s.io/kustomize/kyaml v0.13.0
@@ -56,7 +57,7 @@ require (
 	github.com/go-openapi/jsonreference v0.19.3 // indirect
 	github.com/go-openapi/swag v0.19.5 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.1.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v39 v39.2.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -64,24 +65,23 @@ require (
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/opencontainers/image-spec v1.0.2-0.20210730191737-8e42a01fb1b7 // indirect
+	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
-	github.com/tdewolff/parse/v2 v2.5.22 // indirect
+	github.com/tdewolff/parse/v2 v2.5.23 // indirect
 	github.com/vbatts/tar-split v0.11.2 // indirect
 	github.com/xlab/treeprint v0.0.0-20181112141820-a009c3971eca // indirect
 	go.etcd.io/etcd/api/v3 v3.5.1 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.1 // indirect
 	go.opentelemetry.io/otel/internal/metric v0.25.0 // indirect
-	go.opentelemetry.io/proto/otlp v0.11.0 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.17.0 // indirect
-	golang.org/x/net v0.0.0-20211116231205-47ca1ff31462 // indirect
+	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/multierr v1.7.0 // indirect
+	go.uber.org/zap v1.19.1 // indirect
+	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c // indirect
+	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
