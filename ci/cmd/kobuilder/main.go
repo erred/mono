@@ -1,5 +1,5 @@
 // kobuilder builds the container image used in the cloudbuild ci process.
-// The only dependencies are that authentication is available be default.
+// The only dependencies are that authentication is available by default.
 package main
 
 import (
