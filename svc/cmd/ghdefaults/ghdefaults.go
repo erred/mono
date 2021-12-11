@@ -1,4 +1,4 @@
-package ghdefaults
+package main
 
 import (
 	"bytes"
@@ -12,8 +12,8 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/google/go-github/v38/github"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -43,60 +43,53 @@ var defaultConfig = map[string]github.Repository{
 	},
 }
 
-type Options struct {
-	WebhookSecretPath string
-	PrivateKeyPath    string
-	AppID             int64
-}
-
-func NewOptions(fs *flag.FlagSet) *Options {
-	var o Options
-	fs.StringVar(&o.WebhookSecretPath, "webhook-secret-path", "/var/run/secrets/github/webhook-secret", "path to file containing webhook secret")
-	fs.StringVar(&o.PrivateKeyPath, "private-key-path", "/var/run/secrets/github/private-key", "path to file containing github app private key")
-	fs.Int64Var(&o.AppID, "app-id", 0, "app id in github")
-	return &o
+func New(flags *flag.FlagSet) *Server {
+	var s Server
+	flags.StringVar(&s.WebhookSecretPath, "github.secret", "/var/run/secrets/github/webhook-secret", "path to file containing webhook secret")
+	flags.StringVar(&s.PrivateKeyPath, "github.key", "/var/run/secrets/github/github.pem", "path to file containing github app private key")
+	flags.Int64Var(&s.AppID, "github.id", 0, "app id in github")
+	return &s
 }
 
 type Server struct {
+	WebhookSecretPath string
+	PrivateKeyPath    string
+	AppID             int64
+
 	webhookSecret []byte
 	privateKey    []byte
 	appID         int64
 
 	tr http.RoundTripper
 	t  trace.Tracer
+	l  logr.Logger
 }
 
-func New(ctx context.Context, o *Options) (*Server, error) {
-	tracer := otel.Tracer("ghdefaults")
-	ctx, span := tracer.Start(ctx, "new")
-	defer span.End()
+func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Logger, m metric.MeterProvider, t trace.TracerProvider, shutdown func()) error {
+	s.l = l.WithName("ghdefaults")
+	s.t = t.Tracer("ghdefaults")
 
-	_, span = tracer.Start(ctx, "webhook-secret")
-	webhookSecret, err := os.ReadFile(o.WebhookSecretPath)
-	span.End()
+	var err error
+	webhookSecret, err := os.ReadFile(s.WebhookSecretPath)
 	if err != nil {
-		return nil, fmt.Errorf("webhook-secret %s: %w", o.WebhookSecretPath, err)
+		return fmt.Errorf("webhook-secret %s: %w", s.WebhookSecretPath, err)
 	}
-	webhookSecret = bytes.TrimSpace(webhookSecret)
+	s.webhookSecret = bytes.TrimSpace(webhookSecret)
 
-	_, span = tracer.Start(ctx, "private-key")
-	privateKey, err := os.ReadFile(o.PrivateKeyPath)
-	span.End()
+	s.privateKey, err = os.ReadFile(s.PrivateKeyPath)
 	if err != nil {
-		return nil, fmt.Errorf("private-key %s: %w", o.PrivateKeyPath, err)
+		return fmt.Errorf("private-key %s: %w", s.PrivateKeyPath, err)
 	}
 
-	if o.AppID == 0 {
-		return nil, fmt.Errorf("app-id must be set")
-	}
+	mux.Handle("/", s)
 
-	return &Server{
-		webhookSecret: webhookSecret,
-		privateKey:    privateKey,
-		appID:         o.AppID,
-		tr:            otelhttp.NewTransport(http.DefaultTransport),
-		t:             tracer,
-	}, nil
+	s.tr = otelhttp.NewTransport(
+		http.DefaultTransport,
+		otelhttp.WithMeterProvider(m),
+		otelhttp.WithTracerProvider(t),
+	)
+
+	return nil
 }
 
 // ServeHTTP is the main entrypoint and dispatch for different event types
@@ -104,7 +97,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	ctx, span := s.t.Start(ctx, "dispatch")
 	defer span.End()
-	l := logr.FromContextOrDiscard(ctx).WithName("dispatch")
 
 	switch r.URL.Path {
 	case "/webhook":
@@ -112,7 +104,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		payload, err := github.ValidatePayload(r, s.webhookSecret)
 		if err != nil {
 			span.End()
-			l.Error(err, "validate webhook")
+			s.l.Error(err, "validate webhook")
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
@@ -120,7 +112,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		event, err := github.ParseWebHook(eventType, payload)
 		if err != nil {
 			span.End()
-			l.Error(err, "parse payload")
+			s.l.Error(err, "parse payload")
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
@@ -128,7 +120,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		ctx, span = s.t.Start(ctx, "process")
 		defer span.End()
-		l = l.WithValues("event", eventType)
+		l := s.l.WithValues("event", eventType)
 		msg := "processed"
 		switch event := event.(type) {
 		case *github.InstallationEvent:

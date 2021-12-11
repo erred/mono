@@ -1,0 +1,16 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ghdefaults
+spec:
+  template:
+    spec:
+      containers:
+        - image: ko://go.seankhliao.com/mono/svc/cmd/ghdefaults
+          volumeMounts:
+            - name: secret
+              mountPath: /var/run/secrets/github
+      volumes:
+        - name: secret
+          secret:
+            secretName: ghdefaults

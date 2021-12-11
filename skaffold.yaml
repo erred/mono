@@ -42,6 +42,14 @@ profiles:
       - op: replace
         path: /deploy/kustomize/paths/0
         value: ./deploy/c32/earbug
+  - name: ghdefaults
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: ko://go.seankhliao.com/mono/svc/cmd/ghdefaults
+      - op: replace
+        path: /deploy/kustomize/paths/0
+        value: ./deploy/c32/ghdefaults
   - name: paste
     patches:
       - op: replace
