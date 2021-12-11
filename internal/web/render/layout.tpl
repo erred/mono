@@ -28,7 +28,7 @@
   <link rel="apple-touch-icon" href="https://seankhliao.com/static/icon-192.png">
 
   <style>
-    {{ template "basecss" }}
+    {{ template "basecss" . }}
     {{ .Style }}
   </style>
 

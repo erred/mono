@@ -7,15 +7,13 @@ import (
 	"path"
 	"strings"
 
-	"github.com/go-logr/logr"
 	"go.seankhliao.com/mono/internal/web/render"
 )
 
 // authPage shows the link a user should follow to authorize earbug
 // /auth/user/<user_id>
 func (s *Server) authPage(rw http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	l := logr.FromContextOrDiscard(ctx).WithName("auth").WithValues("page", "user")
+	l := s.l.WithName("auth").WithValues("page", "user")
 
 	parts := strings.Split(r.URL.Path, "/")
 	if len(parts) != 4 || parts[1] != "auth" || parts[2] != "user" {
@@ -48,7 +46,7 @@ Grant authorization via[link](%s)
 // by storing the token and starting a poll worker
 func (s *Server) authCallback(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	l := logr.FromContextOrDiscard(ctx).WithName("auth").WithValues("page", "callback")
+	l := s.l.WithName("auth").WithValues("page", "callback")
 
 	user := r.FormValue("state")
 	l = l.WithValues("user", user)

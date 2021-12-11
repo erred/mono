@@ -12,10 +12,12 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/content"
 	"go.seankhliao.com/mono/internal/web/render"
-	"go.seankhliao.com/mono/svc/httpsvr"
-	"go.seankhliao.com/mono/svc/o11y"
+	"go.seankhliao.com/mono/svc/runsvr"
 )
 
 const (
@@ -44,53 +46,77 @@ _docs:_ [pkg.go.dev](https://pkg.go.dev/go.seankhliao.com/%[1]s)
 )
 
 func main() {
-	oo := o11y.NewOptions(flag.CommandLine)
-	ho := httpsvr.NewOptions(flag.CommandLine)
+	r := runsvr.New(flag.CommandLine)
+	s := New(flag.CommandLine)
 	flag.Parse()
 
-	ctx := oo.New()
-	ho.BaseContext = ctx
-
-	ho.Handler = New(ctx)
-
-	ho.Run()
+	r.HTTP(s)
 }
 
-func New(ctx context.Context) http.Handler {
-	l := logr.FromContextOrDiscard(ctx).WithName("vanity")
+type Server struct {
+	l logr.Logger
+	t trace.Tracer
+
+	repoCtr metric.Int64Counter
+
+	indexBytes []byte
+}
+
+func New(flags *flag.FlagSet) *Server {
+	var s Server
+	return &s
+}
+
+func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Logger, m metric.MeterProvider, t trace.TracerProvider, shutdown func()) error {
+	s.l = l
+	s.t = t.Tracer("vanity")
+
+	var err error
+	s.repoCtr, err = m.Meter("vanity").NewInt64Counter("vanity")
+	if err != nil {
+		return fmt.Errorf("register metric: %w", err)
+	}
 
 	indexRaw, err := fs.ReadFile(content.Vanity, "index.md")
 	if err != nil {
-		l.Error(err, "read index")
+		return fmt.Errorf("read index.md: %w", err)
 	}
 
-	indexBytes, err := render.CompactBytes(
+	s.indexBytes, err = render.CompactBytes(
 		"go.seankhliao.com",
 		"Go custom import path server",
 		"https://go.seankhliao.com",
 		indexRaw,
 	)
 	if err != nil {
-		l.Error(err, "render index")
+		return fmt.Errorf("render index.md: %w", err)
 	}
 
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" {
-			http.ServeContent(rw, r, "index.html", time.Time{}, bytes.NewReader(indexBytes))
-			return
-		}
+	mux.Handle("/", s)
 
-		repo := strings.Split(r.URL.Path, "/")[1]
-		err := render.Render(&render.Options{
-			Data: render.PageData{
-				URLCanonical: "https://go.seankhliao.com/" + repo,
-				Compact:      true,
-				Title:        "go.seankhliao.com/" + repo,
-				Head:         fmt.Sprintf(repoPageHeader, repo),
-			},
-		}, rw, strings.NewReader(fmt.Sprintf(repoPageBody, repo)))
-		if err != nil {
-			l.Error(err, "render repo page")
-		}
-	})
+	return nil
+}
+
+func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	_, span := s.t.Start(r.Context(), "vanity")
+	defer span.End()
+
+	if r.URL.Path == "/" {
+		http.ServeContent(rw, r, "index.html", time.Time{}, bytes.NewReader(s.indexBytes))
+		return
+	}
+
+	repo := strings.Split(r.URL.Path, "/")[1]
+	span.SetAttributes(attribute.String("repo", repo))
+	err := render.Render(&render.Options{
+		Data: render.PageData{
+			URLCanonical: "https://go.seankhliao.com/" + repo,
+			Compact:      true,
+			Title:        "go.seankhliao.com/" + repo,
+			Head:         fmt.Sprintf(repoPageHeader, repo),
+		},
+	}, rw, strings.NewReader(fmt.Sprintf(repoPageBody, repo)))
+	if err != nil {
+		s.l.Error(err, "render repo page")
+	}
 }

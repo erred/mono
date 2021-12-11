@@ -22,7 +22,7 @@ type pageInfo struct {
 
 var dateRe = regexp.MustCompile(`\d{5}-\d{2}-\d{2}`)
 
-func (o *Options) renderAndRegister(mux *http.ServeMux, fsys fs.FS) error {
+func (s *Server) renderAndRegister(mux *http.ServeMux, fsys fs.FS) error {
 	var pis []pageInfo
 
 	err := fs.WalkDir(fsys, ".", func(p string, d fs.DirEntry, err error) error {
@@ -31,17 +31,17 @@ func (o *Options) renderAndRegister(mux *http.ServeMux, fsys fs.FS) error {
 		}
 
 		if path.Ext(p) != ".md" {
-			o.handleFsysFile(mux, fsys, p)
+			s.handleFsysFile(mux, fsys, p)
 			return nil
 		}
 
-		b, pi, err := o.renderFile(fsys, p)
+		b, pi, err := s.renderFile(fsys, p)
 		if err != nil {
 			return fmt.Errorf("render %s: %w", p, err)
 		}
 
 		pis = append(pis, pi)
-		o.handleBytes(mux, pi.path, "index.html", b)
+		s.handleBytes(mux, pi.path, "index.html", b)
 
 		if strings.HasPrefix(pi.path, "/blog/") {
 			// register a redirect for old urls
@@ -49,7 +49,7 @@ func (o *Options) renderAndRegister(mux *http.ServeMux, fsys fs.FS) error {
 			op := "/blog/" + pi.path[7:]
 			mux.Handle(op, http.RedirectHandler(pi.path, http.StatusMovedPermanently))
 		} else if pi.path == "/404" {
-			o.notFoundBody = b
+			s.notFoundBody = b
 		}
 
 		return nil
@@ -62,7 +62,7 @@ func (o *Options) renderAndRegister(mux *http.ServeMux, fsys fs.FS) error {
 		return pis[i].path > pis[j].path
 	})
 
-	pi, err := o.blogIndex(mux, pis)
+	pi, err := s.blogIndex(mux, pis)
 	if err != nil {
 		if !errors.Is(err, errSkip) {
 			return fmt.Errorf("render blog index: %w", err)
@@ -71,16 +71,16 @@ func (o *Options) renderAndRegister(mux *http.ServeMux, fsys fs.FS) error {
 		pis = append(pis, pi)
 	}
 
-	o.sitemap(mux, pis)
+	s.sitemap(mux, pis)
 	return nil
 }
 
-func (o *Options) renderFile(fsys fs.FS, p string) ([]byte, pageInfo, error) {
+func (s *Server) renderFile(fsys fs.FS, p string) ([]byte, pageInfo, error) {
 	f, _ := fsys.Open(p)
 	defer f.Close()
 
 	cp := canonicalPath(p)
-	cu := fmt.Sprintf("https://%s%s", o.Hostname, cp)
+	cu := fmt.Sprintf("https://%s%s", s.Hostname, cp)
 
 	var h1, date string
 	if strings.HasPrefix(cp, "/blog/") {
@@ -91,8 +91,8 @@ func (o *Options) renderFile(fsys fs.FS, p string) ([]byte, pageInfo, error) {
 	ro := render.Options{
 		Data: render.PageData{
 			URLCanonical: cu,
-			GTMID:        o.GTMID,
-			Compact:      o.Compact,
+			GTMID:        s.GTMID,
+			Compact:      s.Compact,
 			H1:           h1,
 			H2:           date,
 		},
@@ -116,7 +116,7 @@ func (o *Options) renderFile(fsys fs.FS, p string) ([]byte, pageInfo, error) {
 var errSkip = errors.New("skip for no entries")
 
 // blogIndex renders a blog index page
-func (o *Options) blogIndex(mux *http.ServeMux, pis []pageInfo) (pageInfo, error) {
+func (s *Server) blogIndex(mux *http.ServeMux, pis []pageInfo) (pageInfo, error) {
 	var blogEntries []pageInfo
 	for _, pi := range pis {
 		if strings.HasPrefix(pi.path, "/blog/") {
@@ -148,8 +148,8 @@ maybe someone will find this useful</p>
 
 	ro := render.Options{
 		Data: render.PageData{
-			URLCanonical: fmt.Sprintf("https://%s/blog/", o.Hostname),
-			GTMID:        o.GTMID,
+			URLCanonical: fmt.Sprintf("https://%s/blog/", s.Hostname),
+			GTMID:        s.GTMID,
 			Title:        "blog | seankhliao",
 			Description:  "list of things i wrote",
 			H1:           `<a href="/blog/">b<em>log</em></a>`,
@@ -171,7 +171,7 @@ ul li {
 		return pageInfo{}, fmt.Errorf("render blog index: %w", err)
 	}
 
-	o.handleBytes(mux, "/blog/", "blog.html", buf.Bytes())
+	s.handleBytes(mux, "/blog/", "blog.html", buf.Bytes())
 	return pageInfo{
 		path:  "/blog/",
 		title: ro.Data.Title,
@@ -179,11 +179,11 @@ ul li {
 }
 
 // sitemap renders a plaintext list of valid urls
-func (o *Options) sitemap(mux *http.ServeMux, pis []pageInfo) {
+func (s *Server) sitemap(mux *http.ServeMux, pis []pageInfo) {
 	var buf bytes.Buffer
 	for _, pi := range pis {
-		fmt.Fprintf(&buf, "https://%s%s\n", o.Hostname, pi.path)
+		fmt.Fprintf(&buf, "https://%s%s\n", s.Hostname, pi.path)
 	}
 
-	o.handleBytes(mux, "/sitemap.txt", "sitemap.txt", buf.Bytes())
+	s.handleBytes(mux, "/sitemap.txt", "sitemap.txt", buf.Bytes())
 }

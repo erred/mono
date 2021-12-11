@@ -13,34 +13,42 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/content"
 	"go.seankhliao.com/mono/static"
 )
 
-type Options struct {
+type Server struct {
 	Hostname string
 	GTMID    string
 	Compact  bool
 
+	l logr.Logger
+	t trace.Tracer
+
 	notFoundBody []byte
 }
 
-func NewOptions(fs *flag.FlagSet) *Options {
-	var o Options
-	fs.StringVar(&o.Hostname, "hostname", "seankhliao.com", "hostname for generating canonical paths")
-	fs.StringVar(&o.GTMID, "gtm", "", "google tag manager id")
-	fs.BoolVar(&o.Compact, "compact", false, "render with compact header")
-	return &o
+func New(flags *flag.FlagSet) *Server {
+	var s Server
+	flags.StringVar(&s.Hostname, "hostname", "seankhliao.com", "hostname for generating canonical paths")
+	flags.StringVar(&s.GTMID, "gtm", "", "google tag manager id")
+	flags.BoolVar(&s.Compact, "compact", false, "render with compact header")
+	return &s
 }
 
-func (o *Options) Handler(ctx context.Context) (http.Handler, error) {
-	staticFsys, err := fs.Sub(static.Static, o.Hostname)
+func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Logger, m metric.MeterProvider, t trace.TracerProvider, shutdown func()) error {
+	s.l = l.WithName("w16")
+	s.t = t.Tracer("w16")
+
+	staticFsys, err := fs.Sub(static.Static, s.Hostname)
 	if err != nil {
-		return nil, fmt.Errorf("generating static sub fs for %s: %w", o.Hostname, err)
+		return fmt.Errorf("generating static sub fs for %s: %w", s.Hostname, err)
 	}
 
 	var contentFsys fs.FS
-	switch o.Hostname {
+	switch s.Hostname {
 	case "go.seankhliao.com":
 		contentFsys = content.Vanity
 	case "medea.seankhliao.com":
@@ -50,21 +58,21 @@ func (o *Options) Handler(ctx context.Context) (http.Handler, error) {
 	case "stylesheet.seankhliao.com":
 		contentFsys = content.Stylesheet
 	default:
-		return nil, fmt.Errorf("no matching embedded fs: %s", o.Hostname)
+		return fmt.Errorf("no matching embedded fs: %s", s.Hostname)
 	}
 
-	mux := http.NewServeMux()
-	o.registerStatic(mux, staticFsys)
-	o.renderAndRegister(mux, contentFsys)
+	m2 := http.NewServeMux()
+	s.registerStatic(m2, staticFsys)
+	s.renderAndRegister(m2, contentFsys)
 
-	return defaultHandler(mux), nil
+	mux.Handle("/", s.defaultHandler(m2))
+
+	return nil
 }
 
-func defaultHandler(h http.Handler) http.Handler {
+func (s *Server) defaultHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		l := logr.FromContextOrDiscard(r.Context())
-
-		l.Info("received request",
+		s.l.Info("received request",
 			"url", r.URL.String(),
 			"referer", r.Referer(),
 			"user_agent", r.UserAgent(),
@@ -90,13 +98,13 @@ func defaultHandler(h http.Handler) http.Handler {
 }
 
 // registerStatic registers handlers for all file paths in the fsys
-func (o *Options) registerStatic(mux *http.ServeMux, fsys fs.FS) error {
+func (s *Server) registerStatic(mux *http.ServeMux, fsys fs.FS) error {
 	err := fs.WalkDir(fsys, ".", func(p string, d fs.DirEntry, err error) error {
 		if err != nil || d.Type() != 0 {
 			return nil
 		}
 
-		o.handleFsysFile(mux, fsys, p)
+		s.handleFsysFile(mux, fsys, p)
 		return nil
 	})
 	if err != nil {
@@ -106,12 +114,12 @@ func (o *Options) registerStatic(mux *http.ServeMux, fsys fs.FS) error {
 }
 
 // handleFsys serves a path directly from an embedded fs
-func (o *Options) handleFsysFile(mux *http.ServeMux, fsys fs.FS, p string) {
+func (s *Server) handleFsysFile(mux *http.ServeMux, fsys fs.FS, p string) {
 	t := time.Now()
 	cp := canonicalPath(p)
 	mux.HandleFunc(cp, func(rw http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != cp {
-			o.notfound(rw, r)
+			s.notfound(rw, r)
 			return
 		}
 
@@ -122,12 +130,12 @@ func (o *Options) handleFsysFile(mux *http.ServeMux, fsys fs.FS, p string) {
 }
 
 // handleBytes serves a path directly from bytes
-func (o *Options) handleBytes(mux *http.ServeMux, p, name string, b []byte) {
+func (s *Server) handleBytes(mux *http.ServeMux, p, name string, b []byte) {
 	t := time.Now()
 	br := bytes.NewReader(b)
 	mux.HandleFunc(p, func(rw http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != p {
-			o.notfound(rw, r)
+			s.notfound(rw, r)
 			return
 		}
 
@@ -136,9 +144,9 @@ func (o *Options) handleBytes(mux *http.ServeMux, p, name string, b []byte) {
 }
 
 // notfound is a simple not found handler
-func (o *Options) notfound(rw http.ResponseWriter, r *http.Request) {
+func (s *Server) notfound(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusNotFound)
-	http.ServeContent(rw, r, "404.html", time.Time{}, bytes.NewReader(o.notFoundBody))
+	http.ServeContent(rw, r, "404.html", time.Time{}, bytes.NewReader(s.notFoundBody))
 }
 
 func canonicalPath(p string) string {

@@ -14,7 +14,7 @@ import (
 
 // startStoredPoll starts pollers for all stored tokens
 func (s *Server) startStoredPoll(ctx context.Context) error {
-	l := logr.FromContextOrDiscard(ctx).WithName("poller")
+	l := s.l.WithName("poller")
 
 	p := path.Join(s.StorePrefix, "token")
 	res, err := s.Store.Get(ctx, p, clientv3.WithPrefix())
@@ -46,7 +46,7 @@ func (s *Server) addPollWorker(ctx context.Context, user string, token *oauth2.T
 // pollUser is a poll worker responsible for updating a user's listening history
 func (s *Server) pollUser(ctx context.Context, user string, token *oauth2.Token) {
 	defer s.pollWorkerWg.Done()
-	l := logr.FromContextOrDiscard(ctx).WithName("poller")
+	l := s.l.WithName("poller")
 	l.Info("starting", "user", user)
 
 	c := spotify.New(s.Auth.Client(ctx, token), spotify.WithRetry(true))
@@ -65,7 +65,7 @@ func (s *Server) pollUser(ctx context.Context, user string, token *oauth2.Token)
 
 // updateHistory pulls a user's recently played tracks and stores it
 func (s *Server) updateHistory(ctx context.Context, user string, c *spotify.Client) {
-	l := logr.FromContextOrDiscard(ctx).WithName("poll").WithValues("user", user)
+	l := s.l.WithName("poll").WithValues("user", user)
 	ctx = logr.NewContext(ctx, l)
 
 	items, err := c.PlayerRecentlyPlayedOpt(ctx, &spotify.RecentlyPlayedOptions{
@@ -82,7 +82,7 @@ func (s *Server) updateHistory(ctx context.Context, user string, c *spotify.Clie
 
 // putHistory stores a single user listen history
 func (s *Server) putHistory(ctx context.Context, user string, item spotify.RecentlyPlayedItem) {
-	l := logr.FromContextOrDiscard(ctx)
+	l := s.l.WithName("poll")
 
 	playedP := path.Join(s.StorePrefix, "history", user, "playback", item.PlayedAt.Format(time.RFC3339Nano))
 	playedB, err := json.Marshal(map[string]interface{}{

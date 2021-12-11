@@ -10,6 +10,7 @@ func Compact(dst io.Writer, title, desc, canonicalURL string, body []byte) error
 	o := &Options{
 		Data: PageData{
 			URLCanonical: canonicalURL,
+			Compact:      true,
 			Title:        title,
 			Description:  desc,
 		},

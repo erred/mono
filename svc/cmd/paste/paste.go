@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	_ "embed"
 	"encoding/base64"
 	"errors"
@@ -16,6 +17,8 @@ import (
 
 	"github.com/go-logr/logr"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/content"
 	"go.seankhliao.com/mono/internal/web/render"
 )
@@ -26,6 +29,10 @@ type Server struct {
 	storeURL    string
 	storePrefix string
 	store       *clientv3.Client
+
+	l        logr.Logger
+	t        trace.Tracer
+	sizeHist metric.Int64Histogram
 
 	startTime time.Time
 	pastePage []byte
@@ -41,39 +48,46 @@ func New(flags *flag.FlagSet) *Server {
 	return &s
 }
 
-func (s *Server) Handler() (http.Handler, error) {
+func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Logger, m metric.MeterProvider, t trace.TracerProvider, shutdown func()) error {
+	s.l = l.WithName("paste")
+	s.t = t.Tracer("paste")
+
 	var err error
+	s.sizeHist, err = m.Meter("paste").NewInt64Histogram("paste.size")
+	if err != nil {
+		return err
+	}
+
 	s.store, err = clientv3.NewFromURL(s.storeURL)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	pasteRaw, err := fs.ReadFile(content.Paste, "paste.html")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	s.pastePage, err = render.CompactBytes("paste", "upload", fmt.Sprintf("https://%s/paste/", s.host), pasteRaw)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	indexRaw, err := fs.ReadFile(content.Paste, "index.html")
+	indexRaw, err := fs.ReadFile(content.Paste, "index.md")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	s.indexPage, err = render.CompactBytes("paste", "simple paste host", fmt.Sprintf("https://%s/", s.host), indexRaw)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	s.startTime = time.Now()
 
-	mux := http.NewServeMux()
 	mux.HandleFunc("/p/", s.lookupHandler)
 	mux.HandleFunc("/paste/", s.pasteHandler)
 	mux.HandleFunc("/", s.indexHandler)
 
-	return mux, nil
+	return nil
 }
 
 func (s *Server) indexHandler(rw http.ResponseWriter, r *http.Request) {
@@ -91,7 +105,6 @@ func (s *Server) indexHandler(rw http.ResponseWriter, r *http.Request) {
 
 func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	l := logr.FromContextOrDiscard(ctx).WithName("paste")
 
 	if r.URL.Path != "/paste/" {
 		http.Redirect(rw, r, "/paste/", http.StatusFound)
@@ -110,7 +123,7 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 	if val == "" {
 		err := r.ParseMultipartForm(1 << 22) // 4M
 		if err != nil {
-			l.Error(err, "parse multipart form")
+			s.l.Error(err, "parse multipart form")
 			http.Error(rw, "bad parse", http.StatusBadRequest)
 			return
 		}
@@ -121,13 +134,15 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 		}
 		defer mpf.Close()
 		var buf strings.Builder
-		_, err = io.Copy(&buf, mpf)
+		n, err := io.Copy(&buf, mpf)
 		if err != nil {
-			l.Error(err, "copy file")
+			s.l.Error(err, "copy file")
 			http.Error(rw, "copy err", http.StatusInternalServerError)
 			return
 		}
 		val = buf.String()
+
+		s.sizeHist.Record(ctx, n)
 	}
 
 	sum := base64.URLEncoding.EncodeToString([]byte(val))
@@ -139,7 +154,7 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 		key = path.Join(basekey, sum[:le])
 		res, err := s.store.Get(ctx, key)
 		if err != nil {
-			l.Error(err, "precheck get", "key", key)
+			s.l.Error(err, "precheck get", "key", key)
 			http.Error(rw, "etcd get", http.StatusInternalServerError)
 			return
 		}
@@ -153,7 +168,7 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		if le == 20 {
-			l.Error(errors.New("can't find unique key"), "max len reached", "key", key, "sum", sum[:])
+			s.l.Error(errors.New("can't find unique key"), "max len reached", "key", key, "sum", sum[:])
 			http.Error(rw, "no unique key", http.StatusInsufficientStorage)
 			return
 		}
@@ -161,19 +176,18 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 
 	_, err := s.store.Put(ctx, key, val)
 	if err != nil {
-		l.Error(err, "store", "key", key)
+		s.l.Error(err, "store", "key", key)
 		http.Error(rw, "put", http.StatusInsufficientStorage)
 		return
 	}
 
-	l.Info("stored", "key", key, "size", len(val))
+	s.l.Info("stored", "key", key, "size", len(val))
 
 	fmt.Fprintf(rw, "https://paste.seankhliao.com%s", strings.TrimPrefix(key, s.storePrefix))
 }
 
 func (s *Server) lookupHandler(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	l := logr.FromContextOrDiscard(ctx).WithName("lookup")
 
 	if r.Method != http.MethodGet {
 		http.Error(rw, "use GET", http.StatusMethodNotAllowed)
@@ -186,17 +200,17 @@ func (s *Server) lookupHandler(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	key := path.Join(s.storePrefix, r.URL.Path)
-	l.Info("get", "key", key)
+	s.l.Info("get", "key", key)
 	res, err := s.store.Get(ctx, key)
 	if err != nil {
-		l.Error(err, "etcd get", "key")
+		s.l.Error(err, "etcd get", "key")
 		http.Error(rw, "storage err", http.StatusInternalServerError)
 		return
 	}
 
 	if len(res.Kvs) != 1 {
 		if len(res.Kvs) > 1 {
-			l.Error(errors.New("extra pastes"), "more than expected pastes", "pastes", len(res.Kvs), "key", key)
+			s.l.Error(errors.New("extra pastes"), "more than expected pastes", "pastes", len(res.Kvs), "key", key)
 		}
 		http.Error(rw, "not found", http.StatusNotFound)
 		return

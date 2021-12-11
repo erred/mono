@@ -14,38 +14,27 @@ import (
 	"github.com/go-logr/logr"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/internal/web/render"
-	"go.seankhliao.com/mono/svc/httpsvr"
-	"go.seankhliao.com/mono/svc/o11y"
+	"go.seankhliao.com/mono/svc/runsvr"
 )
 
 func main() {
-	oo := o11y.NewOptions(flag.CommandLine)
-	ho := httpsvr.NewOptions(flag.CommandLine)
-	var server Server
-	flag.StringVar(&server.CanonicalURL, "url", "https://earbug.seankhliao.com", "url app is hosted on")
-	flag.StringVar(&server.StoreURL, "store", "http://etcd-0.etcd:2379", "etcd url")
-	flag.StringVar(&server.StorePrefix, "store-prefix", "earbug", "key prefix in etcd")
-	flag.DurationVar(&server.PollInterval, "poll-interval", 5*time.Minute, "time between spotify polls")
+	r := runsvr.New(flag.CommandLine)
+	s := New(flag.CommandLine)
 	flag.Parse()
 
-	ctx := oo.New()
-	ho.BaseContext = ctx
+	r.HTTP(s)
+}
 
-	var err error
-	ho.Handler, err = server.Handler(ctx)
-	if err != nil {
-		logr.FromContextOrDiscard(ctx).Error(err, "init")
-		os.Exit(1)
-	}
-
-	defer server.pollWorkerWg.Wait()
-	defer server.Store.Close()
-	defer func() {
-		close(server.pollWorkerShutdown)
-	}()
-
-	ho.Run()
+func New(flags *flag.FlagSet) *Server {
+	var s Server
+	flag.StringVar(&s.CanonicalURL, "url", "https://earbug.seankhliao.com", "url app is hosted on")
+	flag.StringVar(&s.StoreURL, "store", "http://etcd-0.etcd:2379", "etcd url")
+	flag.StringVar(&s.StorePrefix, "store-prefix", "earbug", "key prefix in etcd")
+	flag.DurationVar(&s.PollInterval, "poll-interval", 5*time.Minute, "time between spotify polls")
+	return &s
 }
 
 type Server struct {
@@ -53,6 +42,9 @@ type Server struct {
 	StoreURL     string
 	StorePrefix  string
 	PollInterval time.Duration
+
+	l logr.Logger
+	t trace.Tracer
 
 	Auth  *spotifyauth.Authenticator
 	Store *clientv3.Client
@@ -64,7 +56,10 @@ type Server struct {
 	pollWorkerWg       sync.WaitGroup
 }
 
-func (s *Server) Handler(ctx context.Context) (http.Handler, error) {
+func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Logger, m metric.MeterProvider, t trace.TracerProvider, shutdown func()) error {
+	s.l = l.WithName("earbug")
+	s.t = t.Tracer("earbug")
+
 	s.startTime = time.Now()
 	var err error
 	s.indexPage, err = render.CompactBytes(
@@ -74,7 +69,7 @@ func (s *Server) Handler(ctx context.Context) (http.Handler, error) {
 		[]byte(indexMsg),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("render index: %w", err)
+		return fmt.Errorf("render index: %w", err)
 	}
 
 	s.Auth = spotifyauth.New(
@@ -90,19 +85,18 @@ func (s *Server) Handler(ctx context.Context) (http.Handler, error) {
 
 	s.Store, err = clientv3.NewFromURL(s.StoreURL)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = s.startStoredPoll(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	mux := http.NewServeMux()
 	mux.HandleFunc("/auth/user/", s.authPage)
 	mux.HandleFunc("/auth/callback", s.authCallback)
 	mux.HandleFunc("/", s.index)
-	return mux, nil
+	return nil
 }
 
 func (s *Server) index(rw http.ResponseWriter, r *http.Request) {

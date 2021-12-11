@@ -11,6 +11,7 @@ import (
 	"google.golang.org/protobuf/encoding/prototext"
 )
 
+// fromConfig initializes the authorization strategies from a config file
 func (s *Server) fromConfig() error {
 	b, err := os.ReadFile(s.configFile)
 	if err != nil {
