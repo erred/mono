@@ -8,7 +8,7 @@ require (
 	github.com/go-logr/logr v1.2.1
 	github.com/go-logr/stdr v1.2.0
 	github.com/google/go-containerregistry v0.7.0
-	github.com/google/go-github/v38 v38.1.0
+	github.com/google/go-github/v41 v41.0.0
 	github.com/iand/logfmtr v0.2.1
 	github.com/klauspost/compress v1.13.6
 	github.com/tdewolff/minify/v2 v2.9.22
@@ -29,7 +29,6 @@ require (
 	go.opentelemetry.io/otel/sdk/export/metric v0.25.0
 	go.opentelemetry.io/otel/sdk/metric v0.25.0
 	go.opentelemetry.io/otel/trace v1.2.0
-	go.opentelemetry.io/proto/otlp v0.11.0
 	golang.org/x/crypto v0.0.0-20211209193657-4570a0811e8b
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa
@@ -78,6 +77,7 @@ require (
 	go.etcd.io/etcd/api/v3 v3.5.1 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.1 // indirect
 	go.opentelemetry.io/otel/internal/metric v0.25.0 // indirect
+	go.opentelemetry.io/proto/otlp v0.11.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect

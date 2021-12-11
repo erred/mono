@@ -50,12 +50,14 @@ func run(baseImgName, targetImgName string) error {
 		return fmt.Errorf("get latest ko: %w", err)
 	}
 	log("got ko url", koURL)
+	fmt.Println("Ko:", koURL)
 
 	goURL, err := latestGo()
 	if err != nil {
 		return fmt.Errorf("get latest go: %w", err)
 	}
 	log("got go url", goURL)
+	fmt.Println("Go:", goURL)
 
 	baseRef, err := name.ParseReference(baseImgName)
 	if err != nil {
@@ -121,6 +123,11 @@ func run(baseImgName, targetImgName string) error {
 		return fmt.Errorf("write target img=%s: %w", targetImgName, err)
 	}
 	log("wrote target img")
+	dig, err := img.Digest()
+	if err != nil {
+		return fmt.Errorf("get img digest: %w", err)
+	}
+	fmt.Printf("%s@%s\n", targetRef, dig)
 
 	return nil
 }

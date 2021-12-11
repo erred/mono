@@ -10,7 +10,7 @@ import (
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/go-logr/logr"
-	"github.com/google/go-github/v38/github"
+	"github.com/google/go-github/v41/github"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
