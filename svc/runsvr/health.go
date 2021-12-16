@@ -6,7 +6,6 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	"grpc.go4.org/health/grpc_health_v1"
 )
 
 type okHandler struct{}
