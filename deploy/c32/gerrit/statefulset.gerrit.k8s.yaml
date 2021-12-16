@@ -21,6 +21,9 @@ spec:
             - containerPort: 29418
               name: ssh
               hostPort: 29418
+          env:
+            - name: CANONICAL_WEB_URL
+              value: https://gerrit.seankhliao.com
           volumeMounts:
             - mountPath: /var/gerrit/etc
               name: etc

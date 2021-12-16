@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	_ "embed"
 	"encoding/base64"
 	"errors"
@@ -145,13 +146,14 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 		s.sizeHist.Record(ctx, n)
 	}
 
-	sum := base64.URLEncoding.EncodeToString([]byte(val))
+	sum := sha256.Sum256([]byte(val))
+	sum2 := base64.URLEncoding.EncodeToString(sum[:])
 
 	basekey := path.Join(s.storePrefix, "p")
 	key := ""
 
 	for le := 7; le < 21; le++ {
-		key = path.Join(basekey, sum[:le])
+		key = path.Join(basekey, sum2[:le])
 		res, err := s.store.Get(ctx, key)
 		if err != nil {
 			s.l.Error(err, "precheck get", "key", key)
@@ -161,14 +163,14 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 		if len(res.Kvs) == 0 {
 			break
 		}
-		sum2 := base64.URLEncoding.EncodeToString(res.Kvs[0].Value)
-		if sum2 == sum {
+		sum3 := base64.URLEncoding.EncodeToString(res.Kvs[0].Value)
+		if sum2 == sum3 {
 			fmt.Fprintf(rw, "https://paste.seankhliao.com%s", strings.TrimPrefix(key, s.storePrefix))
 			return
 		}
 
 		if le == 20 {
-			s.l.Error(errors.New("can't find unique key"), "max len reached", "key", key, "sum", sum[:])
+			s.l.Error(errors.New("can't find unique key"), "max len reached", "key", key, "sum", sum2[:])
 			http.Error(rw, "no unique key", http.StatusInsufficientStorage)
 			return
 		}

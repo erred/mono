@@ -124,11 +124,13 @@ func (r *Runner) HTTP(s HTTPService) {
 	ctx := context.TODO()
 
 	mux := http.NewServeMux()
+	// mux.Handle("/healthz", okHandler{})
 	handler := otelhttp.NewHandler(
 		mux,
 		"handle",
 		otelhttp.WithMeterProvider(r.m),
 		otelhttp.WithTracerProvider(r.t),
+		// otelhttp.WithFilter(otelHttpFilter("/livez")),
 	)
 
 	svr := &http.Server{
@@ -163,6 +165,8 @@ func (r *Runner) GRPC(s GRPCService) {
 		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor(otelgrpc.WithTracerProvider(r.t))),
 		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor(otelgrpc.WithTracerProvider(r.t))),
 	)
+	// grpc_health_v1.RegisterHealthServer(svr, okHandler{})
+
 	r.serve = svr.Serve
 	r.shutdowns = append(r.shutdowns, func(context.Context) error { svr.GracefulStop(); return nil })
 

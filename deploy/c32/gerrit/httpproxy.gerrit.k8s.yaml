@@ -12,10 +12,10 @@ spec:
         - name: gerrit
           port: 80
   virtualhost:
+    authorization:
+      extensionRef:
+        name: authd
+        namespace: authd
     fqdn: gerrit.seankhliao.com
     tls:
       secretName: knative-serving/tls-wildcard
-    authorization:
-      extensionRef:
-        name: contour-authserver
-        namespace: contour-authserver

@@ -9,7 +9,6 @@ require (
 	github.com/go-logr/stdr v1.2.0
 	github.com/google/go-containerregistry v0.7.0
 	github.com/google/go-github/v41 v41.0.0
-	github.com/iand/logfmtr v0.2.1
 	github.com/klauspost/compress v1.13.6
 	github.com/tdewolff/minify/v2 v2.9.22
 	github.com/yuin/goldmark v1.4.4

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: git
+spec:
+  serviceName: git
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: git
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: git
+    spec:
+      containers:
+        - name: git
+          image: registry.seankhliao.com/git
+          ports:
+            - containerPort: 22223
+              hostPort: 22223
+          volumeMounts:
+            - mountPath: /etc/ssh/data
+              name: ssh
+            - mountPath: /srv
+              name: data
+      volumes:
+        - name: ssh
+          hostPath:
+            path: /opt/c32/git/ssh
+        - name: data
+          hostPath:
+            path: /opt/c32/git/data
