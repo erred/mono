@@ -58,6 +58,14 @@ profiles:
       - op: replace
         path: /deploy/kustomize/paths/0
         value: ./deploy/c32/paste
+  - name: reqsink
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: ko://go.seankhliao.com/mono/svc/cmd/reqsink
+      - op: replace
+        path: /deploy/kustomize/paths/0
+        value: ./deploy/c32/reqsink
   - name: w16
     patches:
       - op: replace

@@ -134,11 +134,12 @@ func (r *Runner) HTTP(s HTTPService) {
 	)
 
 	svr := &http.Server{
-		Handler:      handler,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
-		IdleTimeout:  120 * time.Second,
-		ErrorLog:     stdlog.New(r.l.WithName("http"), errors.New("net/http")),
+		Handler:           handler,
+		ReadHeaderTimeout: 5 * time.Second,
+		// IdleTimeout:  120 * time.Second,
+		// WriteTimeout: 5 * time.Second,
+		// IdleTimeout:  120 * time.Second,
+		ErrorLog: stdlog.New(r.l.WithName("http"), errors.New("net/http")),
 	}
 
 	r.serve = svr.Serve
