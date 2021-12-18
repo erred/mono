@@ -193,11 +193,19 @@ func (s *Server) setDefaults(ctx context.Context, installID int64, owner, repo s
 	defer span.End()
 
 	config := defaultConfig[owner]
+	// tr, err := ghinstallation.NewAppsTransport(s.tr, s.appID, s.privateKey)
 	tr, err := ghinstallation.New(s.tr, s.appID, installID, s.privateKey)
 	if err != nil {
 		return fmt.Errorf("create ghinstallation transport: %w", err)
 	}
 	client := github.NewClient(&http.Client{Transport: tr})
+	// installToken, _, err := client.Apps.CreateInstallationToken(ctx, installID, nil)
+	// if err != nil {
+	// 	return fmt.Errorf("create installation token: %w", err)
+	// }
+	//
+	// client = github.NewClient(oauth2.NewClient(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: *installToken.Token})))
+
 	_, _, err = client.Repositories.Edit(ctx, owner, repo, &config)
 	if err != nil {
 		return fmt.Errorf("update repo settings: %w", err)
