@@ -35,8 +35,16 @@ var (
 )
 
 var defaultMarkdown = goldmark.New(
-	goldmark.WithExtensions(extension.Table, picture.Picture),
-	goldmark.WithParserOptions(parser.WithAutoHeadingID()),
+	goldmark.WithExtensions(
+		extension.Strikethrough,
+		extension.Table,
+		extension.TaskList,
+		picture.Picture,
+	),
+	goldmark.WithParserOptions(
+		parser.WithHeadingAttribute(), // {#some-id}
+		parser.WithAutoHeadingID(),    // based on heading
+	),
 	goldmark.WithRendererOptions(html.WithUnsafe()),
 )
 
@@ -105,12 +113,13 @@ func (d *PageData) fromHeader(b []byte) ([]byte, error) {
 	if !bytes.HasPrefix(b, []byte("---\n")) { // no header marker
 		return b, nil
 	}
-	i := bytes.Index(b[4:], []byte("---\n"))
+	b = b[4:]
+	i := bytes.Index(b, []byte("---\n"))
 	if i == -1 { // no header ending
 		return b, nil
 	}
 	meta := make(map[string]string)
-	err := yaml.Unmarshal(b[4:i], &meta)
+	err := yaml.Unmarshal(b[:i], &meta)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal metadata: %w", err)
 	}
@@ -121,7 +130,7 @@ func (d *PageData) fromHeader(b []byte) ([]byte, error) {
 	d.H1 = first(d.H1, meta["h1"])
 	d.H2 = first(d.H2, meta["h2"])
 
-	return b[i+8:], nil
+	return b[i+4:], nil
 }
 
 // first returns the first non empty string

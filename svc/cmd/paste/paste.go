@@ -64,7 +64,7 @@ func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Lo
 		return err
 	}
 
-	pasteRaw, err := fs.ReadFile(content.Paste, "paste.html")
+	pasteRaw, err := fs.ReadFile(content.Paste, "paste.md")
 	if err != nil {
 		return err
 	}

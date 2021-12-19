@@ -36,8 +36,8 @@
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ .GTMID }}" height="0" width="0" style="display: none; visibility: hidden"></iframe></noscript>
   {{- end }}
 
-  <h1>{{ .H1 }}</h1>
-  <h2>{{ .H2 }}</h2>
+  <h1>{{ if .H1 }}{{ .H1 }}{{ else if .Compact }}{{ .Title }}{{ end }}</h1>
+  <h2>{{ if .H2 }}{{ .H2 }}{{ else if .Compact }}{{ .Description }}{{ end }}</h2>
 
   <hgroup>
     {{ if .Compact }}
