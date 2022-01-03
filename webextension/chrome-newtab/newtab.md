@@ -38,7 +38,7 @@ _:_
 
 _google:_
 [analytics](https://analytics.google.com)
-[datastudio](https://datastudio.google.com/reporting/91bc28c3-a44f-4bcc-a838-58cf6a56ca04/page/BMLbB)
+[datastudio](https://datastudio.google.com/s/hPBEtNjX6EI)
 [domains](https://domains.google.com)
 [search](https://search.google.com/search-console/)
 

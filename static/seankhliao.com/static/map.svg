@@ -21,6 +21,7 @@
       #HK,
       #ID,
       #IN,
+      #IT,
       #JP,
       #KR,
       #LU,
@@ -31,7 +32,8 @@
       #SG,
       #TW,
       #TL,
-      #US {
+      #US,
+      #VA {
         fill: #a06be0;
       }
     </style>
