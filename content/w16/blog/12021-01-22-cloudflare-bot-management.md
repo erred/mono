@@ -29,7 +29,7 @@ there's not much we can do besides allow/block.
 Cloudflare has quite a few blocking products that sit in front of their CDN,
 workers, and your servers. The order they happen in can be seen:
 
-![cloudflare rule priority](https://developers.cloudflare.com/firewall/static/5bbd49ff428e4d4f2f3d3b8688a8a8f3/29007/firewall-rules-order-and-priority-1.png)
+![cloudflare rule priority](/static/cf-rule-order-1.png)
 
 ##### _not_ enough
 
