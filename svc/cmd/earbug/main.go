@@ -22,6 +22,7 @@ import (
 
 func main() {
 	r := runsvr.New(flag.CommandLine)
+	runsvr.Desc(flag.CommandLine, docgo)
 	s := New(flag.CommandLine)
 	flag.Parse()
 

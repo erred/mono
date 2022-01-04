@@ -47,6 +47,7 @@ _docs:_ [pkg.go.dev](https://pkg.go.dev/go.seankhliao.com/%[1]s)
 
 func main() {
 	r := runsvr.New(flag.CommandLine)
+	runsvr.Desc(flag.CommandLine, docgo)
 	s := New(flag.CommandLine)
 	flag.Parse()
 
