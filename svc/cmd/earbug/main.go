@@ -31,6 +31,7 @@ func main() {
 
 func New(flags *flag.FlagSet) *Server {
 	var s Server
+	s.pollWorkerMap = make(map[string]struct{})
 	flag.StringVar(&s.CanonicalURL, "url", "https://earbug.seankhliao.com", "url app is hosted on")
 	flag.StringVar(&s.StoreURL, "store", "http://etcd-0.etcd:2379", "etcd url")
 	flag.StringVar(&s.StorePrefix, "store-prefix", "earbug", "key prefix in etcd")
@@ -55,6 +56,8 @@ type Server struct {
 
 	pollWorkerShutdown chan struct{}
 	pollWorkerWg       sync.WaitGroup
+	pollWorkerMap      map[string]struct{}
+	pollWorkerMu       sync.Mutex
 }
 
 func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Logger, m metric.MeterProvider, t trace.TracerProvider, shutdown func()) error {
@@ -96,6 +99,7 @@ func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Lo
 
 	mux.HandleFunc("/auth/user/", s.authPage)
 	mux.HandleFunc("/auth/callback", s.authCallback)
+	mux.HandleFunc("/view/user/", s.viewUser)
 	mux.HandleFunc("/", s.index)
 	return nil
 }

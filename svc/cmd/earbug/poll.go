@@ -39,8 +39,14 @@ func (s *Server) startStoredPoll(ctx context.Context) error {
 // addPollWorker starts a poll worker for the user.
 // If token is nil, it is retrieved from the db.
 func (s *Server) addPollWorker(ctx context.Context, user string, token *oauth2.Token) {
-	s.pollWorkerWg.Add(1)
-	go s.pollUser(ctx, user, token)
+	s.pollWorkerMu.Lock()
+	defer s.pollWorkerMu.Unlock()
+	_, ok := s.pollWorkerMap[user]
+	if !ok {
+		s.pollWorkerWg.Add(1)
+		s.pollWorkerMap[user] = struct{}{}
+		go s.pollUser(ctx, user, token)
+	}
 }
 
 // pollUser is a poll worker responsible for updating a user's listening history
@@ -85,10 +91,10 @@ func (s *Server) putHistory(ctx context.Context, user string, item spotify.Recen
 	l := s.l.WithName("poll")
 
 	playedP := path.Join(s.StorePrefix, "history", user, "playback", item.PlayedAt.Format(time.RFC3339Nano))
-	playedB, err := json.Marshal(map[string]interface{}{
-		"track_id":  item.Track.ID,
-		"track_uri": item.Track.URI,
-		"context":   item.PlaybackContext,
+	playedB, err := json.Marshal(PlaybackHistory{
+		TrackID:  string(item.Track.ID),
+		TrackURI: string(item.Track.URI),
+		Context:  item.PlaybackContext,
 	})
 	if err != nil {
 		l.Error(err, "marshal playback")
@@ -114,4 +120,10 @@ func (s *Server) putHistory(ctx context.Context, user string, item spotify.Recen
 	if err != nil {
 		l.Error(err, "put global track info", "key", trackP)
 	}
+}
+
+type PlaybackHistory struct {
+	TrackID  string                  `json:"track_id"`
+	TrackURI string                  `json:"track_uri"`
+	Context  spotify.PlaybackContext `json:"context"`
 }
