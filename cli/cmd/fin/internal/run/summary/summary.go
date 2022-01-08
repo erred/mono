@@ -10,12 +10,7 @@ import (
 	"go.seankhliao.com/mono/proto/finpb"
 )
 
-type Options struct {
-	Year     int
-	Month    int
-	Delta    bool
-	Holdings bool
-}
+type Options struct{}
 
 func NewOptions(fs *flag.FlagSet) *Options {
 	var o Options
@@ -23,16 +18,10 @@ func NewOptions(fs *flag.FlagSet) *Options {
 	return &o
 }
 
-func (o *Options) InitFlags(fs *flag.FlagSet) {
-	fs.IntVar(&o.Year, "y", 0, "year, 0 means all")
-	fs.IntVar(&o.Month, "m", 0, "month, 0 means all")
-	fs.BoolVar(&o.Delta, "delta", false, "print deltas per month")
-	fs.BoolVar(&o.Holdings, "holdings", true, "print final value per month")
-}
+func (o *Options) InitFlags(fs *flag.FlagSet) {}
 
 func Run(o run.Options, args []string) error {
 	fs := flag.NewFlagSet(args[0], flag.ContinueOnError)
-	so := NewOptions(fs)
 	err := fs.Parse(args[1:])
 	if err != nil {
 		return err
@@ -43,117 +32,128 @@ func Run(o run.Options, args []string) error {
 		return fmt.Errorf("read %s: %w", o.File, err)
 	}
 
-	var months []*finpb.Month
-	for i, m := range all.Months {
-		if (so.Year == 0 || so.Year == int(m.Year)) && (so.Month == 0 || so.Month == int(m.Month)) {
-			months = append(months, all.Months[i])
-		}
-	}
-
-	mss := make([]MonthSummary, 0, len(months))
-	for _, m := range months {
-		ms := summarize(m)
-		mss = append(mss, ms)
-	}
-
-	fmt.Println(so.Delta, so.Holdings)
-	switch {
-	case so.Delta:
-		for _, ms := range mss {
-			fmt.Println(ms)
-		}
-	case so.Holdings:
-		var gs GroupSummary
-		for _, ms := range mss {
-			gs.Name = fmt.Sprintf("%d-%02d", ms.Year, ms.Month)
-			gs.Total -= ms.Holdings.Total
-			gs.Categories = ms.Holdings.Categories
-			if len(gs.Deltas) == 0 {
-				gs.Deltas = make([]int64, len(ms.Holdings.Deltas))
-			}
-			for j := range ms.Holdings.Deltas {
-				gs.Deltas[j] -= ms.Holdings.Deltas[j]
-			}
-			fmt.Println(gs)
-		}
-	}
-
+	balance, income, expense := summarize(all)
+	fmt.Println(expense)
+	fmt.Println(income)
+	fmt.Println(balance)
 	return nil
+}
+
+type GroupSummary struct {
+	Name       string
+	Categories []string
+	Months     []MonthSummary
 }
 
 type MonthSummary struct {
 	Year, Month int
-	Holdings    GroupSummary
-	Income      GroupSummary
-	Exppenses   GroupSummary
-
-	Delta map[finpb.Transaction_Category]int64
-}
-
-type GroupSummary struct {
-	Name  string
-	Total int64
-
-	Categories []string
-	Deltas     []int64
+	Total       []int64
+	Delta       []int64
 }
 
 func (s GroupSummary) String() string {
 	b := &strings.Builder{}
-	fmt.Fprintf(b, "%s\t%+.2f\n", s.Name, float64(s.Total)/100)
-	for i, c := range s.Categories {
-		if i != 0 {
-			b.WriteRune('\t')
-		}
-		fmt.Fprintf(b, "%-12s", c)
+	// Category header
+	fmt.Fprintf(b, "%-7s", s.Name)
+	for _, c := range s.Categories {
+		fmt.Fprintf(b, "%20s", c)
 	}
-	b.WriteRune('\n')
-	for i, d := range s.Deltas {
-		if i != 0 {
-			b.WriteRune('\t')
-		}
-		fmt.Fprintf(b, "%+-12.2f", float64(d)/100)
+	fmt.Fprintf(b, "\n")
+	// Month line
+	for _, m := range s.Months {
+		fmt.Fprintln(b, m)
 	}
-	b.WriteRune('\n')
+	fmt.Fprintf(b, "\n")
 	return b.String()
 }
 
 func (s MonthSummary) String() string {
 	b := &strings.Builder{}
-	fmt.Fprintf(b, "%d-%02d\n", s.Year, s.Month)
-	b.WriteString(s.Holdings.String())
-	b.WriteString(s.Income.String())
-	b.WriteString(s.Exppenses.String())
-	b.WriteRune('\n')
+	fmt.Fprintf(b, "%d-%02d", s.Year, s.Month)
+	for i := range s.Delta {
+		fmt.Fprintf(b, "%20s", fmt.Sprintf("%8.2f %+8.2f", float64(s.Total[i])/100, float64(s.Delta[i])/100))
+	}
 	return b.String()
 }
 
-func summarize(m *finpb.Month) MonthSummary {
-	delta := make(map[finpb.Transaction_Category]int64)
-	for _, tr := range m.Transactions {
-		delta[tr.Src] += tr.Amount
-		delta[tr.Dst] -= tr.Amount
+func summarize(all *finpb.All) (balance, income, expense GroupSummary) {
+	balance = GroupSummary{
+		Name:       "Balance",
+		Categories: group(finpb.Transaction_CASH, finpb.Transaction_BITTREX),
+		Months:     months(len(all.Months), int(finpb.Transaction_BITTREX-finpb.Transaction_CASH)+1),
+	}
+	income = GroupSummary{
+		Name:       "Income",
+		Categories: group(finpb.Transaction_SALARY, finpb.Transaction_IN_OTHER),
+		Months:     months(len(all.Months), int(finpb.Transaction_IN_OTHER-finpb.Transaction_SALARY)+1),
+	}
+	expense = GroupSummary{
+		Name:       "Expense",
+		Categories: group(finpb.Transaction_FOOD, finpb.Transaction_EDUCATION),
+		Months:     months(len(all.Months), int(finpb.Transaction_EDUCATION-finpb.Transaction_FOOD)+1),
 	}
 
-	return MonthSummary{
-		Year:      int(m.Year),
-		Month:     int(m.Month),
-		Holdings:  group("Holdings", finpb.Transaction_CASH, finpb.Transaction_BITTREX, delta),
-		Income:    group("Income", finpb.Transaction_SALARY, finpb.Transaction_IN_OTHER, delta),
-		Exppenses: group("Expenses", finpb.Transaction_FOOD, finpb.Transaction_EDUCATION, delta),
-		Delta:     delta,
+	total := make(map[finpb.Transaction_Category]int64)
+	for i, m := range all.Months {
+		delta := make(map[finpb.Transaction_Category]int64)
+		for _, tr := range m.Transactions {
+			delta[tr.Src] -= tr.Amount
+			delta[tr.Dst] += tr.Amount
+		}
+		for c, a := range delta {
+			total[c] += a
+		}
+
+		balance.Months[i].Year = int(m.Year)
+		balance.Months[i].Month = int(m.Month)
+		income.Months[i].Year = int(m.Year)
+		income.Months[i].Month = int(m.Month)
+		expense.Months[i].Year = int(m.Year)
+		expense.Months[i].Month = int(m.Month)
+		for c := range total {
+			idx := categoryIdx(balance.Categories, c.String())
+			if idx != -1 {
+				balance.Months[i].Delta[idx] = delta[c]
+				balance.Months[i].Total[idx] = total[c]
+			}
+			idx = categoryIdx(income.Categories, c.String())
+			if idx != -1 {
+				income.Months[i].Delta[idx] = delta[c] * -1
+				income.Months[i].Total[idx] = total[c] * -1
+			}
+			idx = categoryIdx(expense.Categories, c.String())
+			if idx != -1 {
+				expense.Months[i].Delta[idx] = delta[c] * -1
+				expense.Months[i].Total[idx] = total[c] * -1
+			}
+		}
 	}
+
+	return balance, income, expense
 }
 
-func group(name string, first, last finpb.Transaction_Category, delta map[finpb.Transaction_Category]int64) GroupSummary {
-	s := GroupSummary{
-		Name: name,
-	}
+func group(first, last finpb.Transaction_Category) []string {
+	var ss []string
 	for i := first; i <= last; i++ {
-		s.Categories = append(s.Categories, i.String())
-		s.Deltas = append(s.Deltas, delta[i])
-		s.Total += delta[i]
+		ss = append(ss, i.String())
 	}
+	return ss
+}
 
-	return s
+func months(months, categories int) []MonthSummary {
+	ms := make([]MonthSummary, months)
+	for i := range ms {
+		ms[i].Delta = make([]int64, categories)
+		ms[i].Total = make([]int64, categories)
+	}
+	return ms
+}
+
+func categoryIdx(cs []string, c string) int {
+	for i, s := range cs {
+		if c == s {
+			return i
+		}
+	}
+	return -1
 }

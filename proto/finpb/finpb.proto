@@ -29,8 +29,8 @@ message Transaction {
 
     SALARY = 20;
     ALLOWANCE = 21;
-    CREDIT = 23;
-    IN_OTHER = 24;
+    CREDIT = 22;
+    IN_OTHER = 23;
 
     FOOD = 30;
     TRANSPORT = 31;
