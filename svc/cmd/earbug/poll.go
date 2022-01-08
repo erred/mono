@@ -45,6 +45,7 @@ func (s *Server) addPollWorker(ctx context.Context, user string, token *oauth2.T
 	if !ok {
 		s.pollWorkerWg.Add(1)
 		s.pollWorkerMap[user] = struct{}{}
+		ctx := context.Background()
 		go s.pollUser(ctx, user, token)
 	}
 }

@@ -13,7 +13,9 @@ message Config {
 
   map<string, string> htpasswd = 3;
   // entire file, lower priority
-  string htpasswd_file =4;
+  string htpasswd_file = 4;
+
+  string session_store = 5;
 }
 
 message AllowedPaths {

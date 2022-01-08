@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
+	"net/http"
+	"net/url"
 	"strings"
 
 	envoy_config_core_v3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -36,38 +39,46 @@ func (s *Server) Check(ctx context.Context, r *envoy_service_auth_v3.CheckReques
 		)
 	}()
 
-	ok := s.checkAllowlist(ctx, host, path, headers)
-	if ok {
-		status, check = "allowed", "allowlist"
-		return okResponse("anonymous", headers)
+	checkRes := make(chan checkStatus, 4)
+	go func() {
+		id := s.checkAllowlist(ctx, host, path, headers)
+		checkRes <- checkStatus{"allowlist", id}
+	}()
+	go func() {
+		id := s.checkTokens(ctx, host, headers)
+		checkRes <- checkStatus{"token", id}
+	}()
+	go func() {
+		id := s.checkBasic(ctx, headers)
+		checkRes <- checkStatus{"basic", id}
+	}()
+	go func() {
+		id := s.checkSession(ctx, headers)
+		checkRes <- checkStatus{"session", id}
+	}()
+
+	for i := 0; i < 4; i++ {
+		res := <-checkRes
+		if res.id != "" {
+			status, check, identity = "allowed", res.check, res.id
+			return okResponse(res.id, headers)
+		}
 	}
 
-	id := s.checkTokens(ctx, host, headers)
-	if id != "" {
-		status, identity, check = "allowed", id, "token"
-		return okResponse(id, headers)
-	}
-
-	user := s.checkBasic(ctx, headers)
-	if user != "" {
-		status, identity, check = "allowed", user, "basic"
-		return okResponse(user, headers)
-	}
-
-	return deniedResponse(s.realm)
+	return deniedResponse(h.Scheme + "://" + h.Host + h.Path)
 }
 
 // checkAllowlist checks if a request should be unconditionally allowed based on host/path
-func (s *Server) checkAllowlist(ctx context.Context, host, path string, header map[string]string) bool {
+func (s *Server) checkAllowlist(ctx context.Context, host, path string, header map[string]string) string {
 	_, span := s.t.Start(ctx, "allowlist")
 	defer span.End()
 
 	for _, re := range s.allow[host] {
 		if re.MatchString(path) {
-			return true
+			return "anonymous"
 		}
 	}
-	return false
+	return ""
 }
 
 // checkTokens checks if a request should be allowed based on a Bearer token
@@ -99,6 +110,30 @@ func (s *Server) checkBasic(ctx context.Context, headers map[string]string) stri
 		return ""
 	}
 	return string(user)
+}
+
+// checkSession checks if there's a valid session token created by authn
+func (s *Server) checkSession(ctx context.Context, headers map[string]string) string {
+	_, span := s.t.Start(ctx, "session")
+	defer span.End()
+
+	rawRequest := fmt.Sprintf("GET / HTTP/1.1\r\nCookie: %s\r\n\r\n", headers["cookie"])
+	req, err := http.ReadRequest(bufio.NewReader(bytes.NewBufferString(rawRequest)))
+	if err != nil {
+		s.l.Error(err, "parse error")
+		return ""
+	}
+	c, err := req.Cookie("__authn_session")
+	if err != nil {
+		return ""
+	}
+
+	id, err := s.sessionStore.GetSession(ctx, c.Value)
+	if err != nil {
+		s.l.Error(err, "get session from store")
+		return ""
+	}
+	return id
 }
 
 // compareHtpasswd checks the password for a given user
@@ -148,7 +183,7 @@ func okResponse(user string, headers map[string]string) (*envoy_service_auth_v3.
 				Headers: []*envoy_config_core_v3.HeaderValueOption{
 					{
 						Header: &envoy_config_core_v3.HeaderValue{
-							Key:   "auth-user",
+							Key:   "auth-id",
 							Value: user,
 						},
 					},
@@ -161,21 +196,26 @@ func okResponse(user string, headers map[string]string) (*envoy_service_auth_v3.
 
 // deniedResponse constructs a response denying the request,
 // and asks for HTTP Basic Auth
-func deniedResponse(realm string) (*envoy_service_auth_v3.CheckResponse, error) {
+func deniedResponse(original string) (*envoy_service_auth_v3.CheckResponse, error) {
 	return &envoy_service_auth_v3.CheckResponse{
 		Status: &status.Status{Code: int32(codes.PermissionDenied)},
 		HttpResponse: &envoy_service_auth_v3.CheckResponse_DeniedResponse{
 			DeniedResponse: &envoy_service_auth_v3.DeniedHttpResponse{
-				Status: &envoy_type_v3.HttpStatus{Code: envoy_type_v3.StatusCode_Unauthorized},
+				Status: &envoy_type_v3.HttpStatus{Code: envoy_type_v3.StatusCode_Found},
 				Headers: []*envoy_config_core_v3.HeaderValueOption{
 					{
 						Header: &envoy_config_core_v3.HeaderValue{
-							Key:   "www-authenticate",
-							Value: fmt.Sprintf(`Basic realm="%s", charset="UTF-8"`, realm),
+							Key:   "Location",
+							Value: "https://authn.seankhliao.com/?" + url.Values{"redirect": {original}}.Encode(),
 						},
 					},
 				},
 			},
 		},
 	}, nil
+}
+
+type checkStatus struct {
+	check string
+	id    string
 }

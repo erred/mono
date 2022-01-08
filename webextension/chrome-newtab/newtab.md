@@ -42,6 +42,10 @@ _google:_
 [domains](https://domains.google.com)
 [search](https://search.google.com/search-console/)
 
+_mono:_
+[authn](https://authn.seankhliao.com)
+[earbug](https://earbug.seankhliao.com)
+
 ### _to_ read
 
 _blogs:_

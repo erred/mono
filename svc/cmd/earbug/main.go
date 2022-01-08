@@ -97,9 +97,9 @@ func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Lo
 		return err
 	}
 
-	mux.HandleFunc("/auth/user/", s.authPage)
-	mux.HandleFunc("/auth/callback", s.authCallback)
-	mux.HandleFunc("/view/user/", s.viewUser)
+	mux.HandleFunc("/auth/callback", s.handleAuthCallback)
+	mux.HandleFunc("/user", s.handleUser)
+	mux.HandleFunc("/user/history", s.handleUserHistory)
 	mux.HandleFunc("/", s.index)
 	return nil
 }

@@ -14,20 +14,19 @@ import (
 	"go.seankhliao.com/mono/internal/web/render"
 )
 
-// /view/user/<user>
-func (s *Server) viewUser(rw http.ResponseWriter, r *http.Request) {
+// /user/history
+func (s *Server) handleUserHistory(rw http.ResponseWriter, r *http.Request) {
 	l := s.l.WithName("view").WithValues("page", "user")
 	ctx := r.Context()
 
-	parts := strings.Split(r.URL.Path, "/")
-	if len(parts) != 4 || parts[1] != "view" || parts[2] != "user" {
-		http.Error(rw, "not found", http.StatusNotFound)
+	id := r.Header.Get("auth-id")
+	if id == "" {
+		http.Error(rw, "no user", http.StatusUnauthorized)
 		return
 	}
-	user := parts[3]
 
-	startKey := path.Join(s.StorePrefix, "history", user, "playback")
-	endKey := path.Join(s.StorePrefix, "history", user, "playback2")
+	startKey := path.Join(s.StorePrefix, "history", id, "playback")
+	endKey := path.Join(s.StorePrefix, "history", id, "playback2")
 	gr, err := s.Store.Get(ctx, startKey, clientv3.WithRange(endKey))
 	if err != nil {
 		l.Error(err, "get user history", "startKey", startKey)
@@ -39,7 +38,7 @@ func (s *Server) viewUser(rw http.ResponseWriter, r *http.Request) {
 
 	var buf bytes.Buffer
 	buf.WriteString("### _Listening_ History\n\n")
-	fmt.Fprintf(&buf, "%v entries for _%s_\n\n", len(gr.Kvs), user)
+	fmt.Fprintf(&buf, "%v entries for [_%s_](/user)\n\n", len(gr.Kvs), id)
 	buf.WriteString(`
 | idx | time | track | artist |
 | --- | ---- | ----- | ------ |
@@ -97,7 +96,7 @@ func (s *Server) viewUser(rw http.ResponseWriter, r *http.Request) {
 		rw,
 		"earbug view",
 		"view listening history",
-		s.CanonicalURL+"/view/user/"+user,
+		s.CanonicalURL+"/user/history",
 		buf.Bytes(),
 	)
 	if err != nil {

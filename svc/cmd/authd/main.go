@@ -11,6 +11,7 @@ import (
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
+	"go.seankhliao.com/mono/svc/cmd/authn/store"
 	"go.seankhliao.com/mono/svc/runsvr"
 	"google.golang.org/grpc"
 )
@@ -43,6 +44,8 @@ type Server struct {
 	l logr.Logger
 	t trace.Tracer
 
+	sessionStore *store.Store
+
 	// grpc
 	envoy_service_auth_v3.UnimplementedAuthorizationServer
 }
@@ -62,7 +65,7 @@ func (s *Server) RegisterGRPC(ctx context.Context, svr *grpc.Server, l logr.Logg
 
 	envoy_service_auth_v3.RegisterAuthorizationServer(svr, s)
 
-	err := s.fromConfig()
+	err := s.fromConfig(t)
 	if err != nil {
 		return fmt.Errorf("from config=%s: %w", s.configFile, err)
 	}

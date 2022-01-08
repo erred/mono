@@ -7,12 +7,14 @@ import (
 	"regexp"
 	"strings"
 
+	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/proto/authdpb"
+	"go.seankhliao.com/mono/svc/cmd/authn/store"
 	"google.golang.org/protobuf/encoding/prototext"
 )
 
 // fromConfig initializes the authorization strategies from a config file
-func (s *Server) fromConfig() error {
+func (s *Server) fromConfig(t trace.TracerProvider) error {
 	b, err := os.ReadFile(s.configFile)
 	if err != nil {
 		return fmt.Errorf("read config file=%s: %w", s.configFile, err)
@@ -60,6 +62,11 @@ func (s *Server) fromConfig() error {
 	}
 	for user, pass := range config.Htpasswd {
 		s.passwds[user] = []byte(pass)
+	}
+
+	s.sessionStore, err = store.New(config.SessionStore, t)
+	if err != nil {
+		return fmt.Errorf("create sessionstore")
 	}
 
 	return nil

@@ -34,6 +34,14 @@ profiles:
       - op: replace
         path: /deploy/kustomize/paths/0
         value: ./deploy/c32/authd
+  - name: authn
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: ko://go.seankhliao.com/mono/svc/cmd/authn
+      - op: replace
+        path: /deploy/kustomize/paths/0
+        value: ./deploy/c32/authn
   - name: earbug
     patches:
       - op: replace
