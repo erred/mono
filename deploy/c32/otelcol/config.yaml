@@ -1,0 +1,30 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+processors:
+  batch:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+exporters:
+  jaeger:
+    endpoint: jaeger.jaeger.svc:14250
+    tls:
+      insecure: true
+extensions:
+  memory_ballast:
+    size_mib: 512
+
+service:
+  extensions:
+    - memory_ballast
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - batch
+        - memory_limiter
+      exporters:
+        - jaeger

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jaeger
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jaeger
+  serviceName: jaeger
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: jaeger
+    spec:
+      containers:
+        - name: jaeger
+          image: index.docker.io/jaegertracing/all-in-one
+          env:
+            - name: SPAN_STORAGE_TYPE
+              value: badger
+            - name: BADGER_EPHEMERAL
+              value: "false"
+            - name: BADGER_DIRECTORY_VALUE
+              value: /badger/data
+            - name: BADGER_DIRECTORY_KEY
+              value: /badger/key
+          ports:
+            - containerPort: 14250
+              name: grpc
+            - containerPort: 16686
+              name: http
+          volumeMounts:
+            - mountPath: /badger
+              name: data
+      volumes:
+        - name: data
+          hostPath:
+            path: /opt/c32/jaeger

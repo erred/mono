@@ -14,6 +14,7 @@ import (
 	envoy_service_auth_v3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	envoy_type_v3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 	"go.opentelemetry.io/otel/attribute"
+	"go.seankhliao.com/mono/svc/internal/o11y"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
@@ -21,15 +22,16 @@ import (
 
 // Check implements the envoy extensions.filters.http.ext_authz.v3.ExtAuthz API
 func (s *Server) Check(ctx context.Context, r *envoy_service_auth_v3.CheckRequest) (*envoy_service_auth_v3.CheckResponse, error) {
-	ctx, span := s.t.Start(ctx, "check")
+	ctx, span, l := o11y.Start(s.t, s.l, ctx, "check")
 	defer span.End()
 
 	h := r.GetAttributes().GetRequest().GetHttp()
 	headers, host, path := h.GetHeaders(), h.GetHost(), h.GetPath()
 	status, identity, check := "denied", "anonymous", "all"
 
-	l := s.l.WithValues("host", host, "path", path)
+	l = l.WithValues("host", host, "path", path)
 	span.SetAttributes(attribute.String("host", host), attribute.String("path", path))
+
 	defer func() {
 		l.Info(status, "check", check)
 		span.SetAttributes(

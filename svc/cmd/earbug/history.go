@@ -11,17 +11,19 @@ import (
 
 	"github.com/zmb3/spotify/v2"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.opentelemetry.io/otel/attribute"
 	"go.seankhliao.com/mono/internal/web/render"
+	"go.seankhliao.com/mono/svc/internal/o11y"
 )
 
 // /user/history
 func (s *Server) handleUserHistory(rw http.ResponseWriter, r *http.Request) {
-	l := s.l.WithName("view").WithValues("page", "user")
-	ctx := r.Context()
+	ctx, span, l := o11y.Start(s.t, s.l, r.Context(), "user_history")
+	defer span.End()
 
 	id := r.Header.Get("auth-id")
-	if id == "" {
-		http.Error(rw, "no user", http.StatusUnauthorized)
+	if id == "" || id == "anonymous" {
+		o11y.HttpError(rw, l, span, http.StatusUnauthorized, nil, "no auth-id")
 		return
 	}
 
@@ -29,8 +31,7 @@ func (s *Server) handleUserHistory(rw http.ResponseWriter, r *http.Request) {
 	endKey := path.Join(s.StorePrefix, "history", id, "playback2")
 	gr, err := s.Store.Get(ctx, startKey, clientv3.WithRange(endKey))
 	if err != nil {
-		l.Error(err, "get user history", "startKey", startKey)
-		http.Error(rw, "get history", http.StatusInternalServerError)
+		o11y.HttpError(rw, l, span, http.StatusInternalServerError, err, "get key", attribute.String("start_key", startKey))
 		return
 	}
 
@@ -50,16 +51,14 @@ func (s *Server) handleUserHistory(rw http.ResponseWriter, r *http.Request) {
 		rts := strings.TrimPrefix(string(kv.Key), startKey+"/")
 		ts, err := time.Parse(time.RFC3339Nano, rts)
 		if err != nil {
-			l.Error(err, "unmarshal timestamp", "key", string(kv.Key))
-			http.Error(rw, "unmarshal history", http.StatusInternalServerError)
+			o11y.HttpError(rw, l, span, http.StatusInternalServerError, err, "unmarshal key", attribute.String("key", string(kv.Key)))
 			return
 		}
 
 		var ph PlaybackHistory
 		err = json.Unmarshal(kv.Value, &ph)
 		if err != nil {
-			l.Error(err, "unmarshal history", "key", string(kv.Key))
-			http.Error(rw, "unmarshal history", http.StatusInternalServerError)
+			o11y.HttpError(rw, l, span, http.StatusInternalServerError, err, "unmarshal value", attribute.String("key", string(kv.Key)))
 			return
 		}
 
@@ -68,13 +67,11 @@ func (s *Server) handleUserHistory(rw http.ResponseWriter, r *http.Request) {
 			trackP := path.Join(s.StorePrefix, "track", ph.TrackID)
 			tgr, err := s.Store.Get(ctx, trackP)
 			if err != nil {
-				l.Error(err, "get track", "key", trackP)
-				http.Error(rw, "get track", http.StatusInternalServerError)
+				o11y.HttpError(rw, l, span, http.StatusInternalServerError, err, "get key", attribute.String("key", trackP))
 				return
 			}
 			err = json.Unmarshal(tgr.Kvs[0].Value, &track)
 			if err != nil {
-				l.Error(err, "unmarshal track", "key", trackP)
 				http.Error(rw, "unmarshal track", http.StatusInternalServerError)
 				return
 			}

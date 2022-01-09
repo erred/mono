@@ -1,0 +1,21 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: gerrit
+  annotations:
+    projectcontour.io/ingress.class: contour-external
+spec:
+  routes:
+    - conditions:
+        - prefix: /
+      services:
+        - name: jaeger
+          port: 16686
+  virtualhost:
+    authorization:
+      extensionRef:
+        name: authd
+        namespace: authd
+    fqdn: jaeger.seankhliao.com
+    tls:
+      secretName: knative-serving/tls-wildcard

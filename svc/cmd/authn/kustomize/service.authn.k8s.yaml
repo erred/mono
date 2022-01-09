@@ -7,3 +7,5 @@ spec:
     spec:
       containers:
         - image: ko://go.seankhliao.com/mono/svc/cmd/authn
+          args:
+            - -otlp.endpoint=otelcol.otelcol.svc:4317

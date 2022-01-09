@@ -6,6 +6,7 @@ spec:
   template:
     spec:
       containers:
-      - image: ko://go.seankhliao.com/mono/svc/cmd/w16
-        args:
-        - -compact
+        - image: ko://go.seankhliao.com/mono/svc/cmd/w16
+          args:
+            - -compact
+            - -otlp.endpoint=otelcol.otelcol.svc:4317

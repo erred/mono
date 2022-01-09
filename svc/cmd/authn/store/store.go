@@ -39,7 +39,7 @@ func New(u string, t trace.TracerProvider) (*Store, error) {
 
 // GetSession gets the user id associated with a session
 func (s *Store) GetSession(ctx context.Context, sessionID string) (string, error) {
-	ctx, span := s.t.Start(ctx, "GetSession")
+	ctx, span := s.t.Start(ctx, "get_session")
 	defer span.End()
 
 	res, err := s.c.Get(ctx, path.Join(sessionPrefix, sessionID))
@@ -55,7 +55,7 @@ func (s *Store) GetSession(ctx context.Context, sessionID string) (string, error
 
 // AddSession adds a session for a user
 func (s *Store) AddSession(ctx context.Context, sessionID, userID string) error {
-	ctx, span := s.t.Start(ctx, "AddSession")
+	ctx, span := s.t.Start(ctx, "add_session")
 	defer span.End()
 
 	_, err := s.c.Put(ctx, path.Join(sessionPrefix, sessionID), userID)
@@ -67,7 +67,7 @@ func (s *Store) AddSession(ctx context.Context, sessionID, userID string) error 
 
 // DeleteSession removes a session
 func (s *Store) DeleteSession(ctx context.Context, sessionID string) error {
-	ctx, span := s.t.Start(ctx, "DeleteSession")
+	ctx, span := s.t.Start(ctx, "delete_session")
 	defer span.End()
 
 	_, err := s.c.Delete(ctx, path.Join(sessionPrefix, sessionID))
@@ -83,7 +83,7 @@ func (s *Store) DeleteSession(ctx context.Context, sessionID string) error {
 
 // GetUserPassword retrieves the hashed user password
 func (s *Store) GetUserPassword(ctx context.Context, userID string) ([]byte, error) {
-	ctx, span := s.t.Start(ctx, "GetUserPassword")
+	ctx, span := s.t.Start(ctx, "get_user_password")
 	defer span.End()
 
 	p := path.Join(userPrefix, userID, "bcrypt")

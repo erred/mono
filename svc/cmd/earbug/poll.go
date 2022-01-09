@@ -6,15 +6,17 @@ import (
 	"path"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/zmb3/spotify/v2"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.opentelemetry.io/otel/attribute"
+	"go.seankhliao.com/mono/svc/internal/o11y"
 	"golang.org/x/oauth2"
 )
 
 // startStoredPoll starts pollers for all stored tokens
 func (s *Server) startStoredPoll(ctx context.Context) error {
-	l := s.l.WithName("poller")
+	ctx, span, l := o11y.Start(s.t, s.l, ctx, "start_poll_worker")
+	defer span.End()
 
 	p := path.Join(s.StorePrefix, "token")
 	res, err := s.Store.Get(ctx, p, clientv3.WithPrefix())
@@ -39,12 +41,17 @@ func (s *Server) startStoredPoll(ctx context.Context) error {
 // addPollWorker starts a poll worker for the user.
 // If token is nil, it is retrieved from the db.
 func (s *Server) addPollWorker(ctx context.Context, user string, token *oauth2.Token) {
+	_, span, _ := o11y.Start(s.t, s.l, ctx, "add_poll_worker")
+	defer span.End()
+
 	s.pollWorkerMu.Lock()
 	defer s.pollWorkerMu.Unlock()
+
 	_, ok := s.pollWorkerMap[user]
 	if !ok {
 		s.pollWorkerWg.Add(1)
 		s.pollWorkerMap[user] = struct{}{}
+
 		ctx := context.Background()
 		go s.pollUser(ctx, user, token)
 	}
@@ -53,6 +60,7 @@ func (s *Server) addPollWorker(ctx context.Context, user string, token *oauth2.T
 // pollUser is a poll worker responsible for updating a user's listening history
 func (s *Server) pollUser(ctx context.Context, user string, token *oauth2.Token) {
 	defer s.pollWorkerWg.Done()
+
 	l := s.l.WithName("poller")
 	l.Info("starting", "user", user)
 
@@ -72,8 +80,11 @@ func (s *Server) pollUser(ctx context.Context, user string, token *oauth2.Token)
 
 // updateHistory pulls a user's recently played tracks and stores it
 func (s *Server) updateHistory(ctx context.Context, user string, c *spotify.Client) {
-	l := s.l.WithName("poll").WithValues("user", user)
-	ctx = logr.NewContext(ctx, l)
+	ctx, span, l := o11y.Start(s.t, s.l, ctx, "update_hisory")
+	defer span.End()
+
+	l = l.WithValues("user", user)
+	span.SetAttributes(attribute.String("user", user))
 
 	items, err := c.PlayerRecentlyPlayedOpt(ctx, &spotify.RecentlyPlayedOptions{
 		Limit: 50, // Max
@@ -89,7 +100,8 @@ func (s *Server) updateHistory(ctx context.Context, user string, c *spotify.Clie
 
 // putHistory stores a single user listen history
 func (s *Server) putHistory(ctx context.Context, user string, item spotify.RecentlyPlayedItem) {
-	l := s.l.WithName("poll")
+	ctx, span, l := o11y.Start(s.t, s.l, ctx, "put_history")
+	defer span.End()
 
 	playedP := path.Join(s.StorePrefix, "history", user, "playback", item.PlayedAt.Format(time.RFC3339Nano))
 	playedB, err := json.Marshal(PlaybackHistory{

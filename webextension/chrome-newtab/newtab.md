@@ -45,6 +45,7 @@ _google:_
 _mono:_
 [authn](https://authn.seankhliao.com)
 [earbug](https://earbug.seankhliao.com)
+[jaeger](https://jaeger.seankhliao.com)
 
 ### _to_ read
 

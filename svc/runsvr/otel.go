@@ -73,6 +73,7 @@ func otelResources(ctx context.Context) (*resource.Resource, error) {
 		resource.Default(),
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
+			semconv.ServiceNameKey.String(bi.Path),
 			semconv.ServiceVersionKey.String(bi.Main.Version),
 			semconv.ProcessRuntimeVersionKey.String(runtime.Version()),
 		),

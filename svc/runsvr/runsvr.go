@@ -113,6 +113,9 @@ func (r *Runner) init() {
 		l.Error(err, "setup otel runtime instrumentation")
 		os.Exit(1)
 	}
+
+	r.t = otel.GetTracerProvider()
+	r.m = global.GetMeterProvider()
 }
 
 type HTTPService interface {
