@@ -44,6 +44,7 @@ _google:_
 
 _mono:_
 [authn](https://authn.seankhliao.com)
+[cgit](https://cgit.seankhliao.com/cgit/)
 [earbug](https://earbug.seankhliao.com)
 [jaeger](https://jaeger.seankhliao.com)
 [paste](https://paste.seankhliao.com)

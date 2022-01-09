@@ -77,41 +77,36 @@ func (r *Runner) init() {
 		r.l.WithName("otel").Error(errors.New("otel"), err.Error())
 	}))
 
-	if r.otlpEndpoint == "" {
-		// use global noop
-		r.t = otel.GetTracerProvider()
-		r.m = global.GetMeterProvider()
-		return
-	}
+	if r.otlpEndpoint != "" {
+		ctx := context.TODO()
+		res, err := otelResources(ctx)
+		if err != nil {
+			l.Error(err, "init otel resources")
+			os.Exit(1)
+		}
+		otlpConn, err := otelGRPC(ctx, r.otlpEndpoint)
+		if err != nil {
+			l.Error(err, "connect to otlp collector", "endpoint", r.otlpEndpoint)
+			os.Exit(1)
+		}
 
-	ctx := context.TODO()
-	res, err := otelResources(ctx)
-	if err != nil {
-		l.Error(err, "init otel resources")
-		os.Exit(1)
-	}
-	otlpConn, err := otelGRPC(ctx, r.otlpEndpoint)
-	if err != nil {
-		l.Error(err, "connect to otlp collector", "endpoint", r.otlpEndpoint)
-		os.Exit(1)
-	}
+		err = otelTracer(ctx, res, otlpConn)
+		if err != nil {
+			l.Error(err, "setup tracer")
+			os.Exit(1)
+		}
 
-	err = otelTracer(ctx, res, otlpConn)
-	if err != nil {
-		l.Error(err, "setup tracer")
-		os.Exit(1)
-	}
+		err = otelMetrics(ctx, res, otlpConn)
+		if err != nil {
+			l.Error(err, "setup metrics")
+			os.Exit(1)
+		}
 
-	err = otelMetrics(ctx, res, otlpConn)
-	if err != nil {
-		l.Error(err, "setup metrics")
-		os.Exit(1)
-	}
-
-	err = otelruntime.Start(otelruntime.WithMeterProvider(r.m))
-	if err != nil {
-		l.Error(err, "setup otel runtime instrumentation")
-		os.Exit(1)
+		err = otelruntime.Start(otelruntime.WithMeterProvider(r.m))
+		if err != nil {
+			l.Error(err, "setup otel runtime instrumentation")
+			os.Exit(1)
+		}
 	}
 
 	r.t = otel.GetTracerProvider()
