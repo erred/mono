@@ -17,6 +17,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/content"
 	"go.seankhliao.com/mono/static"
+	"go.seankhliao.com/mono/svc/internal/o11y"
 )
 
 type Server struct {
@@ -72,7 +73,10 @@ func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Lo
 
 func (s *Server) defaultHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s.l.Info("received request",
+		ctx, span, l := o11y.Start(s.t, s.l, r.Context(), "handle")
+		defer span.End()
+
+		l.Info("received request",
 			"url", r.URL.String(),
 			"referer", r.Referer(),
 			"user_agent", r.UserAgent(),
@@ -89,6 +93,7 @@ func (s *Server) defaultHandler(h http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST")
 			w.Header().Set("Access-Control-Max-Age", "86400")
+			r = r.Clone(ctx)
 			h.ServeHTTP(w, r)
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)

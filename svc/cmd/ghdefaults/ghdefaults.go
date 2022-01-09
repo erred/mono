@@ -15,6 +15,8 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
+	"go.seankhliao.com/mono/svc/internal/o11y"
+	"golang.org/x/oauth2"
 )
 
 var defaultConfig = map[string]github.Repository{
@@ -47,14 +49,13 @@ func New(flags *flag.FlagSet) *Server {
 	var s Server
 	flags.StringVar(&s.WebhookSecretPath, "github.secret", "/var/run/secrets/github/webhook-secret", "path to file containing webhook secret")
 	flags.StringVar(&s.PrivateKeyPath, "github.key", "/var/run/secrets/github/github.pem", "path to file containing github app private key")
-	flags.Int64Var(&s.AppID, "github.id", 0, "app id in github")
+	flags.Int64Var(&s.appID, "github.id", 0, "app id in github")
 	return &s
 }
 
 type Server struct {
 	WebhookSecretPath string
 	PrivateKeyPath    string
-	AppID             int64
 
 	webhookSecret []byte
 	privateKey    []byte
@@ -81,7 +82,8 @@ func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Lo
 		return fmt.Errorf("private-key %s: %w", s.PrivateKeyPath, err)
 	}
 
-	mux.Handle("/", s)
+	mux.HandleFunc("/", s.handleIndex)
+	mux.HandleFunc("/webhook", s.handleWebhook)
 
 	s.tr = otelhttp.NewTransport(
 		http.DefaultTransport,
@@ -92,97 +94,109 @@ func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Lo
 	return nil
 }
 
-// ServeHTTP is the main entrypoint and dispatch for different event types
-func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	ctx, span := s.t.Start(ctx, "dispatch")
+func (s *Server) handleWebhook(rw http.ResponseWriter, r *http.Request) {
+	ctx, span, l := o11y.Start(s.t, s.l, r.Context(), "webhook")
 	defer span.End()
 
-	switch r.URL.Path {
-	case "/webhook":
-		_, span = s.t.Start(ctx, "validate-parse")
-		payload, err := github.ValidatePayload(r, s.webhookSecret)
-		if err != nil {
-			span.End()
-			s.l.Error(err, "validate webhook")
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-			return
-		}
-		eventType := github.WebHookType(r)
-		event, err := github.ParseWebHook(eventType, payload)
-		if err != nil {
-			span.End()
-			s.l.Error(err, "parse payload")
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
-		}
-		span.End()
-
-		ctx, span = s.t.Start(ctx, "process")
-		defer span.End()
-		l := s.l.WithValues("event", eventType)
-		msg := "processed"
-		switch event := event.(type) {
-		case *github.InstallationEvent:
-			owner := *event.Installation.Account.Login
-			l = l.WithValues("action", *event.Action, "owner", owner, "repos", len(event.Repositories))
-			installID := *event.Installation.ID
-			switch *event.Action {
-			case "created":
-				if _, ok := defaultConfig[owner]; !ok {
-					msg = "ignoring owner"
-					break
-				}
-
-				go func() {
-					ctx := context.TODO()                  // start new root to avoid getting cancelled
-					ctx = trace.ContextWithSpan(ctx, span) // use span from outside
-					ctx, span := s.t.Start(ctx, "install-repos", trace.WithAttributes(
-						attribute.String("owner", owner),
-					))
-
-					defer span.End()
-					for _, repo := range event.Repositories {
-						l := l.WithValues("repo", *repo.Name)
-						err := s.setDefaults(ctx, installID, owner, *repo.Name)
-						if err != nil {
-							l.Error(err, "set defaults on app install")
-							continue
-						}
-						l.Info("processed")
-					}
-				}()
-			default:
-				msg = "ignoring action"
-			}
-		case *github.RepositoryEvent:
-			l = l.WithValues("action", *event.Action, "repo", *event.Repo.FullName)
-			installID := *event.Installation.ID
-			owner := *event.Repo.Owner.Login
-			repo := *event.Repo.Name
-			switch *event.Action {
-			case "created", "transferred":
-				if _, ok := defaultConfig[owner]; !ok {
-					msg = "ignoring owner"
-					break
-				}
-				err = s.setDefaults(ctx, installID, owner, repo)
-				if err != nil {
-					l.Error(err, "set defaults on repo install")
-					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-					return
-				}
-			default:
-				msg = "ignoring action"
-			}
-		default:
-			msg = "ignoring event"
-		}
-		l.Info(msg)
-		w.WriteHeader(http.StatusOK)
-	default:
-		http.Redirect(w, r, "https://github.com/seankhliao/mono/tree/main/go/cmd/ghdefaults", http.StatusFound)
+	event, eventType, err := s.getPayload(ctx, r)
+	if err != nil {
+		o11y.HttpError(rw, l, span, http.StatusUnauthorized, err, "get payload")
+		return
 	}
+
+	switch event := event.(type) {
+	case *github.InstallationEvent:
+		s.installEvent(ctx, event)
+	case *github.RepositoryEvent:
+		s.repoEvent(ctx, rw, event)
+	default:
+		l.Info("ignoring event", "event", eventType)
+	}
+}
+
+func (s *Server) installEvent(ctx context.Context, event *github.InstallationEvent) {
+	_, span, l := o11y.Start(s.t, s.l, ctx, "installation_event")
+	defer span.End()
+
+	owner := *event.Installation.Account.Login
+	l = l.WithValues("action", *event.Action, "owner", owner, "repos", len(event.Repositories))
+	installID := *event.Installation.ID
+	switch *event.Action {
+	case "created":
+		if _, ok := defaultConfig[owner]; !ok {
+			l.Info("ignoring owner")
+			return
+		}
+
+		go func() {
+			ctx := context.TODO()                  // start new root to avoid getting cancelled
+			ctx = trace.ContextWithSpan(ctx, span) // use span from outside
+			ctx, span := s.t.Start(ctx, "install-repos", trace.WithAttributes(
+				attribute.String("owner", owner),
+			))
+
+			defer span.End()
+			for _, repo := range event.Repositories {
+				l := l.WithValues("repo", *repo.Name)
+				err := s.setDefaults(ctx, installID, owner, *repo.Name)
+				if err != nil {
+					l.Error(err, "set defaults on app install")
+					continue
+				}
+				l.Info("processed")
+			}
+		}()
+	default:
+		l.Info("ignoring action")
+	}
+}
+
+func (s *Server) repoEvent(ctx context.Context, rw http.ResponseWriter, event *github.RepositoryEvent) {
+	ctx, span, l := o11y.Start(s.t, s.l, ctx, "repository_event")
+	defer span.End()
+
+	l = l.WithValues("action", *event.Action, "repo", *event.Repo.FullName)
+	installID := *event.Installation.ID
+	owner := *event.Repo.Owner.Login
+	repo := *event.Repo.Name
+	switch *event.Action {
+	case "created", "transferred":
+		if _, ok := defaultConfig[owner]; !ok {
+			l.Info("ignoring owner")
+			return
+		}
+		err := s.setDefaults(ctx, installID, owner, repo)
+		if err != nil {
+			o11y.HttpError(rw, l, span, http.StatusInternalServerError, err, "set defaults on repo install")
+			return
+		}
+		l.Info("defaults set")
+	default:
+		l.Info("ignoring action")
+	}
+}
+
+func (s *Server) getPayload(ctx context.Context, r *http.Request) (interface{}, string, error) {
+	_, span, _ := o11y.Start(s.t, s.l, ctx, "get_payload")
+	defer span.End()
+
+	payload, err := github.ValidatePayload(r, s.webhookSecret)
+	if err != nil {
+		return nil, "", fmt.Errorf("validate: %w", err)
+	}
+	eventType := github.WebHookType(r)
+	event, err := github.ParseWebHook(eventType, payload)
+	if err != nil {
+		return nil, "", fmt.Errorf("parse: %w", err)
+	}
+	return event, eventType, nil
+}
+
+func (s *Server) handleIndex(rw http.ResponseWriter, r *http.Request) {
+	_, span, _ := o11y.Start(s.t, s.l, r.Context(), "dispatch")
+	defer span.End()
+
+	http.Redirect(rw, r, "https://github.com/seankhliao/mono/tree/main/svc/cmd/ghdefaults", http.StatusFound)
 }
 
 func (s *Server) setDefaults(ctx context.Context, installID int64, owner, repo string) error {
@@ -193,18 +207,21 @@ func (s *Server) setDefaults(ctx context.Context, installID int64, owner, repo s
 	defer span.End()
 
 	config := defaultConfig[owner]
-	// tr, err := ghinstallation.NewAppsTransport(s.tr, s.appID, s.privateKey)
-	tr, err := ghinstallation.New(s.tr, s.appID, installID, s.privateKey)
+	tr, err := ghinstallation.NewAppsTransport(s.tr, s.appID, s.privateKey)
 	if err != nil {
 		return fmt.Errorf("create ghinstallation transport: %w", err)
 	}
 	client := github.NewClient(&http.Client{Transport: tr})
-	// installToken, _, err := client.Apps.CreateInstallationToken(ctx, installID, nil)
-	// if err != nil {
-	// 	return fmt.Errorf("create installation token: %w", err)
-	// }
-	//
-	// client = github.NewClient(oauth2.NewClient(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: *installToken.Token})))
+	installToken, _, err := client.Apps.CreateInstallationToken(ctx, installID, nil)
+	if err != nil {
+		return fmt.Errorf("create installation token: %w", err)
+	}
+
+	client = github.NewClient(&http.Client{
+		Transport: &oauth2.Transport{
+			Source: oauth2.StaticTokenSource(&oauth2.Token{AccessToken: *installToken.Token}),
+		},
+	})
 
 	_, _, err = client.Repositories.Edit(ctx, owner, repo, &config)
 	if err != nil {
