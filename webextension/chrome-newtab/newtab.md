@@ -46,6 +46,7 @@ _mono:_
 [authn](https://authn.seankhliao.com)
 [earbug](https://earbug.seankhliao.com)
 [jaeger](https://jaeger.seankhliao.com)
+[paste](https://paste.seankhliao.com)
 [prometheus](https://prometheus.seankhliao.com)
 
 ### _to_ read

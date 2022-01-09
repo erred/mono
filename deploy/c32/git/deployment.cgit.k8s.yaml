@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cgit
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cgit
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cgit
+    spec:
+      containers:
+        - name: cgit
+          image: index.docker.io/clearlinux/cgit
+          ports:
+            - containerPort: 80
+              name: http
+          volumeMounts:
+            - mountPath: /var/www/cgit
+              name: repos
+      volumes:
+        - name: repos
+          hostPath:
+            path: /opt/c32/git/data

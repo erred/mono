@@ -18,10 +18,12 @@ import (
 
 	"github.com/go-logr/logr"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/content"
 	"go.seankhliao.com/mono/internal/web/render"
+	"go.seankhliao.com/mono/svc/internal/o11y"
 )
 
 type Server struct {
@@ -92,6 +94,9 @@ func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Lo
 }
 
 func (s *Server) indexHandler(rw http.ResponseWriter, r *http.Request) {
+	_, span, _ := o11y.Start(s.t, s.l, r.Context(), "index")
+	defer span.End()
+
 	if r.URL.Path != "/" {
 		http.Redirect(rw, r, "/", http.StatusFound)
 		return
@@ -105,7 +110,8 @@ func (s *Server) indexHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	ctx, span, l := o11y.Start(s.t, s.l, r.Context(), "paste")
+	defer span.End()
 
 	if r.URL.Path != "/paste/" {
 		http.Redirect(rw, r, "/paste/", http.StatusFound)
@@ -124,21 +130,19 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 	if val == "" {
 		err := r.ParseMultipartForm(1 << 22) // 4M
 		if err != nil {
-			s.l.Error(err, "parse multipart form")
-			http.Error(rw, "bad parse", http.StatusBadRequest)
+			o11y.HttpError(rw, l, span, http.StatusBadRequest, err, "bad multipart form")
 			return
 		}
 		mpf, _, err := r.FormFile("upload")
 		if err != nil {
-			http.Error(rw, "bad file", http.StatusBadRequest)
+			o11y.HttpError(rw, l, span, http.StatusBadRequest, err, "bad form file")
 			return
 		}
 		defer mpf.Close()
 		var buf strings.Builder
 		n, err := io.Copy(&buf, mpf)
 		if err != nil {
-			s.l.Error(err, "copy file")
-			http.Error(rw, "copy err", http.StatusInternalServerError)
+			o11y.HttpError(rw, l, span, http.StatusInternalServerError, err, "copy file")
 			return
 		}
 		val = buf.String()
@@ -156,8 +160,7 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 		key = path.Join(basekey, sum2[:le])
 		res, err := s.store.Get(ctx, key)
 		if err != nil {
-			s.l.Error(err, "precheck get", "key", key)
-			http.Error(rw, "etcd get", http.StatusInternalServerError)
+			o11y.HttpError(rw, l, span, http.StatusInternalServerError, err, "precheck key")
 			return
 		}
 		if len(res.Kvs) == 0 {
@@ -170,16 +173,14 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		if le == 20 {
-			s.l.Error(errors.New("can't find unique key"), "max len reached", "key", key, "sum", sum2[:])
-			http.Error(rw, "no unique key", http.StatusInsufficientStorage)
+			o11y.HttpError(rw, l, span, http.StatusInsufficientStorage, errors.New("no unique key"), "max key len reached", attribute.String("key", key))
 			return
 		}
 	}
 
 	_, err := s.store.Put(ctx, key, val)
 	if err != nil {
-		s.l.Error(err, "store", "key", key)
-		http.Error(rw, "put", http.StatusInsufficientStorage)
+		o11y.HttpError(rw, l, span, http.StatusInsufficientStorage, err, "store", attribute.String("key", key))
 		return
 	}
 
@@ -189,15 +190,16 @@ func (s *Server) pasteHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) lookupHandler(rw http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	ctx, span, l := o11y.Start(s.t, s.l, r.Context(), "lookup")
+	defer span.End()
 
 	if r.Method != http.MethodGet {
-		http.Error(rw, "use GET", http.StatusMethodNotAllowed)
+		o11y.HttpError(rw, l, span, http.StatusMethodNotAllowed, nil, "use GET")
 		return
 	}
 	segs := strings.Split(r.URL.Path, "/")
 	if len(segs) != 3 { // /p/$id
-		http.Error(rw, "unknown path format", http.StatusBadRequest)
+		o11y.HttpError(rw, l, span, http.StatusBadRequest, nil, "unknown path format")
 		return
 	}
 
@@ -205,16 +207,17 @@ func (s *Server) lookupHandler(rw http.ResponseWriter, r *http.Request) {
 	s.l.Info("get", "key", key)
 	res, err := s.store.Get(ctx, key)
 	if err != nil {
-		s.l.Error(err, "etcd get", "key")
-		http.Error(rw, "storage err", http.StatusInternalServerError)
+		o11y.HttpError(rw, l, span, http.StatusInternalServerError, err, "get from store")
 		return
 	}
 
 	if len(res.Kvs) != 1 {
+		var err error
 		if len(res.Kvs) > 1 {
-			s.l.Error(errors.New("extra pastes"), "more than expected pastes", "pastes", len(res.Kvs), "key", key)
+			err = errors.New("extra pastes")
 		}
 		http.Error(rw, "not found", http.StatusNotFound)
+		o11y.HttpError(rw, l, span, http.StatusNotFound, err, "not found", attribute.Int("pastes_found", len(res.Kvs)))
 		return
 	}
 
