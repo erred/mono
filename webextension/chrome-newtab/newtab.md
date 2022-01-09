@@ -47,6 +47,7 @@ _mono:_
 [cgit](https://cgit.seankhliao.com/cgit/)
 [earbug](https://earbug.seankhliao.com)
 [jaeger](https://jaeger.seankhliao.com)
+[medea](https://medea.seankhliao.com)
 [paste](https://paste.seankhliao.com)
 [prometheus](https://prometheus.seankhliao.com)
 
