@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  serviceName: prometheus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: index.docker.io/prom/prometheus
+          args:
+            - --config.file=/config/prometheus.yaml
+            - --storage.tsdb.path=/data
+            - --enable-feature=remote-write-receiver,exemplar-storage
+          ports:
+            - containerPort: 9090
+              name: http
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /data
+              name: data
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus
+        - name: data
+          hostPath:
+            path: /opt/c32/prometheus

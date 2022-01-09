@@ -12,6 +12,10 @@ exporters:
     endpoint: jaeger.jaeger.svc:14250
     tls:
       insecure: true
+  prometheusremotewrite:
+    endpoint: http://prometheus.prometheus.svc/api/v1/write
+    tls:
+      insecure: true
 extensions:
   memory_ballast:
     size_mib: 512
@@ -28,3 +32,11 @@ service:
         - memory_limiter
       exporters:
         - jaeger
+    metrics:
+      receivers:
+        - otlp
+      processors:
+        - batch
+        - memory_limiter
+      exporters:
+        - prometheusremotewrite

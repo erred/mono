@@ -1,7 +1,7 @@
 apiVersion: projectcontour.io/v1
 kind: HTTPProxy
 metadata:
-  name: jaeger
+  name: prometheus
   annotations:
     projectcontour.io/ingress.class: contour-external
 spec:
@@ -9,13 +9,13 @@ spec:
     - conditions:
         - prefix: /
       services:
-        - name: jaeger
-          port: 16686
+        - name: prometheus
+          port: 80
   virtualhost:
     authorization:
       extensionRef:
         name: authd
         namespace: authd
-    fqdn: jaeger.seankhliao.com
+    fqdn: prometheus.seankhliao.com
     tls:
       secretName: knative-serving/tls-wildcard

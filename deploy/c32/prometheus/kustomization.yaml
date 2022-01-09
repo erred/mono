@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: prometheus
+resources:
+  - httpproxy.prometheus.k8s.yaml
+  - namespace.prometheus.k8s.yaml
+  - service.prometheus.k8s.yaml
+  - statefulset.prometheus.k8s.yaml
+configMapGenerator:
+  - name: prometheus
+    files:
+      - prometheus.yaml
