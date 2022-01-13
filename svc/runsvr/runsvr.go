@@ -23,6 +23,8 @@ import (
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/internal/stdlog"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 )
 
@@ -130,6 +132,9 @@ func (r *Runner) HTTP(s HTTPService) {
 		otelhttp.WithTracerProvider(r.t),
 		// otelhttp.WithFilter(otelHttpFilter("/livez")),
 	)
+
+	var h2 http2.Server
+	handler = h2c.NewHandler(handler, &h2)
 
 	svr := &http.Server{
 		Handler:           handler,
