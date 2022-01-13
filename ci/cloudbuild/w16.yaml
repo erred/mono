@@ -12,6 +12,6 @@ steps:
       - >
         set -ex
         && img=$(ko publish --preserve-import-paths $_IMG)
-        && gcloud run deploy seankhliao-com --image=${img} --region=us-central1 --platform=managed --args=-gtm=$_GTM
+        && gcloud run deploy seankhliao-com --image=${img} --region=us-central1 --platform=managed --max-instances=2 --use-http2 --args=-gtm=$_GTM
     env:
       - KO_DOCKER_REPO=$_REG
