@@ -7,7 +7,7 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.seankhliao.com/mono/internal/web/render"
-	"go.seankhliao.com/mono/svc/internal/o11y"
+	"go.seankhliao.com/mono/internal/o11y"
 )
 
 // handleIndex serves either the login page or user info page (if logged in)

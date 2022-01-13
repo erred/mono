@@ -9,7 +9,7 @@ import (
 	"github.com/zmb3/spotify/v2"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/attribute"
-	"go.seankhliao.com/mono/svc/internal/o11y"
+	"go.seankhliao.com/mono/internal/o11y"
 	"golang.org/x/oauth2"
 )
 

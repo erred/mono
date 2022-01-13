@@ -23,7 +23,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"go.seankhliao.com/mono/content"
 	"go.seankhliao.com/mono/internal/web/render"
-	"go.seankhliao.com/mono/svc/internal/o11y"
+	"go.seankhliao.com/mono/internal/o11y"
 )
 
 type Server struct {

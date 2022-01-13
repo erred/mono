@@ -13,7 +13,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/attribute"
 	"go.seankhliao.com/mono/internal/web/render"
-	"go.seankhliao.com/mono/svc/internal/o11y"
+	"go.seankhliao.com/mono/internal/o11y"
 )
 
 // /user/history

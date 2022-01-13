@@ -134,10 +134,9 @@ func (r *Runner) HTTP(s HTTPService) {
 	svr := &http.Server{
 		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
-		// IdleTimeout:  120 * time.Second,
-		// WriteTimeout: 5 * time.Second,
-		// IdleTimeout:  120 * time.Second,
-		ErrorLog: stdlog.New(r.l.WithName("http"), errors.New("net/http")),
+		IdleTimeout:       120 * time.Second,
+		WriteTimeout:      5 * time.Second,
+		ErrorLog:          stdlog.New(r.l.WithName("http"), errors.New("net/http")),
 	}
 
 	r.serve = svr.Serve
@@ -161,8 +160,8 @@ func (r *Runner) GRPC(s GRPCService) {
 	ctx := context.TODO()
 
 	svr := grpc.NewServer(
-		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor(otelgrpc.WithTracerProvider(r.t))),
-		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor(otelgrpc.WithTracerProvider(r.t))),
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
 	)
 	// grpc_health_v1.RegisterHealthServer(svr, okHandler{})
 

@@ -18,20 +18,31 @@ func Start(t trace.Tracer, l logr.Logger, ctx context.Context, name string) (con
 	return ctx, span, l
 }
 
+func Set(l logr.Logger, span trace.Span, attrs ...attribute.KeyValue) logr.Logger {
+	span.SetAttributes(attrs...)
+	l = l.WithValues(expandKvs(attrs...)...)
+	return l
+}
+
+func OK(l logr.Logger, span trace.Span, msg string, attrs ...attribute.KeyValue) {
+	span.SetStatus(codes.Ok, msg)
+	span.SetAttributes(attribute.String("msg", msg))
+
+	Set(l, span, attrs...).Info(msg)
+}
+
+func Error(l logr.Logger, span trace.Span, err error, msg string, attrs ...attribute.KeyValue) {
+	span.SetStatus(codes.Error, msg)
+	span.RecordError(err)
+
+	Set(l, span, attrs...).Error(err, msg)
+}
+
 func HttpError(rw http.ResponseWriter, l logr.Logger, span trace.Span, httpStatusCode int, err error, msg string, attrs ...attribute.KeyValue) {
 	fmt.Fprintln(rw, msg)
 	rw.WriteHeader(httpStatusCode)
 
-	if err != nil {
-		l.Error(err, msg, expandKvs(attrs...)...)
-		span.SetStatus(codes.Error, msg)
-		span.RecordError(err)
-	} else {
-		span.SetAttributes(attribute.String("info", msg))
-		l.Info(msg, expandKvs(attrs...)...)
-	}
-
-	span.SetAttributes(attrs...)
+	Error(l, span, err, msg, attrs...)
 }
 
 func expandKvs(attrs ...attribute.KeyValue) []interface{} {
