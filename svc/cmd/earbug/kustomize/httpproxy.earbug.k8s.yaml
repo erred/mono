@@ -6,16 +6,16 @@ metadata:
     projectcontour.io/ingress.class: contour-external
 spec:
   routes:
-  - conditions:
-    - prefix: /
-    services:
-    - name: earbug
-      port: 80
+    - conditions:
+        - prefix: /
+      services:
+        - name: earbug
+          port: 80
   virtualhost:
     authorization:
       extensionRef:
-        name: authd
-        namespace: authd
+        name: authext
+        namespace: auth
     fqdn: earbug.seankhliao.com
     tls:
       secretName: knative-serving/tls-wildcard

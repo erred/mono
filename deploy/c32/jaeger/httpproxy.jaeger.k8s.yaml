@@ -14,8 +14,8 @@ spec:
   virtualhost:
     authorization:
       extensionRef:
-        name: authd
-        namespace: authd
+        name: authext
+        namespace: auth
     fqdn: jaeger.seankhliao.com
     tls:
       secretName: knative-serving/tls-wildcard

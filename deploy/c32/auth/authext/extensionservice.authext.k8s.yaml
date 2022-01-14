@@ -1,0 +1,9 @@
+apiVersion: projectcontour.io/v1alpha1
+kind: ExtensionService
+metadata:
+  name: authext
+spec:
+  protocol: h2c
+  services:
+    - name: authext
+      port: 80

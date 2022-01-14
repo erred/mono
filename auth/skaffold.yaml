@@ -4,7 +4,7 @@ metadata:
   name: auth
 build:
   artifacts:
-    - image: ko://go.seankhliao.com/mono/auth/cmd/authnb
+    - image: ko://go.seankhliao.com/mono/auth/cmd/authext
       ko: &koopts
         flags:
           - -trimpath
@@ -17,6 +17,8 @@ build:
               - sh
               - -c
               - COSIGN_PASSWORD= cosign sign --key ../secret/cosign/cosign.key $SKAFFOLD_IMAGE
+    - image: ko://go.seankhliao.com/mono/auth/cmd/authnb
+      ko: *koopts
     - image: ko://go.seankhliao.com/mono/auth/cmd/authnf
       ko: *koopts
   local:
