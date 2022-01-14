@@ -26,6 +26,7 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type Runner struct {
@@ -169,6 +170,7 @@ func (r *Runner) GRPC(s GRPCService) {
 		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
 	)
 	// grpc_health_v1.RegisterHealthServer(svr, okHandler{})
+	reflection.Register(svr)
 
 	r.serve = svr.Serve
 	r.shutdowns = append(r.shutdowns, func(context.Context) error { svr.GracefulStop(); return nil })

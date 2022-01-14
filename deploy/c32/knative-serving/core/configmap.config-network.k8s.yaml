@@ -24,7 +24,7 @@ metadata:
 data:
   ingress.class: contour.ingress.networking.knative.dev
   domain-template: "{{.Name}}.{{.Domain}}"
-  http-protocol: "Redirected"
+  http-protocol: "Enabled"
   default-external-scheme: "https"
   _example: |
     ################################

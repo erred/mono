@@ -1,0 +1,29 @@
+apiVersion: skaffold/v2beta26
+kind: Config
+metadata:
+  name: auth
+build:
+  artifacts:
+    - image: ko://go.seankhliao.com/mono/auth/cmd/authnb
+      ko: &koopts
+        flags:
+          - -trimpath
+        ldflags:
+          - -s
+          - -w
+      hooks:
+        after:
+          - command:
+              - sh
+              - -c
+              - COSIGN_PASSWORD= cosign sign --key ../secret/cosign/cosign.key $SKAFFOLD_IMAGE
+    - image: ko://go.seankhliao.com/mono/auth/cmd/authnf
+      ko: *koopts
+  local:
+    concurrency: 0
+  tagPolicy:
+    sha256: {}
+deploy:
+  kustomize:
+    paths:
+      - ../deploy/c32/auth

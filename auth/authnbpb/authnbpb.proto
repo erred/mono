@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package seankhliao.auth.authnbpb;
+
+option go_package = "go.seankhliao.com/mono/auth/authnbpb";
+
+service AuthnB {
+  rpc GetSession(GetSessionRequest) returns(GetSessionResponse);
+  rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
+  rpc DeleteSession(DeleteSessionRequest) returns (DeleteSessionResponse);
+
+  rpc GetUserAuth(GetUserAuthRequest) returns (GetUserAuthResponse);
+}
+
+message GetSessionRequest{
+  string session_token = 1;
+}
+message GetSessionResponse{
+  string user_id = 1;
+}
+
+message CreateSessionRequest{
+  string user_id = 1;
+  int64 ttl = 2;
+}
+message CreateSessionResponse{
+  string session_token = 1;
+}
+
+message DeleteSessionRequest{
+  string session_token = 1;
+}
+message DeleteSessionResponse{
+  bool found = 1;
+}
+
+message GetUserAuthRequest {
+  string user_id = 1;
+}
+message GetUserAuthResponse {
+  bytes bcrypt = 1;
+}
