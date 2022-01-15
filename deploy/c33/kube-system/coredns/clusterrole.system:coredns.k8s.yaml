@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:coredns
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+rules:
+- resources:
+  - endpoints
+  - services
+  - pods
+  - namespaces
+  apiGroups:
+  - ""
+  verbs:
+  - list
+  - watch
+- resources:
+  - nodes
+  apiGroups:
+  - ""
+  verbs:
+  - get
