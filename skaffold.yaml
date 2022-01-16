@@ -49,7 +49,7 @@ profiles:
         value: ko://go.seankhliao.com/mono/svc/cmd/earbug
       - op: replace
         path: /deploy/kustomize/paths/0
-        value: ./deploy/c32/earbug
+        value: ./deploy/c33/earbug
   - name: ghdefaults
     patches:
       - op: replace

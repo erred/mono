@@ -14,8 +14,8 @@ spec:
       containers:
         - name: earbug
           image: ko://go.seankhliao.com/mono/svc/cmd/earbug
-          args:
-            - -otlp.endpoint=otelcol.otelcol.svc:4317
+          # args:
+          #   - -otlp.endpoint=otelcol.otelcol.svc:4317
           ports:
             - name: http
               containerPort: 8080

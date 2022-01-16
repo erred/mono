@@ -29,3 +29,18 @@ deploy:
   kustomize:
     paths:
       - ../deploy/c32/auth
+    buildArgs:
+      - --enable-managedby-label
+    flags:
+      apply:
+        - --prune=true
+        - --selector=app.kubernetes.io/managed-by=kustomize-4.4.1
+    hooks:
+      before:
+        - host:
+            command:
+              - sh
+              - -c
+              - cosign verify --key ../secret/cosign/cosign.pub $SKAFFOLD_IMAGE
+  logs:
+    prefix: container
