@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: local-path-provisioner
+rules:
+- resources: ["nodes", "persistentvolumeclaims", "configmaps"]
+  apiGroups: [""]
+  verbs: ["get", "list", "watch"]
+- resources: ["endpoints", "persistentvolumes", "pods"]
+  apiGroups: [""]
+  verbs: ["*"]
+- resources: ["events"]
+  apiGroups: [""]
+  verbs: ["create", "patch"]
+- resources: ["storageclasses"]
+  apiGroups: ["storage.k8s.io"]
+  verbs: ["get", "list", "watch"]

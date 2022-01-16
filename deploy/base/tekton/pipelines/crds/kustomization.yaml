@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- customresourcedefinition.clustertasks.tekton.dev.k8s.yaml
+- customresourcedefinition.conditions.tekton.dev.k8s.yaml
+- customresourcedefinition.pipelineresources.tekton.dev.k8s.yaml
+- customresourcedefinition.pipelineruns.tekton.dev.k8s.yaml
+- customresourcedefinition.pipelines.tekton.dev.k8s.yaml
+- customresourcedefinition.runs.tekton.dev.k8s.yaml
+- customresourcedefinition.taskruns.tekton.dev.k8s.yaml
+- customresourcedefinition.tasks.tekton.dev.k8s.yaml

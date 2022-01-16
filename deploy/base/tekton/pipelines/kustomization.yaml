@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - controller
+  - crds
+  - webhook
+  - clusterrole.tekton-aggregate-edit.k8s.yaml
+  - clusterrole.tekton-aggregate-view.k8s.yaml
+  - configmap.config-artifact-bucket.k8s.yaml
+  - configmap.config-artifact-pvc.k8s.yaml
+  - configmap.config-defaults.k8s.yaml
+  - configmap.config-leader-election.k8s.yaml
+  - configmap.config-logging.k8s.yaml
+  - configmap.config-observability.k8s.yaml
+  - configmap.config-registry-cert.k8s.yaml
+  - configmap.feature-flags.k8s.yaml
+  - configmap.pipelines-info.k8s.yaml
+  - role.tekton-pipelines-leader-election.k8s.yaml

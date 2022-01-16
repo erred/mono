@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tekton-pipelines-controller
+  namespace: tekton-pipelines
+  labels:
+    # labels below are related to istio and should not be used for resource lookup
+    app: tekton-pipelines-controller
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/name: controller
+    app.kubernetes.io/part-of: tekton-pipelines
+    app.kubernetes.io/version: "v0.32.0"
+    # tekton.dev/release value replaced with inputs.params.versionTag in pipeline/tekton/publish.yaml
+    pipeline.tekton.dev/release: "v0.32.0"
+    version: "v0.32.0"
+spec:
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/name: controller
+    app.kubernetes.io/part-of: tekton-pipelines
+  ports:
+  - name: http-metrics
+    protocol: TCP
+    port: 9090
+    targetPort: 9090
+  - name: http-profiling
+    port: 8008
+    targetPort: 8008
+  - name: probes
+    port: 8080
