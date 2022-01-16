@@ -1,0 +1,92 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: requestauthentications.security.istio.io
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    istio: security
+    release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: security.istio.io
+  names:
+    kind: RequestAuthentication
+    categories:
+    - istio-io
+    - security-istio-io
+    listKind: RequestAuthenticationList
+    plural: requestauthentications
+    shortNames:
+    - ra
+    singular: requestauthentication
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            description: RequestAuthentication defines what request authentication methods are supported by a workload.
+            properties:
+              selector:
+                type: object
+                description: The selector determines the workloads to apply the RequestAuthentication on.
+                properties:
+                  matchLabels:
+                    type: object
+                    additionalProperties:
+                      type: string
+              jwtRules:
+                type: array
+                description: Define the list of JWTs that can be validated at the selected workloads' proxy.
+                items:
+                  type: object
+                  properties:
+                    audiences:
+                      type: array
+                      items:
+                        type: string
+                    forwardOriginalToken:
+                      type: boolean
+                      description: If set to true, the original token will be kept for the upstream request.
+                    fromHeaders:
+                      type: array
+                      description: List of header locations from which JWT is expected.
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            description: The HTTP header name.
+                          prefix:
+                            type: string
+                            description: The prefix that should be stripped before decoding the token.
+                    fromParams:
+                      type: array
+                      description: List of query parameters from which JWT is expected.
+                      items:
+                        type: string
+                    issuer:
+                      type: string
+                      description: Identifies the issuer that issued the JWT.
+                    jwks:
+                      type: string
+                      description: JSON Web Key Set of public keys to validate signature of the JWT.
+                    jwksUri:
+                      type: string
+                    jwks_uri:
+                      type: string
+                    outputPayloadToHeader:
+                      type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    served: true
+    storage: true
+    subresources:
+      status: {}

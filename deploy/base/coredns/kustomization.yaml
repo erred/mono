@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  app.kubernetes.io/name: coredns
+resources:
+  - clusterrole.system:coredns.k8s.yaml
+  - clusterrolebinding.system:coredns.k8s.yaml
+  - deployment.coredns.k8s.yaml
+  - service.kube-dns.k8s.yaml
+  - serviceaccount.coredns.k8s.yaml
+configMapGenerator:
+  - name: coredns
+    files:
+      - Corefile

@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  app.kubernetes.io/name: istiod
+  istio.io/rev: default
+resources:
+  - clusterrole.istio-reader-clusterrole-istio-system.k8s.yaml
+  - clusterrole.istiod-clusterrole-istio-system.k8s.yaml
+  - clusterrole.istiod-gateway-controller-istio-system.k8s.yaml
+  - clusterrolebinding.istio-reader-clusterrole-istio-system.k8s.yaml
+  - clusterrolebinding.istiod-clusterrole-istio-system.k8s.yaml
+  - clusterrolebinding.istiod-gateway-controller-istio-system.k8s.yaml
+  - configmap.istio-sidecar-injector.k8s.yaml
+  - configmap.istio.k8s.yaml
+  - deployment.istiod.k8s.yaml
+  - envoyfilter.stats-filter-1.12.k8s.yaml
+  - envoyfilter.tcp-stats-filter-1.12.k8s.yaml
+  - mutatingwebhookconfiguration.istio-sidecar-injector.k8s.yaml
+  - role.istiod.k8s.yaml
+  - rolebinding.istiod.k8s.yaml
+  - service.istiod.k8s.yaml
+  - serviceaccount.istiod.k8s.yaml
+  - validatingwebhookconfiguration.istio-validator-istio-system.k8s.yaml

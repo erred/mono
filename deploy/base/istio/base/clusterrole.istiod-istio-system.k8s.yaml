@@ -1,0 +1,95 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: istiod-istio-system
+rules:
+  # sidecar injection controller
+  - resources: ["mutatingwebhookconfigurations"]
+    apiGroups: ["admissionregistration.k8s.io"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  # configuration validation webhook controller
+  - resources: ["validatingwebhookconfigurations"]
+    apiGroups: ["admissionregistration.k8s.io"]
+    verbs: ["get", "list", "watch", "update"]
+  # istio configuration
+  # removing CRD permissions can break older versions of Istio running alongside this control plane (https://github.com/istio/istio/issues/29382)
+  # please proceed with caution
+  - resources: ["*"]
+    apiGroups:
+      [
+        "config.istio.io",
+        "security.istio.io",
+        "networking.istio.io",
+        "authentication.istio.io",
+        "rbac.istio.io",
+        "telemetry.istio.io",
+      ]
+    verbs: ["get", "watch", "list"]
+  - resources: ["workloadentries"]
+    apiGroups: ["networking.istio.io"]
+    verbs: ["get", "watch", "list", "update", "patch", "create", "delete"]
+  - resources: ["workloadentries/status"]
+    apiGroups: ["networking.istio.io"]
+    verbs: ["get", "watch", "list", "update", "patch", "create", "delete"]
+  # auto-detect installed CRD definitions
+  - resources: ["customresourcedefinitions"]
+    apiGroups: ["apiextensions.k8s.io"]
+    verbs: ["get", "list", "watch"]
+  # discovery and routing
+  - resources: ["pods", "nodes", "services", "namespaces", "endpoints"]
+    apiGroups: [""]
+    verbs: ["get", "list", "watch"]
+  - resources: ["endpointslices"]
+    apiGroups: ["discovery.k8s.io"]
+    verbs: ["get", "list", "watch"]
+  # ingress controller
+  - resources: ["ingresses", "ingressclasses"]
+    apiGroups: ["networking.k8s.io"]
+    verbs: ["get", "list", "watch"]
+  - resources: ["ingresses/status"]
+    apiGroups: ["networking.k8s.io"]
+    verbs: ["*"]
+  # required for CA's namespace controller
+  - resources: ["configmaps"]
+    apiGroups: [""]
+    verbs: ["create", "get", "list", "watch", "update"]
+  # Istiod and bootstrap.
+  - resources:
+      - "certificatesigningrequests"
+      - "certificatesigningrequests/approval"
+      - "certificatesigningrequests/status"
+    apiGroups: ["certificates.k8s.io"]
+    verbs: ["update", "create", "get", "delete", "watch"]
+  - resources:
+      - "signers"
+    apiGroups: ["certificates.k8s.io"]
+    resourceNames:
+      - "kubernetes.io/legacy-unknown"
+    verbs: ["approve"]
+  # Used by Istiod to verify the JWT tokens
+  - resources: ["tokenreviews"]
+    apiGroups: ["authentication.k8s.io"]
+    verbs: ["create"]
+  # Used by Istiod to verify gateway SDS
+  - resources: ["subjectaccessreviews"]
+    apiGroups: ["authorization.k8s.io"]
+    verbs: ["create"]
+  # Use for Kubernetes Service APIs
+  - resources: ["*"]
+    apiGroups: ["networking.x-k8s.io", "gateway.networking.k8s.io"]
+    verbs: ["get", "watch", "list"]
+  - resources: ["*"] # TODO: should be on just */status but wildcard is not supported
+    apiGroups: ["networking.x-k8s.io", "gateway.networking.k8s.io"]
+    verbs: ["update"]
+  # Needed for multicluster secret reading, possibly ingress certs in the future
+  - resources: ["secrets"]
+    apiGroups: [""]
+    verbs: ["get", "watch", "list"]
+  # Used for MCS serviceexport management
+  - resources: ["serviceexports"]
+    apiGroups: ["multicluster.x-k8s.io"]
+    verbs: ["get", "watch", "list", "create", "delete"]
+  # Used for MCS serviceimport management
+  - resources: ["serviceimports"]
+    apiGroups: ["multicluster.x-k8s.io"]
+    verbs: ["get", "watch", "list"]

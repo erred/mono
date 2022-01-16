@@ -1,0 +1,224 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: telemetries.telemetry.istio.io
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    istio: telemetry
+    release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: telemetry.istio.io
+  names:
+    kind: Telemetry
+    categories:
+    - istio-io
+    - telemetry-istio-io
+    listKind: TelemetryList
+    plural: telemetries
+    shortNames:
+    - telemetry
+    singular: telemetry
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    additionalPrinterColumns:
+    - name: Age
+      type: date
+      description: 'CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC. Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata'
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            description: 'Telemetry configuration for workloads. See more details at: https://istio.io/docs/reference/config/telemetry.html'
+            properties:
+              selector:
+                type: object
+                description: Optional.
+                properties:
+                  matchLabels:
+                    type: object
+                    additionalProperties:
+                      type: string
+              accessLogging:
+                type: array
+                description: Optional.
+                items:
+                  type: object
+                  properties:
+                    disabled:
+                      type: boolean
+                      description: Controls logging.
+                      nullable: true
+                    providers:
+                      type: array
+                      description: Optional.
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            description: Required.
+              metrics:
+                type: array
+                description: Optional.
+                items:
+                  type: object
+                  properties:
+                    overrides:
+                      type: array
+                      description: Optional.
+                      items:
+                        type: object
+                        properties:
+                          disabled:
+                            type: boolean
+                            description: Optional.
+                            nullable: true
+                          match:
+                            type: object
+                            description: Match allows provides the scope of the override.
+                            oneOf:
+                            - not:
+                                anyOf:
+                                - required:
+                                  - metric
+                                - required:
+                                  - customMetric
+                            - required:
+                              - metric
+                            - required:
+                              - customMetric
+                            properties:
+                              customMetric:
+                                type: string
+                                description: Allows free-form specification of a metric.
+                              metric:
+                                type: string
+                                description: One of the well-known Istio Standard Metrics.
+                                enum:
+                                - ALL_METRICS
+                                - REQUEST_COUNT
+                                - REQUEST_DURATION
+                                - REQUEST_SIZE
+                                - RESPONSE_SIZE
+                                - TCP_OPENED_CONNECTIONS
+                                - TCP_CLOSED_CONNECTIONS
+                                - TCP_SENT_BYTES
+                                - TCP_RECEIVED_BYTES
+                                - GRPC_REQUEST_MESSAGES
+                                - GRPC_RESPONSE_MESSAGES
+                              mode:
+                                type: string
+                                description: 'Controls which mode of metrics generation is selected: CLIENT and/or SERVER.'
+                                enum:
+                                - CLIENT_AND_SERVER
+                                - CLIENT
+                                - SERVER
+                          tagOverrides:
+                            type: object
+                            additionalProperties:
+                              type: object
+                              properties:
+                                value:
+                                  type: string
+                                  description: Value is only considered if the operation is `UPSERT`.
+                                operation:
+                                  type: string
+                                  description: Operation controls whether or not to update/add a tag, or to remove it.
+                                  enum:
+                                  - UPSERT
+                                  - REMOVE
+                            description: Optional.
+                    providers:
+                      type: array
+                      description: Optional.
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            description: Required.
+              tracing:
+                type: array
+                description: Optional.
+                items:
+                  type: object
+                  properties:
+                    customTags:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        oneOf:
+                        - not:
+                            anyOf:
+                            - required:
+                              - literal
+                            - required:
+                              - environment
+                            - required:
+                              - header
+                        - required:
+                          - literal
+                        - required:
+                          - environment
+                        - required:
+                          - header
+                        properties:
+                          environment:
+                            type: object
+                            description: Environment adds the value of an environment variable to each span.
+                            properties:
+                              name:
+                                type: string
+                                description: Name of the environment variable from which to extract the tag value.
+                              defaultValue:
+                                type: string
+                                description: Optional.
+                          header:
+                            type: object
+                            description: RequestHeader adds the value of an header from the request to each span.
+                            properties:
+                              name:
+                                type: string
+                                description: Name of the header from which to extract the tag value.
+                              defaultValue:
+                                type: string
+                                description: Optional.
+                          literal:
+                            type: object
+                            description: Literal adds the same, hard-coded value to each span.
+                            properties:
+                              value:
+                                type: string
+                                description: The tag value to use.
+                      description: Optional.
+                    disableSpanReporting:
+                      type: boolean
+                      description: Controls span reporting.
+                      nullable: true
+                    providers:
+                      type: array
+                      description: Optional.
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            description: Required.
+                    randomSamplingPercentage:
+                      type: number
+                      nullable: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    served: true
+    storage: true
+    subresources:
+      status: {}

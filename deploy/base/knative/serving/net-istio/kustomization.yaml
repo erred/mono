@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - clusterrole.knative-serving-istio.k8s.yaml
+  - configmap.config-istio.k8s.yaml
+  - deployment.net-istio-controller.k8s.yaml
+  - deployment.net-istio-webhook.k8s.yaml
+  - gateway.knative-ingress-gateway.k8s.yaml
+  - gateway.knative-local-gateway.k8s.yaml
+  - mutatingwebhookconfiguration.webhook.istio.networking.internal.knative.dev.k8s.yaml
+  # kustomize bug with int keys: https://github.com/kubernetes-sigs/kustomize/issues/3446
+  # - peerauthentication.domainmapping-webhook.k8s.yaml
+  # - peerauthentication.net-istio-webhook.k8s.yaml
+  # - peerauthentication.webhook.k8s.yaml
+  - secret.net-istio-webhook-certs.k8s.yaml
+  - service.knative-local-gateway.k8s.yaml
+  - service.net-istio-webhook.k8s.yaml
+  - validatingwebhookconfiguration.config.webhook.istio.networking.internal.knative.dev.k8s.yaml

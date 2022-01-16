@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: domainmapping-webhook
+  namespace: knative-serving
+  labels:
+    app.kubernetes.io/component: domain-mapping
+    app.kubernetes.io/name: knative-serving
+    app.kubernetes.io/version: "1.1.0"
+    role: domainmapping-webhook
+    serving.knative.dev/release: "v1.1.0"
+spec:
+  selector:
+    role: domainmapping-webhook
+  ports:
+  # Define metrics and profiling for them to be accessible within service meshes.
+  - name: http-metrics
+    port: 9090
+    targetPort: 9090
+  - name: http-profiling
+    port: 8008
+    targetPort: 8008
+  - name: https-webhook
+    port: 443
+    targetPort: 8443

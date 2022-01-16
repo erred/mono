@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  app.kubernetes.io/name: istio-base
+resources:
+  - clusterrole.istio-reader-istio-system.k8s.yaml
+  - clusterrole.istiod-istio-system.k8s.yaml
+  - clusterrolebinding.istio-reader-istio-system.k8s.yaml
+  - clusterrolebinding.istiod-istio-system.k8s.yaml
+  - customresourcedefinition.authorizationpolicies.security.istio.io.k8s.yaml
+  - customresourcedefinition.destinationrules.networking.istio.io.k8s.yaml
+  - customresourcedefinition.envoyfilters.networking.istio.io.k8s.yaml
+  - customresourcedefinition.gateways.networking.istio.io.k8s.yaml
+  - customresourcedefinition.istiooperators.install.istio.io.k8s.yaml
+  - customresourcedefinition.peerauthentications.security.istio.io.k8s.yaml
+  - customresourcedefinition.requestauthentications.security.istio.io.k8s.yaml
+  - customresourcedefinition.serviceentries.networking.istio.io.k8s.yaml
+  - customresourcedefinition.sidecars.networking.istio.io.k8s.yaml
+  - customresourcedefinition.telemetries.telemetry.istio.io.k8s.yaml
+  - customresourcedefinition.virtualservices.networking.istio.io.k8s.yaml
+  - customresourcedefinition.wasmplugins.extensions.istio.io.k8s.yaml
+  - customresourcedefinition.workloadentries.networking.istio.io.k8s.yaml
+  - customresourcedefinition.workloadgroups.networking.istio.io.k8s.yaml
+  - role.istiod-istio-system.k8s.yaml
+  - rolebinding.istiod-istio-system.k8s.yaml
+  - serviceaccount.istio-reader-service-account.k8s.yaml
+  - serviceaccount.istiod-service-account.k8s.yaml
