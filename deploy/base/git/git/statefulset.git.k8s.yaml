@@ -4,13 +4,7 @@ metadata:
   name: git
 spec:
   serviceName: git
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: git
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: git
     spec:
       containers:
         - name: git
@@ -26,7 +20,7 @@ spec:
       volumes:
         - name: ssh
           hostPath:
-            path: /opt/c32/git/ssh
+            path: /opt/c33/git/ssh
         - name: data
           hostPath:
-            path: /opt/c32/git/data
+            path: /opt/c33/git/data

@@ -3,8 +3,6 @@ kind: Service
 metadata:
   name: registry
 spec:
-  selector:
-    app.kubernetes.io/name: registry
   ports:
     - port: 80
       targetPort: 5000

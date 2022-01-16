@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cgit
+spec:
+  gateways:
+    - knative-serving/knative-ingress-gateway
+  hosts:
+    - registry.seankhliao.com
+  http:
+    - match:
+        - uri:
+            prefix: "/"
+      route:
+        - destination:
+            host: registry

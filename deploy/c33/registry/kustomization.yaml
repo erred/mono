@@ -3,7 +3,5 @@ kind: Kustomization
 namespace: registry
 resources:
   - ../../../secret/kustomize/registry
-  - httpproxy.registry.k8s.yaml
+  - ../../base/registry
   - namespace.registry.k8s.yaml
-  - service.registry.k8s.yaml
-  - statefulset.registry.k8s.yaml
