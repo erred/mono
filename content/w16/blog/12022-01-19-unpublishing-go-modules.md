@@ -19,7 +19,7 @@ reducing the impact of `left-pad` type situations (where dependencies just disap
 
 So why might you want to unpublish something?
 
-#### _undo_ multi module
+##### _undo_ multi module
 
 For example: you have a module at `github.com/foo/bar`
 and you decided to experiment with with a multi module configuration,
@@ -29,7 +29,7 @@ Because of the permanent cache and [longest module path wins](https://go.dev/ref
 removing the module from your source repo isn't enough.
 This is especially apparent for tools installed with `go install pkg@latest`.
 
-#### _wiping_ a repo
+##### _wiping_ a repo
 
 You no longer want to keep the repo,
 and you also want `pkg.go.dev` to stop displaying documentation for it.
@@ -44,7 +44,7 @@ _Note:_ the code will still live on in the proxy,
 stopping existing builds from breaking,
 but new code shouldn't, by default, add it as a new direct dependency.
 
-#### _start_
+##### _start_
 
 What version do you start retracting from?
 If you're wiping out something entirely, `v0.0.0-0` is a good choice.
@@ -60,13 +60,14 @@ Within prerelease identifiers,
 shorter sets (dot separated) order first,
 and numeric identifiers order before strings, so `0` is the earliest prerelease possible.
 
-#### _end_
+##### _end_
 
 What version do you end at retracting?
 If you've never published tags for it, you could use `v0.0.1`.
 If you have, then the next version up works fine.
+The important thing here is you can retract the same version that is publishing the retraction.
 
-#### _publishing_
+##### _publishing_
 
 So you have a `retract [v0.0.0-0, v1.5.6]` directive in the `go.mod`.
 What next?
@@ -76,10 +77,53 @@ You'll have to publish it with `v1.5.6`:
   - `v1.5.6` if it's the repo root
   - `path/from/root/v1.5.6` if it's a multi module repo
 - push it to your repo
-- pull the module/version through the proxy to make it aware
+- pull the module/version through the proxy to make it aware of the retraction.
   - in some temporary module `go get your/module@v1.5.6`
 
-Because we're using tags,
+_Note:_ because we're using tags,
 this doesn't have to happen on the main branch of the repo.
 You could create an empty branch, say `retractions`,
 with just the `go.mod` containing the `module ....` and `retract` in it.
+
+#### _example_
+
+You have a multi module repo and you want to move back to a single module:
+
+```gomod
+// /go.mod
+module github.com/foo/bar
+
+// published tags:
+// v0.1.0
+// v0.2.0
+// v0.3.0
+// v0.4.0
+```
+
+and
+
+```gomod
+// /cmd/bar/go.mod
+module github.com/foo/bar/cmd/bar
+
+// published tags:
+// cmd/bar/v0.3.0
+// cmd/bar/v0.4.0
+```
+
+You should:
+
+On a non default branch tag this as `cmd/bar/v0.5.0`
+(If you use the default branch,
+your next commit after the tag should remove to `go.mod` file entirely).
+
+```gomod
+// /cmd/bar/go.mod
+module github.com/foo/bar/cmd/bar
+
+retract [v0.0.0-0, v0.5.0]
+```
+
+Tag a new release of the module at the root (`github.com/foo/bar`)
+so downstream users will have a working way of getting the content in `cmd/bar`.
+Ex: `v0.4.1`.
