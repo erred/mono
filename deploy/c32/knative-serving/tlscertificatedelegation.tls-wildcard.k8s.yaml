@@ -1,9 +1,0 @@
-apiVersion: projectcontour.io/v1
-kind: TLSCertificateDelegation
-metadata:
-  name: tls-wildcard
-spec:
-  delegations:
-    - secretName: tls-wildcard
-      targetNamespaces:
-        - "*"

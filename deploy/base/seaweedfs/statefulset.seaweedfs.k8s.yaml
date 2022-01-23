@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs
+spec:
+  serviceName: seaweedfs
+  template:
+    spec:
+      containers:
+        - name: seaweedfs
+          image: index.docker.io/chrislusf/seaweedfs
+          args:
+            - server
+            - -dir=/data
+            - ip=seaweedfs-0
+            - -s3
+            - -s3.config=/config/s3.json
+          ports:
+            - containerPort: 8333
+              name: s3gateway
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /data
+              name: data
+      volumes:
+        - name: config
+          secret:
+            secretName: seaweedfs
+        - name: data
+          hostPath:
+            path: /opt/c33/seaweedfs
