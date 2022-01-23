@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: auth/authnbpb/authnbpb.proto
+// source: authnb/v1/authnb.proto
 
-package authnbpb
+package v1
 
 import (
 	context "context"
@@ -38,7 +38,7 @@ func NewAuthnBClient(cc grpc.ClientConnInterface) AuthnBClient {
 
 func (c *authnBClient) GetSession(ctx context.Context, in *GetSessionRequest, opts ...grpc.CallOption) (*GetSessionResponse, error) {
 	out := new(GetSessionResponse)
-	err := c.cc.Invoke(ctx, "/seankhliao.auth.authnbpb.AuthnB/GetSession", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/apis.authnb.AuthnB/GetSession", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (c *authnBClient) GetSession(ctx context.Context, in *GetSessionRequest, op
 
 func (c *authnBClient) CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error) {
 	out := new(CreateSessionResponse)
-	err := c.cc.Invoke(ctx, "/seankhliao.auth.authnbpb.AuthnB/CreateSession", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/apis.authnb.AuthnB/CreateSession", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (c *authnBClient) CreateSession(ctx context.Context, in *CreateSessionReque
 
 func (c *authnBClient) DeleteSession(ctx context.Context, in *DeleteSessionRequest, opts ...grpc.CallOption) (*DeleteSessionResponse, error) {
 	out := new(DeleteSessionResponse)
-	err := c.cc.Invoke(ctx, "/seankhliao.auth.authnbpb.AuthnB/DeleteSession", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/apis.authnb.AuthnB/DeleteSession", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (c *authnBClient) DeleteSession(ctx context.Context, in *DeleteSessionReque
 
 func (c *authnBClient) GetUserAuth(ctx context.Context, in *GetUserAuthRequest, opts ...grpc.CallOption) (*GetUserAuthResponse, error) {
 	out := new(GetUserAuthResponse)
-	err := c.cc.Invoke(ctx, "/seankhliao.auth.authnbpb.AuthnB/GetUserAuth", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/apis.authnb.AuthnB/GetUserAuth", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func _AuthnB_GetSession_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/seankhliao.auth.authnbpb.AuthnB/GetSession",
+		FullMethod: "/apis.authnb.AuthnB/GetSession",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthnBServer).GetSession(ctx, req.(*GetSessionRequest))
@@ -140,7 +140,7 @@ func _AuthnB_CreateSession_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/seankhliao.auth.authnbpb.AuthnB/CreateSession",
+		FullMethod: "/apis.authnb.AuthnB/CreateSession",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthnBServer).CreateSession(ctx, req.(*CreateSessionRequest))
@@ -158,7 +158,7 @@ func _AuthnB_DeleteSession_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/seankhliao.auth.authnbpb.AuthnB/DeleteSession",
+		FullMethod: "/apis.authnb.AuthnB/DeleteSession",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthnBServer).DeleteSession(ctx, req.(*DeleteSessionRequest))
@@ -176,7 +176,7 @@ func _AuthnB_GetUserAuth_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/seankhliao.auth.authnbpb.AuthnB/GetUserAuth",
+		FullMethod: "/apis.authnb.AuthnB/GetUserAuth",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthnBServer).GetUserAuth(ctx, req.(*GetUserAuthRequest))
@@ -188,7 +188,7 @@ func _AuthnB_GetUserAuth_Handler(srv interface{}, ctx context.Context, dec func(
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AuthnB_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "seankhliao.auth.authnbpb.AuthnB",
+	ServiceName: "apis.authnb.AuthnB",
 	HandlerType: (*AuthnBServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -209,5 +209,5 @@ var AuthnB_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "auth/authnbpb/authnbpb.proto",
+	Metadata: "authnb/v1/authnb.proto",
 }

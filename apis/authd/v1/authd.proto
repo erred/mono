@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package seankhliao.authdpb;
+package authd.v1;
 
 option go_package = "go.seankhliao.com/mono/proto/authdpb";
 

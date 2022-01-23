@@ -1,8 +1,6 @@
 syntax = "proto3";
 
-package seankhliao.finpb;
-
-option go_package = "go.seankhliao.com/mono/proto/finpb";
+package apis.fin.v1;
 
 message All {
   string name = 1;

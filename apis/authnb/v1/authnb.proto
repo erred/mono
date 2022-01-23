@@ -1,8 +1,6 @@
 syntax = "proto3";
 
-package seankhliao.auth.authnbpb;
-
-option go_package = "go.seankhliao.com/mono/auth/authnbpb";
+package apis.authnb;
 
 service AuthnB {
   rpc GetSession(GetSessionRequest) returns(GetSessionResponse);
