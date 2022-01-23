@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
-	"go.seankhliao.com/mono/auth/authnbpb"
+	authnbv1 "go.seankhliao.com/mono/apis/authnb/v1"
 	"google.golang.org/grpc"
 )
 
@@ -23,7 +23,7 @@ type Server struct {
 	cookieName  string
 
 	authnbURL string
-	authnb    authnbpb.AuthnBClient
+	authnb    authnbv1.AuthnBClient
 
 	// grpc
 	envoy_service_auth_v3.UnimplementedAuthorizationServer
@@ -50,7 +50,7 @@ func (s *Server) RegisterGRPC(ctx context.Context, svr *grpc.Server, l logr.Logg
 	if err != nil {
 		return fmt.Errorf("grpc client conn: %w", err)
 	}
-	s.authnb = authnbpb.NewAuthnBClient(conn)
+	s.authnb = authnbv1.NewAuthnBClient(conn)
 
 	envoy_service_auth_v3.RegisterAuthorizationServer(svr, s)
 

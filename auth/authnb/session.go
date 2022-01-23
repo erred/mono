@@ -9,7 +9,7 @@ import (
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/attribute"
-	"go.seankhliao.com/mono/auth/authnbpb"
+	authnbv1 "go.seankhliao.com/mono/apis/authnb/v1"
 	"go.seankhliao.com/mono/internal/o11y"
 )
 
@@ -17,7 +17,7 @@ const (
 	sessionKeyFmt = "authnb/sessions/%s"
 )
 
-func (s *Server) GetSession(ctx context.Context, r *authnbpb.GetSessionRequest) (*authnbpb.GetSessionResponse, error) {
+func (s *Server) GetSession(ctx context.Context, r *authnbv1.GetSessionRequest) (*authnbv1.GetSessionResponse, error) {
 	ctx, span, l := o11y.Start(s.t, s.l, ctx, "GetSession")
 	defer span.End()
 
@@ -28,7 +28,7 @@ func (s *Server) GetSession(ctx context.Context, r *authnbpb.GetSessionRequest) 
 		return nil, err
 	}
 
-	var response authnbpb.GetSessionResponse
+	var response authnbv1.GetSessionResponse
 	switch len(result.Kvs) {
 	case 0: // not found
 	case 1: // found
@@ -42,7 +42,7 @@ func (s *Server) GetSession(ctx context.Context, r *authnbpb.GetSessionRequest) 
 	return &response, nil
 }
 
-func (s *Server) CreateSession(ctx context.Context, r *authnbpb.CreateSessionRequest) (*authnbpb.CreateSessionResponse, error) {
+func (s *Server) CreateSession(ctx context.Context, r *authnbv1.CreateSessionRequest) (*authnbv1.CreateSessionResponse, error) {
 	ctx, span, l := o11y.Start(s.t, s.l, ctx, "CreateSession")
 	defer span.End()
 
@@ -67,12 +67,12 @@ func (s *Server) CreateSession(ctx context.Context, r *authnbpb.CreateSessionReq
 	}
 
 	o11y.OK(l, span, "created session")
-	return &authnbpb.CreateSessionResponse{
+	return &authnbv1.CreateSessionResponse{
 		SessionToken: sessionToken,
 	}, nil
 }
 
-func (s *Server) DeleteSession(ctx context.Context, r *authnbpb.DeleteSessionRequest) (*authnbpb.DeleteSessionResponse, error) {
+func (s *Server) DeleteSession(ctx context.Context, r *authnbv1.DeleteSessionRequest) (*authnbv1.DeleteSessionResponse, error) {
 	ctx, span, l := o11y.Start(s.t, s.l, ctx, "DeleteSession")
 	defer span.End()
 
@@ -84,7 +84,7 @@ func (s *Server) DeleteSession(ctx context.Context, r *authnbpb.DeleteSessionReq
 	}
 
 	o11y.OK(l, span, "deleted session")
-	return &authnbpb.DeleteSessionResponse{
+	return &authnbv1.DeleteSessionResponse{
 		Found: result.Deleted > 0,
 	}, nil
 }

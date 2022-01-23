@@ -48,7 +48,7 @@ func otelMetrics(ctx context.Context, res *resource.Resource, conn *grpc.ClientC
 	// provider
 	provider := controller.New(
 		processor.NewFactory(
-			selector.NewWithExactDistribution(),
+			selector.NewWithHistogramDistribution(),
 			aggregation.CumulativeTemporalitySelector(),
 		),
 		controller.WithExporter(exporter),

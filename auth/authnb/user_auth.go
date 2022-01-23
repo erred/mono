@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/otel/attribute"
-	"go.seankhliao.com/mono/auth/authnbpb"
+	authnbv1 "go.seankhliao.com/mono/apis/authnb/v1"
 	"go.seankhliao.com/mono/internal/o11y"
 )
 
@@ -13,7 +13,7 @@ const (
 	userAuthKeyFmt = "authnb/auth/%s/%s"
 )
 
-func (s *Server) GetUserAuth(ctx context.Context, r *authnbpb.GetUserAuthRequest) (*authnbpb.GetUserAuthResponse, error) {
+func (s *Server) GetUserAuth(ctx context.Context, r *authnbv1.GetUserAuthRequest) (*authnbv1.GetUserAuthResponse, error) {
 	ctx, span, l := o11y.Start(s.t, s.l, ctx, "GetUserAuth")
 	defer span.End()
 
@@ -24,7 +24,7 @@ func (s *Server) GetUserAuth(ctx context.Context, r *authnbpb.GetUserAuthRequest
 		return nil, err
 	}
 
-	var response authnbpb.GetUserAuthResponse
+	var response authnbv1.GetUserAuthResponse
 	switch len(result.Kvs) {
 	case 0: // not found
 	case 1: // found

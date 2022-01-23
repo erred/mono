@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
-	"go.seankhliao.com/mono/auth/authnbpb"
+	authnbv1 "go.seankhliao.com/mono/apis/authnb/v1"
 	"google.golang.org/grpc"
 )
 
@@ -24,7 +24,7 @@ type Server struct {
 	cookieTTL    time.Duration
 
 	authnbURL string
-	authnb    authnbpb.AuthnBClient
+	authnb    authnbv1.AuthnBClient
 }
 
 func New(flags *flag.FlagSet) *Server {
@@ -48,7 +48,7 @@ func (s *Server) RegisterHTTP(ctx context.Context, mux *http.ServeMux, l logr.Lo
 	if err != nil {
 		return fmt.Errorf("grpc client conn: %w", err)
 	}
-	s.authnb = authnbpb.NewAuthnBClient(conn)
+	s.authnb = authnbv1.NewAuthnBClient(conn)
 
 	mux.HandleFunc("/logout", s.handleLogout)
 	mux.HandleFunc("/login", s.handleLogin)

@@ -7,7 +7,7 @@ import (
 	"text/template"
 	"time"
 
-	"go.seankhliao.com/mono/auth/authnbpb"
+	authnbv1 "go.seankhliao.com/mono/apis/authnb/v1"
 	"go.seankhliao.com/mono/internal/o11y"
 	"go.seankhliao.com/mono/internal/web/render"
 	"golang.org/x/crypto/bcrypt"
@@ -25,7 +25,7 @@ func (s *Server) handleIndex(rw http.ResponseWriter, r *http.Request) {
 
 	sessionToken := extractSession(r, s.cookieName)
 	if sessionToken != "" {
-		sRes, err := s.authnb.GetSession(ctx, &authnbpb.GetSessionRequest{
+		sRes, err := s.authnb.GetSession(ctx, &authnbv1.GetSessionRequest{
 			SessionToken: sessionToken,
 		})
 		if err != nil {
@@ -105,7 +105,7 @@ func (s *Server) handleLogin(rw http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	id, pass := r.FormValue("email"), r.FormValue("password")
-	uaRes, err := s.authnb.GetUserAuth(ctx, &authnbpb.GetUserAuthRequest{
+	uaRes, err := s.authnb.GetUserAuth(ctx, &authnbv1.GetUserAuthRequest{
 		UserId: id,
 	})
 	if err != nil {
@@ -120,7 +120,7 @@ func (s *Server) handleLogin(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sRes, err := s.authnb.CreateSession(ctx, &authnbpb.CreateSessionRequest{
+	sRes, err := s.authnb.CreateSession(ctx, &authnbv1.CreateSessionRequest{
 		UserId: id,
 		Ttl:    int64(s.cookieTTL.Seconds()),
 	})
@@ -151,7 +151,7 @@ func (s *Server) handleLogout(rw http.ResponseWriter, r *http.Request) {
 
 	sessionToken := extractSession(r, s.cookieName)
 	if sessionToken != "" {
-		_, err := s.authnb.DeleteSession(ctx, &authnbpb.DeleteSessionRequest{
+		_, err := s.authnb.DeleteSession(ctx, &authnbv1.DeleteSessionRequest{
 			SessionToken: sessionToken,
 		})
 		if err != nil {

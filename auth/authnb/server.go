@@ -9,7 +9,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
-	"go.seankhliao.com/mono/auth/authnbpb"
+	authnbv1 "go.seankhliao.com/mono/apis/authnb/v1"
 	"google.golang.org/grpc"
 )
 
@@ -20,7 +20,7 @@ type Server struct {
 	storeURL string
 	store    *clientv3.Client
 
-	authnbpb.UnimplementedAuthnBServer
+	authnbv1.UnimplementedAuthnBServer
 }
 
 func New(flags *flag.FlagSet) *Server {
@@ -33,7 +33,7 @@ func (s *Server) RegisterGRPC(ctx context.Context, svr *grpc.Server, l logr.Logg
 	s.t = t.Tracer("authnb")
 	s.l = l.WithName("authnb")
 
-	authnbpb.RegisterAuthnBServer(svr, s)
+	authnbv1.RegisterAuthnBServer(svr, s)
 
 	var err error
 	s.store, err = clientv3.NewFromURL(s.storeURL)

@@ -12,7 +12,7 @@ import (
 	envoy_service_auth_v3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	envoy_type_v3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 	"go.opentelemetry.io/otel/attribute"
-	"go.seankhliao.com/mono/auth/authnbpb"
+	authnbv1 "go.seankhliao.com/mono/apis/authnb/v1"
 	"go.seankhliao.com/mono/internal/o11y"
 	"google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
@@ -89,7 +89,7 @@ func (s *Server) checkSession(ctx context.Context, headers map[string]string) st
 		return ""
 	}
 
-	res, err := s.authnb.GetSession(ctx, &authnbpb.GetSessionRequest{
+	res, err := s.authnb.GetSession(ctx, &authnbv1.GetSessionRequest{
 		SessionToken: c.Value,
 	})
 	if err != nil {

@@ -5,23 +5,23 @@ import (
 	"io"
 	"sort"
 
-	"go.seankhliao.com/mono/proto/finpb"
+	finv1 "go.seankhliao.com/mono/apis/fin/v1"
 )
 
 func Run() {
-	var all *finpb.All
+	var all *finv1.All
 	var w io.Writer
 
 	fmt.Fprintf(w, "Summary for %s in %s\n", all.Name, all.Currency)
 }
 
-func delta(all *finpb.All) months {
+func delta(all *finv1.All) months {
 	ms := make(months, 0, len(all.Months))
 	for _, mo := range all.Months {
 		m := month{
 			year:       int(mo.Year),
 			month:      int(mo.Month),
-			categories: make(map[finpb.Transaction_Category]int64),
+			categories: make(map[finv1.Transaction_Category]int64),
 		}
 		for _, tr := range mo.Transactions {
 			m.categories[tr.Src] -= tr.Amount
@@ -33,13 +33,13 @@ func delta(all *finpb.All) months {
 	return ms
 }
 
-func balances(w io.Writer, all *finpb.All) {
+func balances(w io.Writer, all *finv1.All) {
 }
 
 type month struct {
 	year       int
 	month      int
-	categories map[finpb.Transaction_Category]int64
+	categories map[finv1.Transaction_Category]int64
 }
 type months []month
 

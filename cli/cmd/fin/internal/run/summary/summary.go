@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	finv1 "go.seankhliao.com/mono/apis/fin/v1"
 	"go.seankhliao.com/mono/cli/cmd/fin/internal/run"
 	"go.seankhliao.com/mono/cli/cmd/fin/internal/store"
-	"go.seankhliao.com/mono/proto/finpb"
 )
 
 type Options struct{}
@@ -76,26 +76,26 @@ func (s MonthSummary) String() string {
 	return b.String()
 }
 
-func summarize(all *finpb.All) (balance, income, expense GroupSummary) {
+func summarize(all *finv1.All) (balance, income, expense GroupSummary) {
 	balance = GroupSummary{
 		Name:       "Balance",
-		Categories: group(finpb.Transaction_CASH, finpb.Transaction_BITTREX),
-		Months:     months(len(all.Months), int(finpb.Transaction_BITTREX-finpb.Transaction_CASH)+1),
+		Categories: group(finv1.Transaction_CASH, finv1.Transaction_BITTREX),
+		Months:     months(len(all.Months), int(finv1.Transaction_BITTREX-finv1.Transaction_CASH)+1),
 	}
 	income = GroupSummary{
 		Name:       "Income",
-		Categories: group(finpb.Transaction_SALARY, finpb.Transaction_IN_OTHER),
-		Months:     months(len(all.Months), int(finpb.Transaction_IN_OTHER-finpb.Transaction_SALARY)+1),
+		Categories: group(finv1.Transaction_SALARY, finv1.Transaction_IN_OTHER),
+		Months:     months(len(all.Months), int(finv1.Transaction_IN_OTHER-finv1.Transaction_SALARY)+1),
 	}
 	expense = GroupSummary{
 		Name:       "Expense",
-		Categories: group(finpb.Transaction_FOOD, finpb.Transaction_EDUCATION),
-		Months:     months(len(all.Months), int(finpb.Transaction_EDUCATION-finpb.Transaction_FOOD)+1),
+		Categories: group(finv1.Transaction_FOOD, finv1.Transaction_EDUCATION),
+		Months:     months(len(all.Months), int(finv1.Transaction_EDUCATION-finv1.Transaction_FOOD)+1),
 	}
 
-	total := make(map[finpb.Transaction_Category]int64)
+	total := make(map[finv1.Transaction_Category]int64)
 	for i, m := range all.Months {
-		delta := make(map[finpb.Transaction_Category]int64)
+		delta := make(map[finv1.Transaction_Category]int64)
 		for _, tr := range m.Transactions {
 			delta[tr.Src] -= tr.Amount
 			delta[tr.Dst] += tr.Amount
@@ -132,7 +132,7 @@ func summarize(all *finpb.All) (balance, income, expense GroupSummary) {
 	return balance, income, expense
 }
 
-func group(first, last finpb.Transaction_Category) []string {
+func group(first, last finv1.Transaction_Category) []string {
 	var ss []string
 	for i := first; i <= last; i++ {
 		ss = append(ss, i.String())
