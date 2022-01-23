@@ -6,8 +6,11 @@ resource "google_cloudbuild_trigger" "vanity" {
   included_files = [
     "ci/cloudbuild/vanity.yaml",
     "go.*",
+    "content/**",
+    "internal/stdlog/**",
+    "internal/web/**",
     "svc/cmd/vanity/**",
-    "svc/webserver/**",
+    "svc/runsvr/**",
   ]
 
   github {
@@ -25,13 +28,15 @@ resource "google_cloudbuild_trigger" "w16" {
 
   filename = "ci/cloudbuild/w16.yaml"
   included_files = [
-    "blog/**",
-    "ci/cloudbuild/w16.yaml",
-    "internal/web/**",
     "go.*",
+    "content/**",
+    "internal/o11y/**",
+    "internal/web/picture/**",
+    "internal/web/render/**",
     "static/**",
+    "internal/stdlog/**",
+    "svc/runsvr/**",
     "svc/cmd/w16/**",
-    "svc/webserver/*",
   ]
 
   github {

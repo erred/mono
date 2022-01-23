@@ -6,15 +6,18 @@ variable "publicruns" {
   type = map(object({
     image = string
     url   = string
+    args  = list(string)
   }))
   default = {
     "go-seankhliao-com" = {
       image = "go.seankhliao.com/mono/svc/cmd/vanity"
       url   = "go.seankhliao.com"
+      args  = []
     }
     "seankhliao-com" = {
       image = "go.seankhliao.com/mono/svc/cmd/w16"
       url   = "seankhliao.com"
+      args  = ["-gtm=GTM-TLVN7D6"]
     }
   }
 }
@@ -95,9 +98,10 @@ resource "google_cloud_run_service" "publicruns" {
       containers {
         # image = "${google_artifact_registry_repository.run.location}-docker.pkg.dev/${data.google_project.default.project_id}/${google_artifact_registry_repository.run.repository_id}/${each.value.image}:latest"
         image = "${local.ar_run_url}/${each.value.image}:latest"
+        args  = each.value.args
 
         ports {
-          name           = "http1"
+          name           = "h2c"
           container_port = 8080
         }
 
@@ -113,6 +117,12 @@ resource "google_cloud_run_service" "publicruns" {
   traffic {
     latest_revision = true
     percent         = 100
+  }
+
+  lifecycle {
+    ignore_changes = [
+      template.0.spec.0.containers.0.image
+    ]
   }
 }
 resource "google_cloud_run_service_iam_policy" "publicruns" {
