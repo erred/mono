@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medea
+spec:
+  template:
+    spec:
+      containers:
+        - name: main
+          image: ko://go.seankhliao.com/mono/singlepage/medea
+          env:
+            - name: SINGLEPAGE_HOST
+              value: medea.seankhliao.com
+          ports:
+            - name: http
+              containerPort: 8080

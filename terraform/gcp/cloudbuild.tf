@@ -2,15 +2,14 @@ resource "google_cloudbuild_trigger" "vanity" {
   name        = "vanity"
   description = "go.seankhliao.com ci/cd"
 
-  filename = "ci/cloudbuild/vanity.yaml"
+  filename = "vanity/cloudbuild.yaml"
   included_files = [
-    "ci/cloudbuild/vanity.yaml",
     "go.*",
-    "content/**",
-    "internal/stdlog/**",
+    "internal/envconf/**",
+    "internal/runhttp/**",
+    "internal/vanity/**",
     "internal/web/**",
-    "svc/cmd/vanity/**",
-    "svc/runsvr/**",
+    "vanity/**",
   ]
 
   github {
@@ -22,21 +21,19 @@ resource "google_cloudbuild_trigger" "vanity" {
   }
 }
 
-resource "google_cloudbuild_trigger" "w16" {
-  name        = "w16"
+resource "google_cloudbuild_trigger" "blog" {
+  name        = "blog"
   description = "seankhliao.com ci/cd"
 
-  filename = "ci/cloudbuild/w16.yaml"
+  filename = "blog/cloudbuild.yaml"
   included_files = [
+    "blog/**",
     "go.*",
-    "content/**",
-    "internal/o11y/**",
-    "internal/web/picture/**",
-    "internal/web/render/**",
-    "static/**",
-    "internal/stdlog/**",
-    "svc/runsvr/**",
-    "svc/cmd/w16/**",
+    "internal/blog/**",
+    "internal/envconf/**",
+    "internal/runhttp/**",
+    "internal/seankhliao.com/**",
+    "internal/web/**",
   ]
 
   github {

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: earbug
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: earbug
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: earbug
+    spec:
+      containers:
+        - name: earbug
+          image: ko://go.seankhliao.com/mono/earbug
+          envFrom:
+            - secretRef:
+                name: earbug
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          hostPath:
+            path: /opt/c33/earbug

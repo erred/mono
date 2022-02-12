@@ -2,4 +2,5 @@
 
 package apis
 
-//go:generate ../tools/bin/buf generate
+//go:generate -command buf go run github.com/bufbuild/buf/cmd/buf@latest
+//go:generate buf generate

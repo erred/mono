@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: stylesheet
+spec:
+  hosts:
+    - stylesheet.seankhliao.com
+  gateways:
+    - knative-serving/knative-ingress-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: stylesheet
