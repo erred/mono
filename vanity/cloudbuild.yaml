@@ -1,5 +1,5 @@
 substitutions:
-  _IMG: go.seankhliao.com/mono/svc/cmd/vanity
+  _IMG: go.seankhliao.com/mono/vanity
   _REG: us-central1-docker.pkg.dev/com-seankhliao/run
 
 steps:

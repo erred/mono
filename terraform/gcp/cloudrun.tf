@@ -6,18 +6,23 @@ variable "publicruns" {
   type = map(object({
     image = string
     url   = string
-    args  = list(string)
+    envs = map(string)
   }))
   default = {
     "go-seankhliao-com" = {
       image = "go.seankhliao.com/mono/svc/cmd/vanity"
       url   = "go.seankhliao.com"
-      args  = []
+      envs = {
+        VANITY_HOST = "go.seankhliao.com"
+      }
     }
     "seankhliao-com" = {
       image = "go.seankhliao.com/mono/svc/cmd/w16"
       url   = "seankhliao.com"
-      args  = ["-gtm=GTM-TLVN7D6"]
+      envs = {
+        BLOG_HOST = "seankhliao.com"
+        BLOG_GTM = "GTM-TLVN7D6"
+      }
     }
   }
 }
@@ -98,7 +103,14 @@ resource "google_cloud_run_service" "publicruns" {
       containers {
         # image = "${google_artifact_registry_repository.run.location}-docker.pkg.dev/${data.google_project.default.project_id}/${google_artifact_registry_repository.run.repository_id}/${each.value.image}:latest"
         image = "${local.ar_run_url}/${each.value.image}:latest"
-        args  = each.value.args
+
+        dynamic "env" {
+          for_each = each.value.envs
+          content {
+            name = env.key
+            value = env.value
+          }
+        }
 
         ports {
           name           = "h2c"
