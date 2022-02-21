@@ -119,7 +119,7 @@ resource "google_cloud_run_service" "publicruns" {
 
         resources {
           limits = {
-            "cpu"    = "1"
+            "cpu"    = "1000m"
             "memory" = "128Mi"
           }
         }

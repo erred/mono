@@ -35,6 +35,10 @@ locals {
   # cloud build service account
   #
   cloudbuild_service_account = "${data.google_project.default.number}@cloudbuild.gserviceaccount.com"
+
+  # appengine
+  gae_service_service_account = "service-${data.google_project.default.number}@gcp-gae-service.iam.gserviceaccount.com"
+  gae_api_service_account = "service-${data.google_project.default.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_policy" "default" {
@@ -97,6 +101,13 @@ data "google_iam_policy" "project" {
       "serviceAccount:service-330311169810@compute-system.iam.gserviceaccount.com"
     ]
     role = "roles/compute.serviceAgent"
+  }
+
+  binding {
+    members = [
+      "serviceAccount:${local.gae_service_service_account}",
+    ]
+    role = "roles/appengine.serviceAgent"
   }
 
   dynamic "binding" {
