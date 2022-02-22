@@ -2,6 +2,9 @@ package blog
 
 import (
 	"bytes"
+	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/fs"
@@ -10,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"go.seankhliao.com/ga4mp"
 	"go.seankhliao.com/mono/internal/envconf"
 	seankhliaocom "go.seankhliao.com/mono/internal/seankhliao.com"
 )
@@ -20,6 +24,8 @@ type Server struct {
 
 	notFoundBody []byte
 
+	mp *ga4mp.Client
+
 	mux *http.ServeMux
 }
 
@@ -27,7 +33,11 @@ func New() (*Server, error) {
 	s := &Server{
 		host: envconf.String("BLOG_HOST", "seankhliao.com"),
 		gtm:  envconf.String("BLOG_GTM", ""),
-		mux:  http.NewServeMux(),
+		mp: ga4mp.New(ga4mp.ClientOptions{
+			ApiSecret:     envconf.String("GA4_SECRET", ""),
+			MeasurementID: envconf.String("GA4_ID", "'"),
+		}),
+		mux: http.NewServeMux(),
 	}
 
 	s.registerStatic(s.mux, seankhliaocom.StaticFS)
@@ -37,6 +47,46 @@ func New() (*Server, error) {
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	var id string
+	c, err := r.Cookie("__blog_ga4id")
+	if err == nil {
+		id = c.Value
+	}
+	if id == "" {
+		buf := make([]byte, 8)
+		io.ReadFull(rand.Reader, buf)
+		id = "ga4_rnd_" + hex.EncodeToString(buf)
+	}
+
+	go func() {
+		ua := r.Header.Get("sec-ch-ua")
+		if ua == "" {
+			ua = r.UserAgent()
+		}
+		s.mp.Send(context.Background(), &ga4mp.Request{
+			ClientID: id,
+			Events: []ga4mp.Event{
+				{
+					Name: "http_request",
+					Params: map[string]any{
+						"path":       r.URL.Path,
+						"user_agent": ua,
+						"referrer":   r.Referer(),
+					},
+				},
+			},
+		})
+	}()
+
+	http.SetCookie(rw, &http.Cookie{
+		Name:     "__blog_ga4id",
+		Value:    id,
+		Path:     "/",
+		Domain:   "seankhliao.com",
+		HttpOnly: true,
+		Secure:   true,
+	})
+
 	s.mux.ServeHTTP(rw, r)
 }
 

@@ -25,6 +25,7 @@ require (
 	go.opentelemetry.io/otel/sdk/export/metric v0.26.0
 	go.opentelemetry.io/otel/sdk/metric v0.26.0
 	go.opentelemetry.io/otel/trace v1.3.0
+	go.seankhliao.com/ga4mp v0.0.1
 	gocloud.dev v0.24.0
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 	golang.org/x/exp v0.0.0-20220128181451-c853b6ddb95e
