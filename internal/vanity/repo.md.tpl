@@ -4,7 +4,7 @@ description: module go.seankhliao.com/{{ .Repo }}
 head: |
     <meta
       name="go-import"
-      content="go.seankhliao.com/{{ .Repo }} git https://github.com/seankhliao/{{ .Rrepo }}">
+      content="go.seankhliao.com/{{ .Repo }} git https://github.com/seankhliao/{{ .Repo }}">
     <meta
       name="go-source"
       content="go.seankhliao.com/{{ .Repo }}
