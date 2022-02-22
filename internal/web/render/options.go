@@ -124,6 +124,7 @@ func (d *PageData) fromHeader(b []byte) ([]byte, error) {
 		return nil, fmt.Errorf("unmarshal metadata: %w", err)
 	}
 
+	d.Head = first(d.Head, meta["head"])
 	d.Title = first(d.Title, meta["title"])
 	d.Description = first(d.Description, meta["description"])
 	d.Style = first(d.Style, meta["style"])
