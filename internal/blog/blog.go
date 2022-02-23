@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"log"
 	"net/http"
 	"path"
 	"strings"
@@ -58,26 +59,6 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		id = "ga4_rnd_" + hex.EncodeToString(buf)
 	}
 
-	go func() {
-		ua := r.Header.Get("sec-ch-ua")
-		if ua == "" {
-			ua = r.UserAgent()
-		}
-		s.mp.Send(context.Background(), &ga4mp.Request{
-			ClientID: id,
-			Events: []ga4mp.Event{
-				{
-					Name: "http_request",
-					Params: map[string]interface{}{
-						"path":       r.URL.Path,
-						"user_agent": ua,
-						"referrer":   r.Referer(),
-					},
-				},
-			},
-		})
-	}()
-
 	http.SetCookie(rw, &http.Cookie{
 		Name:     "__blog_ga4id",
 		Value:    id,
@@ -87,7 +68,31 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 	})
 
+	t := time.Now()
 	s.mux.ServeHTTP(rw, r)
+	d := time.Since(t)
+
+	ua := r.Header.Get("sec-ch-ua")
+	if ua == "" {
+		ua = r.UserAgent()
+	}
+	err = s.mp.Send(context.Background(), &ga4mp.Request{
+		ClientID: id,
+		Events: []ga4mp.Event{
+			{
+				Name: "http_request",
+				Params: map[string]interface{}{
+					"path":          r.URL.Path,
+					"user_agent":    ua,
+					"referrer":      r.Referer(),
+					"serve_time_ns": d.Nanoseconds(),
+				},
+			},
+		},
+	})
+	if err != nil {
+		log.Println("send analytics", err)
+	}
 }
 
 // registerStatic registers handlers for all file paths in the fsys
