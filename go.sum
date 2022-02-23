@@ -1280,6 +1280,8 @@ go.opentelemetry.io/proto/otlp v0.12.0 h1:CMJ/3Wp7iOWES+CYLfnBv+DVmPbB+kmy9PJ92X
 go.opentelemetry.io/proto/otlp v0.12.0/go.mod h1:TsIjwGWIx5VFYv9KGVlOpxoBl5Dy+63SUguV7GGvlSQ=
 go.seankhliao.com/ga4mp v0.0.1 h1:aVWdWFAtfLOvlfmBsX6U/mWVRYp1bZ5WHivVGwsTa6Q=
 go.seankhliao.com/ga4mp v0.0.1/go.mod h1:EUc3uN+DAbOiliamqGVzNePigoUbxHxJf/FshdQHRf0=
+go.seankhliao.com/ga4mp v0.0.2 h1:+WvP9YKOvX62/lk++h/Qhj1CAOvUntDTX+6bfBvFzKc=
+go.seankhliao.com/ga4mp v0.0.2/go.mod h1:iTA2SWPGkwvjsbQPT+vkWfTfGZHAFJlwt24oy8R0I5Q=
 go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5/go.mod h1:nmDLcffg48OtT/PSW0Hg7FvpRQsQh5OSqIylirxKC7o=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=

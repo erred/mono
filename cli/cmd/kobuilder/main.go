@@ -215,7 +215,7 @@ type ghRel []struct {
 }
 
 func latestGo() (string, error) {
-	res, err := http.Get("https://go.dev/dl/?mode=json&include=all")
+	res, err := http.Get("https://go.dev/dl/?mode=json")
 	if err != nil {
 		return "", fmt.Errorf("GET go.dev/dl: %w", err)
 	}
