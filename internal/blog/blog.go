@@ -68,7 +68,7 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 			Events: []ga4mp.Event{
 				{
 					Name: "http_request",
-					Params: map[string]any{
+					Params: map[string]interface{}{
 						"path":       r.URL.Path,
 						"user_agent": ua,
 						"referrer":   r.Referer(),
