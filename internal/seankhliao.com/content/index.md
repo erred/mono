@@ -27,6 +27,10 @@ Dates using the
 
 ##### _Site_ Reliability Engineer
 
+_12022_ Deloitte
+
+##### _Site_ Reliability Engineer
+
 _12020—12021_ de Bijenkorf — observability, platform/cicd, security
 
 ##### _MSc_ Security and Network Engineering
@@ -51,7 +55,7 @@ _12014—12018_ National Taiwan University — programming, machine learning, bu
 - Belgium — 12019-10
 - Canada — 12019-04
 - Czechia — 12019-12
-- England — _12009—12011_, 12019-10, 12020-02, 12021-11
+- England — _12009—12011_, 12019-10, 12020-02, 12021-11, _12022_
 - France — 12021-11
 - Germany — 12019-12
 - Hong Kong — 12017-08
@@ -60,7 +64,7 @@ _12014—12018_ National Taiwan University — programming, machine learning, bu
 - Italy — 12021-12
 - Japan — 12018-03
 - Luxembourg — 12019-10
-- Netherlands — _12019—12021_
+- Netherlands — _12019—12022_
 - Philippines — 12017-08
 - Russia — _12000—12005_
 - Singapore — 12017-01
