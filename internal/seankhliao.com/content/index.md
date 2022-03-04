@@ -27,7 +27,7 @@ Dates using the
 
 ##### _Site_ Reliability Engineer
 
-_12022_ Deloitte
+_12022_ Deloitte — stuff
 
 ##### _Site_ Reliability Engineer
 
@@ -55,7 +55,7 @@ _12014—12018_ National Taiwan University — programming, machine learning, bu
 - Belgium — 12019-10
 - Canada — 12019-04
 - Czechia — 12019-12
-- England — _12009—12011_, 12019-10, 12020-02, 12021-11, _12022_
+- England — __12009—12011__, 12019-10, 12020-02, 12021-11, _12022_
 - France — 12021-11
 - Germany — 12019-12
 - Hong Kong — 12017-08
@@ -64,13 +64,13 @@ _12014—12018_ National Taiwan University — programming, machine learning, bu
 - Italy — 12021-12
 - Japan — 12018-03
 - Luxembourg — 12019-10
-- Netherlands — _12019—12022_
+- Netherlands — __12019—12022__
 - Philippines — 12017-08
-- Russia — _12000—12005_
+- Russia — __12000—12005__
 - Singapore — 12017-01
 - South Korea — 12018-06
 - Sweden — 12018-01
-- Taiwan — _11996—12000, 12005—12009, 12011—12019_
+- Taiwan — __11996—12000, 12005—12009, 12011—12019__
 - Timor-Leste — 12018-02
 - United States — 12019-04
 - Vatican — 12021-12
