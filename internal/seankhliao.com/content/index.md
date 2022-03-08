@@ -44,7 +44,7 @@ _12014—12018_ National Taiwan University — programming, machine learning, bu
 #### _Find_ Me
 
 - [Blog](/blog/) — home of random thoughts
-- [Email](mailto:sean@seankhliao.com) — for me?
+- [Email](mailto:sean@liao.dev) — for me?
 - [Github](https://github.com/seankhliao) — half broken stuff lives here
 - [Github Org](https://github.com/erred) — where old code goes to die
 
