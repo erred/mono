@@ -30,6 +30,7 @@ func (s *Server) registerRedirects(mux *http.ServeMux) {
 		skhlRedirect("linkedin", "readme", "seankhliao"),
 		skhlRedirect("linkedin", "profile", "seankhliao"),
 		skhlRedirect("twitter", "profile", "seankhliao"),
+		skhlRedirect("youtube", "profile", "seankhliao"),
 	}
 
 	for _, r := range redirects {
@@ -53,6 +54,7 @@ func shorten(source string) string {
 		"instagram": "ig",
 		"linkedin":  "li",
 		"twitter":   "tw",
+		"youtube":   "yt",
 		// medium
 		"profile": "p",
 		"readme":  "r",
