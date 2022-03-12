@@ -41,6 +41,7 @@ func New() (*Server, error) {
 		mux: http.NewServeMux(),
 	}
 
+	s.registerRedirects(s.mux)
 	s.registerStatic(s.mux, seankhliaocom.StaticFS)
 	s.renderAndRegister(s.mux, seankhliaocom.ContentFS)
 
