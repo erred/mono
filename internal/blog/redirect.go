@@ -26,7 +26,7 @@ func (s *Server) registerRedirects(mux *http.ServeMux) {
 		skhlRedirect("github", "site", "seankhliao"),
 		skhlRedirect("google", "profile", "seankhliao"),
 		skhlRedirect("instagram", "profile", "seankhliao"),
-		skhlRedirect("linkedin", "about", "seankhliao"),
+		skhlRedirect("linkedin", "readme", "seankhliao"),
 		skhlRedirect("linkedin", "profile", "seankhliao"),
 		skhlRedirect("twitter", "profile", "seankhliao"),
 	}
