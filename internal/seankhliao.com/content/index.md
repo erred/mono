@@ -9,13 +9,28 @@ style: |
 
 ### _Hey_, I'm Sean
 
-##### _Bleeding_ Edge Cloud Native
+##### _I_ am...
 
-I run with shiny new stuff that is always _half-broken_,
-so I know what works and what is just a waste of time.
-I have a preference for Go, both as something to write and operate,
-and have the most experience with Kubernetes as the deployment platform.
-Mostly into observability stuff (metrics, tracing, logging, alerting).
+Well I don't know,
+I'll let you decide who you think I am.
+In the flesh liveness probes over the coffee protocol
+may be possible if you're in London, UK,
+[contact for details](mailto:sean+coffee@liao.dev).
+
+##### _Around_ the Internet
+
+This site is the center of my online presence,
+the [blog section](/blog/) contains write ups of experiments with cloud native tech.
+Occasionally, I may appear in [Go](https://go.dev) related projects.
+
+##### _Work_
+
+For work, I prod at clouds with Go and way too much bash + yaml.
+Observability, in its various forms, are my primary interest area
+(maintaining black boxes is too painful),
+[Software Supply Chain Security](https://slsa.dev/) comes second
+(got to find something interesting when working on all those CI/CD pipelines),
+and automation is table stakes (I am [lazy...](https://quoteinvestigator.com/2014/02/26/lazy-job/)).
 
 _No promises_ I'm actually good at anything
 
@@ -27,7 +42,7 @@ Dates using the
 
 ##### _Site_ Reliability Engineer
 
-_12022_ Deloitte — stuff
+_12022_ Deloitte — things I don't know if I can say?
 
 ##### _Site_ Reliability Engineer
 
@@ -44,7 +59,7 @@ _12014—12018_ National Taiwan University — programming, machine learning, bu
 #### _Find_ Me
 
 - [Blog](/blog/) — home of random thoughts
-- [Email](mailto:sean@liao.dev) — for me?
+- [Email](mailto:sean+hello@liao.dev) — for me?
 - [Github](https://github.com/seankhliao) — half broken stuff lives here
 - [Github Org](https://github.com/erred) — where old code goes to die
 
