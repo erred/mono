@@ -2,12 +2,12 @@ resource "google_cloudbuild_trigger" "vanity" {
   name        = "vanity"
   description = "go.seankhliao.com ci/cd"
 
-  filename = "vanity/cloudbuild.yaml"
+  filename = "cmd/go.seankhliao.com/cloudbuild.yaml"
   included_files = [
     "go.*",
     "internal/envconf/**",
     "internal/runhttp/**",
-    "internal/vanity/**",
+    "internal/go.seankhliao.com/**",
     "internal/web/**",
     "vanity/**",
   ]
@@ -25,11 +25,10 @@ resource "google_cloudbuild_trigger" "blog" {
   name        = "blog"
   description = "seankhliao.com ci/cd"
 
-  filename = "blog/cloudbuild.yaml"
+  filename = "cmd/seankhliao.com/cloudbuild.yaml"
   included_files = [
-    "blog/**",
+    "cmd/seankhliao.com/**",
     "go.*",
-    "internal/blog/**",
     "internal/envconf/**",
     "internal/runhttp/**",
     "internal/seankhliao.com/**",
