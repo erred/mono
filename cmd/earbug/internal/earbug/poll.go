@@ -3,7 +3,7 @@ package earbug
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/zmb3/spotify/v2"
@@ -16,15 +16,14 @@ func (s *Server) start() error {
 	var token oauth2.Token
 	err := json.Unmarshal(s.Store.Token, &token)
 	if err != nil {
-		return err
+		return fmt.Errorf("unmarshal stored token: %w", err)
 	}
 
 	go func() {
-		c := spotify.New(s.auth.Client(context.Background(), &token), spotify.WithRetry(true))
 		t := time.NewTicker(s.pollInterval)
 		defer t.Stop()
 		for {
-			s.update(c)
+			s.update()
 			<-t.C
 		}
 	}()
@@ -32,12 +31,18 @@ func (s *Server) start() error {
 	return nil
 }
 
-func (s *Server) update(c *spotify.Client) {
-	items, err := c.PlayerRecentlyPlayedOpt(context.Background(), &spotify.RecentlyPlayedOptions{
-		Limit: 50, // Max
-	})
+func (s *Server) update() {
+	s.mu.RLock()
+	items, err := s.client.PlayerRecentlyPlayedOpt(
+		context.Background(),
+		&spotify.RecentlyPlayedOptions{
+			Limit: 50, // Max
+		},
+	)
+	s.mu.RUnlock()
 	if err != nil {
-		log.Println("get recently played", err)
+		u := s.auth.AuthURL(earbugState)
+		s.log.Err(err).Str("auth_url", u).Msg("get recently played")
 		return
 	}
 
@@ -75,10 +80,13 @@ func (s *Server) update(c *spotify.Client) {
 	newPlaybacks, newTracks := len(s.Store.Playbacks), len(s.Store.Tracks)
 
 	if (newPlaybacks+newTracks)-(oldTracks+oldPlaybacks) > 0 {
-		log.Println("tracks", oldTracks, "+", newTracks-oldTracks, "playbacks", oldPlaybacks, "+", newPlaybacks-oldPlaybacks)
+		s.log.Debug().
+			Int("tracks_total", newTracks).Int("tracks_new", newTracks-oldTracks).
+			Int("plays_total", newPlaybacks).Int("plays_new", newPlaybacks-oldPlaybacks).
+			Msg("new")
 		err = s.Write()
 		if err != nil {
-			log.Println("write store", err)
+			s.log.Err(err).Msg("write to store")
 		}
 	}
 }

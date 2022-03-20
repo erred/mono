@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"os"
+	"time"
 
-	"github.com/go-logr/stdr"
+	"github.com/rs/zerolog"
 	"go.seankhliao.com/mono/internal/web/render"
 )
 
@@ -22,24 +23,24 @@ func main() {
 	)
 	flag.Parse()
 
-	log := stdr.New(nil)
+	log := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 
 	fi, err := os.Open(src)
 	if err != nil {
-		log.Error(err, "open src", "file", src)
+		log.Err(err).Str("src", src).Msg("open file")
 		os.Exit(1)
 	}
 	defer fi.Close()
 	fo, err := os.Create(dst)
 	if err != nil {
-		log.Error(err, "open dst", "file", dst)
+		log.Err(err).Str("dst", dst).Msg("create file")
 		os.Exit(1)
 	}
 	defer fo.Close()
 
 	err = render.Render(&o, fo, fi)
 	if err != nil {
-		log.Error(err, "render")
+		log.Err(err).Msg("render")
 		os.Exit(1)
 	}
 }
