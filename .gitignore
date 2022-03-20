@@ -1,5 +1,7 @@
 .terraform/
 *tfstate*
 
+bin/
+pkgbuild/
 secret
 tools/bin/
