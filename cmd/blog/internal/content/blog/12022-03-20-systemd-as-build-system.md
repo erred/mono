@@ -48,6 +48,8 @@ but they really only have an effect when everything is installed+enabled.
 `.target` files are useful when since with the graph method you need to know the end state,
 and it's unlikely your last step is very memorable.
 It's also a good place to attach the notification handlers with `OnSuccess=` and `OnFailure`.
+Unfortunately, they only run once (unless explicitly targetted by a `systemctl start` command,
+so you may want to consider replacing them with a dummy service that just echos something).
 
 ##### _passing_ values
 
