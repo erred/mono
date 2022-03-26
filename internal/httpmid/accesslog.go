@@ -40,7 +40,7 @@ func AccessLog(h http.Handler, o AccessLogOut) http.Handler {
 
 		spanCtx := trace.SpanContextFromContext(r.Context())
 		al := httpmidv1.AccessLog{
-			Ts:            timestamppb.New(t1),
+			Ts:            timestamppb.New(t0),
 			TraceId:       spanCtx.TraceID().String(),
 			SpanId:        spanCtx.SpanID().String(),
 			HttpMethod:    r.Method,
