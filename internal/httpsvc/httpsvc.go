@@ -11,8 +11,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/nats-io/nats.go"
+	natsproto "github.com/nats-io/nats.go/encoders/protobuf"
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.seankhliao.com/mono/internal/envconf"
+	"go.seankhliao.com/mono/internal/httpmid"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"golang.org/x/sys/unix"
@@ -52,9 +56,30 @@ func Run(s HTTPSvc) {
 
 	s.Init(log)
 
+	accessLogOpts := httpmid.AccessLogOut{
+		Log: log,
+	}
+
+	natsURL := envconf.String("NATS_URL", "nats://localhost:4222")
+	natsConn, err := nats.Connect(natsURL)
+	if err != nil {
+		log.Info().Err(err).Msg("skipping nats setup")
+	} else {
+		natsConnEncoded, err := nats.NewEncodedConn(natsConn, natsproto.PROTOBUF_ENCODER)
+		if err != nil {
+			log.Info().Err(err).Msg("setup nats encoded conn")
+		} else {
+			accessLogOpts.Pub = natsConnEncoded
+		}
+	}
+
+	handler := http.Handler(s)
+	handler = httpmid.AccessLog(handler, accessLogOpts)
+	handler = otelhttp.NewHandler(handler, "serve")
+	handler = h2c.NewHandler(handler, &http2.Server{})
+
 	host := envconf.String("HOST", "")
 	port := envconf.String("PORT", "8080")
-	handler := h2c.NewHandler(s, &http2.Server{})
 	svr := http.Server{
 		Addr:              host + ":" + port,
 		Handler:           handler,

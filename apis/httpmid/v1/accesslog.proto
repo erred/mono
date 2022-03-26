@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package httpmid.v1;
+
+option go_package = "go.seankhliao.com/mono/apis/httpmid/v1;httpmidv1";
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+message AccessLog {
+  google.protobuf.Timestamp ts = 1;
+  string trace_id = 2;
+  string span_id = 3;
+
+  string http_method = 4;
+  string http_url = 5;
+  string http_version = 6;
+  string http_host = 7;
+  string http_useragent = 8;
+  string http_referrer = 9;
+
+  google.protobuf.Duration handle_time = 10;
+  int32 http_status = 11;
+  int64 bytes_written = 12;
+  // int64 bytes_read = 13;
+}

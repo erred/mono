@@ -47,6 +47,5 @@ func (s *Server) Init(log zerolog.Logger) error {
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	s.log.Debug().Str("user_agent", r.UserAgent()).Str("referrer", r.Referer()).Str("url", r.URL.String()).Msg("requested")
 	s.mux.ServeHTTP(rw, r)
 }
