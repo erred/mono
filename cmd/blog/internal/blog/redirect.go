@@ -15,6 +15,7 @@ type redirectLink struct {
 func (s *Server) registerRedirects(mux *http.ServeMux) {
 	redirects := []redirectLink{
 		skhlRedirect("angelco", "profile", "seankhliao"),
+		skhlRedirect("cv", "profile", "seankhliao"),
 		skhlRedirect("facebook", "profile", "seankhliao"),
 		skhlRedirect("github", "profile", "erred"),
 		skhlRedirect("github", "profile", "sean-dbk"),
