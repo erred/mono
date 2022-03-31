@@ -9,13 +9,13 @@ import (
 	"go.seankhliao.com/mono/cli/cmd/fin/internal/store"
 )
 
-func Run(o run.Options, args []string) error {
+func Run(o *run.Options, args []string) error {
 	fs := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	err := fs.Parse(args[1:])
 	if err != nil {
 		return err
 	}
-
+	fmt.Println("formatting", o.File)
 	return format(o.File)
 }
 

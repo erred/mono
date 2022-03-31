@@ -3,6 +3,10 @@ title: liao.dev
 description: infra?
 ---
 
-### _liao.dev_
+### _hey_ you
 
-This domain holds various infra components for [seankhliao](https://seankhliao.com/w-s-liaodev)
+I wonder where you found this site?
+If you're looking for me (sean),
+that's at [seankhliao.com](https://seankhliao.com/w-s-liaodev)
+Anyway, there's no much to see here (yet!),
+move along.

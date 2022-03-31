@@ -1,0 +1,10 @@
+[Unit]
+Description=paste.liao.dev
+
+[Service]
+Environment=PORT=28008
+Environment=NATS_URL=nats://192.168.100.1:4222
+ExecStart=/usr/local/bin/paste
+
+[Install]
+WantedBy=multi-user.target

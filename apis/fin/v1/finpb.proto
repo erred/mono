@@ -24,6 +24,10 @@ message Transaction {
     REVOLUT = 13;
     DEGIRO = 14;
     BITTREX = 15;
+    HSBC = 16;
+    NOVUS = 17;
+    // = 18;
+    FOREX = 19;
 
     SALARY = 20;
     ALLOWANCE = 21;

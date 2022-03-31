@@ -1,0 +1,10 @@
+[Unit]
+Description=go.seankhliao.com
+
+[Service]
+Environment=PORT=28002
+Environment=NATS_URL=nats://192.168.100.1:4222
+ExecStart=/usr/local/bin/vanity
+
+[Install]
+WantedBy=multi-user.target

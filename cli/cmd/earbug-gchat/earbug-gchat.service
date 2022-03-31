@@ -1,0 +1,6 @@
+[Unit]
+Description=report listening records
+
+[Service]
+EnvironmentFile=/etc/mono/earbug-gchat/env
+ExecStart=/usr/local/bin/earbug-gchat

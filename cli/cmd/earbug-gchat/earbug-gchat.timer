@@ -1,0 +1,11 @@
+[Unit]
+Description=daily report of listening history
+Wants=network-online.target
+After=network-online.target
+
+[Timer]
+OnCalendar=*-*-* 11,23:55:00
+Unit=earbug-gchat.service
+
+[Install]
+WantedBy=multi-user.target

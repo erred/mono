@@ -20,7 +20,7 @@ func NewOptions(fs *flag.FlagSet) *Options {
 
 func (o *Options) InitFlags(fs *flag.FlagSet) {}
 
-func Run(o run.Options, args []string) error {
+func Run(o *run.Options, args []string) error {
 	fs := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	err := fs.Parse(args[1:])
 	if err != nil {
@@ -79,8 +79,8 @@ func (s MonthSummary) String() string {
 func summarize(all *finv1.All) (balance, income, expense GroupSummary) {
 	balance = GroupSummary{
 		Name:       "Balance",
-		Categories: group(finv1.Transaction_CASH, finv1.Transaction_BITTREX),
-		Months:     months(len(all.Months), int(finv1.Transaction_BITTREX-finv1.Transaction_CASH)+1),
+		Categories: group(finv1.Transaction_CASH, finv1.Transaction_FOREX),
+		Months:     months(len(all.Months), int(finv1.Transaction_FOREX-finv1.Transaction_CASH)+1),
 	}
 	income = GroupSummary{
 		Name:       "Income",

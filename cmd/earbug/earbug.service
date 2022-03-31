@@ -1,0 +1,14 @@
+[Unit]
+Description=Spotify listening history logger
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=NATS_URL=nats://192.168.100.1:4222
+EnvironmentFile=/etc/earbug/env
+ExecStart=/usr/local/bin/earbug
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

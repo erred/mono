@@ -1,0 +1,17 @@
+[Unit]
+Description=Github repo default setter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=PORT=28003
+Environment=GH_APP_ID=126001
+Environment=GH_APP_KEY_FILE=/etc/ghdefaults/github.pem
+Environment=GH_WEBHOOK_SECRET_FILE=/etc/ghdefaults/WEBHOOK_SECRET
+Environment=NATS_URL=nats://192.168.100.1:4222
+ExecStart=/usr/local/bin/ghdefaults
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
