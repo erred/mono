@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog"
 	"go.seankhliao.com/mono/cmd/blog/internal"
 	"go.seankhliao.com/mono/internal/httpsvc"
+	"go.seankhliao.com/mono/internal/webstatic"
 )
 
 var _ httpsvc.HTTPSvc = &Server{}
@@ -29,6 +30,7 @@ func (s *Server) Init(init *httpsvc.Init) error {
 	s.registerRedirects(s.mux)
 	s.registerStatic(s.mux, internal.StaticFS)
 	s.renderAndRegister(s.mux, internal.ContentFS)
+	webstatic.Register(s.mux)
 	return nil
 }
 

@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog"
 	"go.seankhliao.com/mono/internal/httpsvc"
 	"go.seankhliao.com/mono/internal/web/render"
+	"go.seankhliao.com/mono/internal/webstatic"
 )
 
 var (
@@ -30,6 +31,7 @@ type Server struct {
 	host string
 
 	ts    time.Time
+	mux   *http.ServeMux
 	index []byte
 }
 
@@ -37,16 +39,23 @@ func (s *Server) Init(init *httpsvc.Init) error {
 	s.log = init.Log
 	s.ts = time.Now()
 
+	s.mux = http.NewServeMux()
+	webstatic.Register(s.mux)
+	s.mux.HandleFunc("/", s.handler)
+
 	var err error
 	s.index, err = render.CompactBytes("", "", "", indexRaw)
 	if err != nil {
 		return fmt.Errorf("prerender index: %w", err)
 	}
-
 	return nil
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	s.mux.ServeHTTP(rw, r)
+}
+
+func (s *Server) handler(rw http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		http.ServeContent(rw, r, "index.html", s.ts, bytes.NewReader(s.index))
 		return

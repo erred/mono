@@ -17,6 +17,7 @@ import (
 	"github.com/rs/zerolog"
 	"go.seankhliao.com/mono/internal/httpsvc"
 	"go.seankhliao.com/mono/internal/web/render"
+	"go.seankhliao.com/mono/internal/webstatic"
 )
 
 var (
@@ -27,63 +28,57 @@ var (
 
 	//go:embed paste.md
 	pasteRaw []byte
-
-	//go:embed favicon.ico
-	favicon []byte
 )
 
 type Server struct {
 	log zerolog.Logger
 
 	dir string
-
-	ts    time.Time
-	index []byte
-	paste []byte
+	mux *http.ServeMux
 }
 
 func (s *Server) Init(init *httpsvc.Init) error {
 	s.log = init.Log
 	init.Flags.StringVar(&s.dir, "paste.dir", "/var/lib/paste", "directory to store pastes")
 
-	s.ts = time.Now()
+	s.mux = http.NewServeMux()
+	webstatic.Register(s.mux)
+	ts := time.Now()
 	var err error
-	s.index, err = render.CompactBytes("", "", "", indexRaw)
+	index, err := render.CompactBytes("", "", "", indexRaw)
 	if err != nil {
 		return fmt.Errorf("render index: %w", err)
 	}
-	s.paste, err = render.CompactBytes("", "", "", pasteRaw)
+	s.mux.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
+		http.ServeContent(rw, r, "x.html", ts, bytes.NewReader(index))
+	})
+	paste, err := render.CompactBytes("", "", "", pasteRaw)
 	if err != nil {
 		return fmt.Errorf("render paste: %w", err)
 	}
-	return nil
-}
-
-func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	switch r.URL.Path {
-	case "/":
-		http.ServeContent(rw, r, "x.html", s.ts, bytes.NewReader(s.index))
-	case "/favicon.ico":
-		http.ServeContent(rw, r, "favicon.ico", s.ts, bytes.NewReader(favicon))
-	case "/paste":
-		http.Redirect(rw, r, "/paste/", http.StatusTemporaryRedirect)
-	case "/paste/":
+	s.mux.HandleFunc("/paste/", func(rw http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			http.ServeContent(rw, r, "x.html", s.ts, bytes.NewReader(s.paste))
+			http.ServeContent(rw, r, "x.html", ts, bytes.NewReader(paste))
 		case http.MethodPost:
 			s.upload(rw, r)
 		default:
 			http.Error(rw, "GET / POST only", http.StatusMethodNotAllowed)
 		}
-	default:
+	})
+	s.mux.HandleFunc("/p/", func(rw http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
 		if strings.HasPrefix(p, "/p/") && !strings.Contains(p[3:], "/") {
 			s.lookup(rw, r)
 		} else {
 			http.Error(rw, "not found", http.StatusNotFound)
 		}
-	}
+	})
+	return nil
+}
+
+func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	s.mux.ServeHTTP(rw, r)
 }
 
 func (s *Server) lookup(rw http.ResponseWriter, r *http.Request) {

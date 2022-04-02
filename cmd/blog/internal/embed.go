@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	//go:embed static
+	//go:embed all:static
 	staticFS    embed.FS
 	StaticFS, _ = fs.Sub(staticFS, "static")
 
-	//go:embed content
+	//go:embed all:content
 	contentFS    embed.FS
 	ContentFS, _ = fs.Sub(contentFS, "content")
 )
