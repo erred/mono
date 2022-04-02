@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package apis.healthchecker.v1;
+
+message Config {
+  NotifyConfig notify = 1;
+  string state_dir = 2;
+  string user_agent = 3;
+  repeated HttpCheckConfig http = 5;
+}
+
+message HttpCheckConfig {
+  string name = 1;
+  string url  = 2;
+  string match_exact = 3;
+  string match_regex = 4;
+}
+
+message NotifyConfig {
+  string gchat = 1;
+}

@@ -1,14 +1,15 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"errors"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
+
+	"go.seankhliao.com/mono/internal/gchat"
 )
 
 func main() {
@@ -46,34 +47,19 @@ func run() error {
 		return errors.New("no message provided")
 	}
 
-	p := Payload{msg}
-	b, err := json.Marshal(p)
-	if err != nil {
-		return fmt.Errorf("marshal message: %w", err)
+	client := &gchat.WebhookClient{
+		Endpoint: endpoint,
+		Client:   http.DefaultClient,
 	}
 
-	req, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewReader(b))
+	err := client.Post(context.TODO(), gchat.WebhookPayload{
+		Text: msg,
+	})
 	if err != nil {
-		return fmt.Errorf("create request: %w", err)
+		return fmt.Errorf("send message: %w", err)
 	}
 
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("post request: %w", err)
-	}
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("post status: %s", res.Status)
-	}
-	// defer res.Body.Close()
-	// b, err = io.ReadAll(res.Body)
-	// if err != nil {
-	// 	return fmt.Errorf("read response: %w", err)
-	// }
 	fmt.Println("ok")
 
 	return nil
-}
-
-type Payload struct {
-	Text string `json:"text"`
 }

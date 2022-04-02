@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package apis.healthchecker.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message State {
+  map<string, CheckResult> results = 1;
+}
+
+message CheckResult {
+  string protocol = 1;
+  google.protobuf.Timestamp ts_initial = 2;
+  google.protobuf.Timestamp ts_latest = 3;
+  bool pass = 4;
+  string details = 5;
+}
