@@ -52,6 +52,7 @@ func run() error {
 		go func(check *healthcheckerv1.HttpCheckConfig) {
 			defer wg.Done()
 			err := CheckHttp(httpClient, check)
+			log.Println("check", check.Name, err == nil)
 			httpResMu.Lock()
 			defer httpResMu.Unlock()
 			httpRes[check.Name] = err
