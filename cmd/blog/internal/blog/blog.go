@@ -5,7 +5,6 @@ import (
 
 	"github.com/rs/zerolog"
 	"go.seankhliao.com/mono/cmd/blog/internal"
-	"go.seankhliao.com/mono/internal/envconf"
 	"go.seankhliao.com/mono/internal/httpsvc"
 )
 
@@ -21,23 +20,10 @@ type Server struct {
 	mux *http.ServeMux
 }
 
-func (s Server) Desc() string {
-	return `blog engine`
-}
-
-func (s Server) Help() string {
-	return `
-BLOG_GTM
-        google tag manager id
-BLOG_HOST
-        hostname
-`
-}
-
-func (s *Server) Init(log zerolog.Logger) error {
-	s.log = log
-	s.host = envconf.String("BLOG_HOST", "seankhliao.com")
-	s.gtm = envconf.String("BLOG_GTM", "GTM-TLVN7D6")
+func (s *Server) Init(init *httpsvc.Init) error {
+	s.log = init.Log
+	init.Flags.StringVar(&s.host, "blog.host", "seankhliao.com", "canonical host for blog")
+	init.Flags.StringVar(&s.gtm, "blog.gtm", "GTM-TLVN7D6", "GTM id for analytics")
 	s.mux = http.NewServeMux()
 
 	s.registerRedirects(s.mux)

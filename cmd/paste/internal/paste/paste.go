@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"go.seankhliao.com/mono/internal/envconf"
 	"go.seankhliao.com/mono/internal/httpsvc"
 	"go.seankhliao.com/mono/internal/web/render"
 )
@@ -43,20 +42,9 @@ type Server struct {
 	paste []byte
 }
 
-func (s Server) Desc() string {
-	return `pastebin`
-}
-
-func (s Server) Help() string {
-	return `
-PASTE_DIR
-        path to storage directory
-`
-}
-
-func (s *Server) Init(log zerolog.Logger) error {
-	s.log = log
-	s.dir = envconf.String("PASTE_DIR", "/var/lib/paste")
+func (s *Server) Init(init *httpsvc.Init) error {
+	s.log = init.Log
+	init.Flags.StringVar(&s.dir, "paste.dir", "/var/lib/paste", "directory to store pastes")
 
 	s.ts = time.Now()
 	var err error

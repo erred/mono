@@ -7,12 +7,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v41/github"
 	"github.com/rs/zerolog"
-	"go.seankhliao.com/mono/internal/envconf"
 	"go.seankhliao.com/mono/internal/httpsvc"
 	"golang.org/x/oauth2"
 )
@@ -53,44 +51,28 @@ type Server struct {
 	hookSecret []byte
 }
 
-func (s *Server) Init(log zerolog.Logger) error {
-	s.log = log
-
-	var err error
-	appIDStr := envconf.String("GH_APP_ID", "0")
-	s.appID, err = strconv.ParseInt(appIDStr, 10, 64)
-	if err != nil {
-		return fmt.Errorf("parse GH_APP_ID=%q: %w", appIDStr, err)
+func (s *Server) Init(init *httpsvc.Init) error {
+	s.log = init.Log
+	init.Flags.Int64Var(&s.appID, "gh.app-id", 0, "github app id")
+	var appKeyFile, hookSecretFile string
+	init.Flags.StringVar(&appKeyFile, "gh.app-key-file", "", "file with github aoo key")
+	init.Flags.StringVar(&hookSecretFile, "gh.webhook-secret-file", "", "file with shared webhook secret")
+	init.FlagsAfter = func() error {
+		var err error
+		s.appKey, err = os.ReadFile(appKeyFile)
+		if err != nil {
+			return fmt.Errorf("read app key file %s: %w", appKeyFile, err)
+		}
+		s.appKey = bytes.TrimSpace(s.appKey)
+		s.hookSecret, err = os.ReadFile(hookSecretFile)
+		if err != nil {
+			return fmt.Errorf("read shared webhook file %s: %w", hookSecretFile, err)
+		}
+		s.hookSecret = bytes.TrimSpace(s.hookSecret)
+		return nil
 	}
-	appKeyFile := envconf.String("GH_APP_KEY_FILE", "")
-	s.appKey, err = os.ReadFile(appKeyFile)
-	if err != nil {
-		return fmt.Errorf("read GH_APP_KEY_FILE=%q: %w", appKeyFile, err)
-	}
-	s.appKey = bytes.TrimSpace(s.appKey)
-	hookSecretFile := envconf.String("GH_WEBHOOK_SECRET_FILE", "")
-	s.hookSecret, err = os.ReadFile(hookSecretFile)
-	if err != nil {
-		return fmt.Errorf("read GH_WEBHOOK_SECRET_FILE=%q: %w", hookSecretFile, err)
-	}
-	s.hookSecret = bytes.TrimSpace(s.hookSecret)
 
 	return nil
-}
-
-func (s Server) Desc() string {
-	return "sets defaults on newly created github repos"
-}
-
-func (s Server) Help() string {
-	return `
-GH_APP_ID
-        github app id
-GH_APP_KEY_FILE
-        path to github secret key (rsa pem)
-GH_WEBHOOK_SECRET_FILE
-        path to github shared webhook secret
-`
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {

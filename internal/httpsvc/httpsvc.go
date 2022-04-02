@@ -2,12 +2,11 @@ package httpsvc
 
 import (
 	"context"
+	"errors"
 	"flag"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"sync"
 	"time"
 
@@ -15,52 +14,65 @@ import (
 	natsproto "github.com/nats-io/nats.go/encoders/protobuf"
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.seankhliao.com/mono/internal/envconf"
+	"go.seankhliao.com/mono/internal/flagwrap"
 	"go.seankhliao.com/mono/internal/httpmid"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"golang.org/x/sys/unix"
 )
 
-type HTTPSvc interface {
-	Init(zerolog.Logger) error
-	Desc() string
-	Help() string
-	http.Handler
+type Init struct {
+	Flags      *flag.FlagSet
+	FlagsAfter func() error
+	Log        zerolog.Logger
 }
 
-func help() string {
-	return `
-HOST
-        ip address to listen on
-PORT
-        port to listen on over http/h2c
-`
+type HTTPSvc interface {
+	Init(*Init) error
+	http.Handler
 }
 
 func Run(s HTTPSvc) {
 	log := zerolog.New(os.Stderr).With().Timestamp().Logger()
+	fset := flag.NewFlagSet("", flag.ContinueOnError)
 
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "%s %s\n", os.Args[0], s.Desc())
-		for _, str := range []string{help(), s.Help()} {
-			fmt.Fprintln(os.Stderr, strings.TrimSpace(str))
-		}
+	init := Init{
+		Flags: fset,
+		Log:   log,
 	}
-	flag.Parse()
-
-	if args := flag.Args(); len(args) > 0 {
-		log.Error().Strs("args", args).Msg("unexpected arguments")
+	err := s.Init(&init)
+	if err != nil {
+		log.Err(err).Msg("svc initialize")
 		os.Exit(1)
 	}
 
-	s.Init(log)
+	var host, port, natsURL string
+	fset.StringVar(&host, "host", "", "ip address to listen on")
+	fset.StringVar(&port, "port", "8080", "port to listen on")
+	fset.StringVar(&natsURL, "nats.url", "nats://localhost:4222", "NATS endpoint for reporting")
+	err = flagwrap.Parse(fset, os.Args[1:])
+	if errors.Is(err, flag.ErrHelp) {
+		os.Exit(0)
+	} else if err != nil {
+		log.Err(err).Msg("parse config")
+		os.Exit(1)
+	}
+	if fset.NArg() != 0 {
+		log.Error().Strs("args", fset.Args()).Msg("unexpected args")
+		os.Exit(1)
+	}
+	if init.FlagsAfter != nil {
+		err := init.FlagsAfter()
+		if err != nil {
+			log.Err(err).Msg("svc parse hook")
+			os.Exit(1)
+		}
+	}
 
 	accessLogOpts := httpmid.AccessLogOut{
 		Log: log,
 	}
 
-	natsURL := envconf.String("NATS_URL", "nats://localhost:4222")
 	natsConn, err := nats.Connect(natsURL)
 	if err != nil {
 		log.Info().Err(err).Msg("skipping nats setup")
@@ -78,8 +90,6 @@ func Run(s HTTPSvc) {
 	handler = otelhttp.NewHandler(handler, "serve")
 	handler = h2c.NewHandler(handler, &http2.Server{})
 
-	host := envconf.String("HOST", "")
-	port := envconf.String("PORT", "8080")
 	svr := http.Server{
 		Addr:              host + ":" + port,
 		Handler:           handler,

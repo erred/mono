@@ -9,21 +9,11 @@ import (
 	"os"
 	"strings"
 
+	"go.seankhliao.com/mono/internal/flagwrap"
 	"go.seankhliao.com/mono/internal/gchat"
 )
 
 func main() {
-	flag.Usage = func() {
-		fmt.Fprint(os.Stderr, `post text messages to a google chat workspace
-
-GCHAT_WEBHOOK
-        webhook url
-GCHAT_MESSAGE
-        text message (if not passed via args)
-`)
-	}
-	flag.Parse()
-
 	err := run()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
@@ -32,14 +22,20 @@ GCHAT_MESSAGE
 }
 
 func run() error {
-	endpoint := os.Getenv("GCHAT_WEBHOOK")
-	endpoint = strings.TrimSpace(endpoint)
+	var endpoint, msg string
+	fset := flag.NewFlagSet("", flag.ContinueOnError)
+	fset.StringVar(&endpoint, "gchat.webhook", "", "webhook endpoint")
+	fset.StringVar(&msg, "gchat.message", "", "message")
+	err := flagwrap.Parse(fset, os.Args[1:])
+	if err != nil {
+		return err
+	}
+
 	if endpoint == "" {
 		return errors.New("no webhook provided")
 	}
 
-	msg := os.Getenv("GCHAT_MESSAGE")
-	if len(flag.Args()) > 0 {
+	if fset.NArg() > 0 {
 		msg = strings.Join(flag.Args(), " ")
 	}
 	msg = strings.TrimSpace(msg)
@@ -52,7 +48,7 @@ func run() error {
 		Client:   http.DefaultClient,
 	}
 
-	err := client.Post(context.TODO(), gchat.WebhookPayload{
+	err = client.Post(context.TODO(), gchat.WebhookPayload{
 		Text: msg,
 	})
 	if err != nil {

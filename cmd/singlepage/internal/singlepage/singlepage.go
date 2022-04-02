@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"go.seankhliao.com/mono/internal/envconf"
 	"go.seankhliao.com/mono/internal/httpsvc"
 	"go.seankhliao.com/mono/internal/web/render"
 )
@@ -28,29 +27,22 @@ type Server struct {
 	rendered []byte
 }
 
-func (s Server) Desc() string {
-	return `a single static page`
-}
-
-func (s Server) Help() string {
-	return `
-SINGLEPAGE_SOURCE
-        path to markdown file to render
-`
-}
-
-func (s *Server) Init(log zerolog.Logger) error {
-	s.log = log
+func (s *Server) Init(init *httpsvc.Init) error {
+	s.log = init.Log
 	s.ts = time.Now()
 
-	src := envconf.String("SINGLEPAGE_SOURCE", "index.md")
-	raw, err := os.ReadFile(src)
-	if err != nil {
-		return fmt.Errorf("read SINGLEPAGE_SOURCE=%q: %w", src, err)
-	}
-	s.rendered, err = render.CompactBytes("", "", "", raw)
-	if err != nil {
-		return fmt.Errorf("prerender page: %w", err)
+	var src string
+	init.Flags.StringVar(&src, "singlepage.source", "index.md", "source file in markdown")
+	init.FlagsAfter = func() error {
+		raw, err := os.ReadFile(src)
+		if err != nil {
+			return fmt.Errorf("read src %s: %w", src, err)
+		}
+		s.rendered, err = render.CompactBytes("", "", "", raw)
+		if err != nil {
+			return fmt.Errorf("prerender page: %w", err)
+		}
+		return nil
 	}
 
 	return nil

@@ -33,16 +33,8 @@ type Server struct {
 	index []byte
 }
 
-func (s Server) Desc() string {
-	return `custom import paths for go`
-}
-
-func (s Server) Help() string {
-	return ``
-}
-
-func (s *Server) Init(log zerolog.Logger) error {
-	s.log = log
+func (s *Server) Init(init *httpsvc.Init) error {
+	s.log = init.Log
 	s.ts = time.Now()
 
 	var err error

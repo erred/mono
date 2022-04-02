@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,7 +12,7 @@ import (
 	"time"
 
 	earbugv1 "go.seankhliao.com/mono/apis/earbug/v1"
-	"go.seankhliao.com/mono/internal/envconf"
+	"go.seankhliao.com/mono/internal/flagwrap"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -24,7 +25,14 @@ func main() {
 }
 
 func run() error {
-	fname := envconf.String("EARBUG_DATA", "/var/lib/earbug/earbug.pb")
+	var fname string
+	fset := flag.NewFlagSet("", flag.ContinueOnError)
+	fset.StringVar(&fname, "earbug.data", "/var/lib/earbug/earbug.pb", "path to data file")
+	err := flagwrap.Parse(fset, os.Args[1:])
+	if err != nil {
+		return err
+	}
+
 	b, err := os.ReadFile(fname)
 	if err != nil {
 		return fmt.Errorf("read %s: %w", fname, err)

@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -14,7 +12,6 @@ import (
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	earbugv1 "go.seankhliao.com/mono/apis/earbug/v1"
-	"go.seankhliao.com/mono/internal/envconf"
 	"go.seankhliao.com/mono/internal/httpsvc"
 	"golang.org/x/oauth2"
 )
@@ -39,68 +36,49 @@ type Server struct {
 	client *spotify.Client
 }
 
-func (s *Server) Desc() string {
-	return `spotify listening history logger`
-}
+func (s *Server) Init(init *httpsvc.Init) error {
+	s.log = init.Log
 
-func (s *Server) Help() string {
-	return `
-EARBUG_DATA
-        path to file to store data
-EARBUG_HOST
-        hostname (for auth callback)
-EARBUG_POLL_INTERVAL
-        interval between polls
-SPOTIFY_ID
-        spotify client id
-SPOTIFY_SECRET
-        spotify client secret
-`
-}
+	init.Flags.StringVar(&s.fname, "earbug.data", "/var/lib/earbug/earbug.pb", "path to data file")
+	init.Flags.DurationVar(&s.pollInterval, "earbug.poll.interval", 5*time.Minute, "polling interval")
+	var host, spotifyID, spotifySecret string
+	init.Flags.StringVar(&host, "earbug.host", "earbug.liao.dev", "host for auth callback")
+	init.Flags.StringVar(&spotifyID, "spotify.id", "", "spotify client id")
+	init.Flags.StringVar(&spotifySecret, "spotify.secret", "", "spotify cluent secret")
 
-func (s *Server) Init(log zerolog.Logger) error {
-	s.log = log
+	init.FlagsAfter = func() error {
+		s.auth = spotifyauth.New(
+			spotifyauth.WithRedirectURL("https://"+host+"/auth/callback"),
+			spotifyauth.WithScopes(
+				spotifyauth.ScopeUserReadRecentlyPlayed,
+			),
+			spotifyauth.WithClientID(spotifyID),
+			spotifyauth.WithClientSecret(spotifySecret),
+		)
+
+		err := s.initStore()
+		if err != nil {
+			return fmt.Errorf("init store: %w", err)
+		}
+
+		var token oauth2.Token
+		err = json.Unmarshal(s.Store.Token, &token)
+		if err != nil {
+			return fmt.Errorf("unmarshal stored token: %w", err)
+		}
+
+		s.setClient(&token)
+
+		err = s.start()
+		if err != nil {
+			return fmt.Errorf("start background: %w", err)
+		}
+		return nil
+	}
 
 	s.mux = http.NewServeMux()
 	s.mux.HandleFunc("/auth/callback", s.authCallback)
-	var err error
-	pollInterval := envconf.String("EARBUG_POLL_INTERVAL", "5m")
-	s.pollInterval, err = time.ParseDuration(pollInterval)
-	if err != nil {
-		return fmt.Errorf("parse EARBUG_POLL_INTERVAL=%q:  %w", pollInterval, err)
-	}
-
-	s.fname = envconf.String("EARBUG_DATA", "/var/lib/earbug/earbug.pb")
-
 	s.Store = &earbugv1.Store{}
-
-	host := envconf.String("EARBUG_HOST", "earbug.liao.dev")
-	s.auth = spotifyauth.New(
-		spotifyauth.WithRedirectURL("https://"+host+"/auth/callback"),
-		spotifyauth.WithScopes(
-			spotifyauth.ScopeUserReadRecentlyPlayed,
-		),
-		spotifyauth.WithClientID(strings.TrimSpace(os.Getenv("SPOTIFY_ID"))),
-		spotifyauth.WithClientSecret(strings.TrimSpace(os.Getenv("SPOTIFY_SECRET"))),
-	)
-
-	err = s.initStore()
-	if err != nil {
-		return fmt.Errorf("init store: %w", err)
-	}
-
-	var token oauth2.Token
-	err = json.Unmarshal(s.Store.Token, &token)
-	if err != nil {
-		return fmt.Errorf("unmarshal stored token: %w", err)
-	}
-
-	s.setClient(&token)
-
-	err = s.start()
-	if err != nil {
-		return fmt.Errorf("start background: %w", err)
-	}
 
 	return nil
 }
