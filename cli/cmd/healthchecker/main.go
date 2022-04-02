@@ -126,6 +126,11 @@ func run() error {
 		state.Results[name] = old
 	}
 
+	err = WriteState(c.StateDir, state)
+	if err != nil {
+		return fmt.Errorf("save state: %w", err)
+	}
+
 	return nil
 }
 
@@ -160,6 +165,25 @@ func GetState(stateDir string) (*healthcheckerv1.State, error) {
 		return nil, fmt.Errorf("unmarshal state: %w", err)
 	}
 	return &state, nil
+}
+
+func WriteState(stateDir string, state *healthcheckerv1.State) error {
+	statePath := filepath.Join(stateDir, "state.prototext")
+	tmpPath := statePath + ".tmp"
+
+	b, err := prototext.Marshal(state)
+	if err != nil {
+		return fmt.Errorf("marshal state: %w", err)
+	}
+	err = os.WriteFile(tmpPath, b, 0o644)
+	if err != nil {
+		return fmt.Errorf("write tmp state to %s: %w", tmpPath, err)
+	}
+	err = os.Rename(tmpPath, statePath)
+	if err != nil {
+		return fmt.Errorf("replace old state: %w", err)
+	}
+	return nil
 }
 
 func CheckHttp(client *http.Client, c *healthcheckerv1.HttpCheckConfig) error {
