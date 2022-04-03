@@ -23,6 +23,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type otelclient struct {
@@ -56,7 +57,7 @@ func newOtelClient(otlpURL string, log zerolog.Logger) (*otelclient, error) {
 		return nil, fmt.Errorf("create otel resource: %w", err)
 	}
 
-	conn, err := grpc.DialContext(ctx, u.Host, grpc.WithInsecure(), grpc.WithUserAgent(userAgent()), grpc.WithBlock())
+	conn, err := grpc.DialContext(ctx, u.Host, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithUserAgent(userAgent()), grpc.WithBlock())
 	if err != nil {
 		return nil, fmt.Errorf("setup otlp grpc conn to %s: %w", u.Host, err)
 	}
