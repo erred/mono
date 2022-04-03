@@ -75,9 +75,11 @@ func newOtelClient(otlpURL string, grpcOpts []grpc.DialOption, log zerolog.Logge
 
 	// set global propagator to tracecontext (the default is no-op).
 	otel.SetTextMapPropagator(
-		propagation.Baggage{},
-		propagation.TraceContext{},
-		b3.New(),
+		propagation.NewCompositeTextMapPropagator(
+			propagation.Baggage{},
+			propagation.TraceContext{},
+			b3.New(),
+		),
 	)
 
 	metricExporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithGRPCConn(conn))
