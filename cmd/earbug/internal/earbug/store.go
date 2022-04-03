@@ -11,6 +11,8 @@ import (
 )
 
 func (s *Server) initStore() error {
+	s.Store = &earbugv1.Store{}
+
 	b, err := os.ReadFile(s.fname)
 	if errors.Is(err, fs.ErrNotExist) {
 		s.Store.Playbacks = make(map[string]*earbugv1.Playback)
