@@ -123,7 +123,6 @@ func (o *otelclient) start() error {
 }
 
 func (o *otelclient) stop() error {
-	close(o.done)
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
