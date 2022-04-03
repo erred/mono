@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel"
 	httpmidv1 "go.seankhliao.com/mono/apis/httpmid/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -26,7 +26,13 @@ func AccessLog(h http.Handler, o AccessLogOut) http.Handler {
 	if o.PubSubject == "" {
 		o.PubSubject = "accesslog." + filepath.Base(os.Args[0])
 	}
+	tracer := otel.GetTracerProvider().Tracer("accesslog")
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "accesslog")
+		defer span.End()
+
+		r = r.WithContext(ctx)
+
 		wrw, ok := rw.(*responseWrapper)
 		if !ok {
 			wrw = newResponseWrapper(rw)
@@ -38,11 +44,10 @@ func AccessLog(h http.Handler, o AccessLogOut) http.Handler {
 		t1 := time.Now()
 		d := t1.Sub(t0)
 
-		spanCtx := trace.SpanContextFromContext(r.Context())
 		al := httpmidv1.AccessLog{
 			Ts:            timestamppb.New(t0),
-			TraceId:       spanCtx.TraceID().String(),
-			SpanId:        spanCtx.SpanID().String(),
+			TraceId:       span.SpanContext().TraceID().String(),
+			SpanId:        span.SpanContext().SpanID().String(),
 			HttpMethod:    r.Method,
 			HttpUrl:       r.URL.String(),
 			HttpVersion:   r.Proto,
