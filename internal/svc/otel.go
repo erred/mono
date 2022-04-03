@@ -13,7 +13,7 @@ import (
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
@@ -31,7 +31,7 @@ type otelclient struct {
 	done           chan error
 }
 
-func newOtelClient(otlpURL string, grpcOpts []grpc.DialOption, log zerolog.Logger) (*otelclient, error) {
+func newOtelClient(otlpURL string, log zerolog.Logger) (*otelclient, error) {
 	ctx := context.TODO()
 
 	otel.SetErrorHandler(otel.ErrorHandlerFunc(func(err error) {
@@ -56,13 +56,13 @@ func newOtelClient(otlpURL string, grpcOpts []grpc.DialOption, log zerolog.Logge
 		return nil, fmt.Errorf("create otel resource: %w", err)
 	}
 
-	conn, err := grpc.DialContext(ctx, u.Host, append(grpcOpts, grpc.WithInsecure())...)
+	conn, err := grpc.DialContext(ctx, u.Host, grpc.WithInsecure(), grpc.WithUserAgent(userAgent()), grpc.WithBlock())
 	if err != nil {
 		return nil, fmt.Errorf("setup otlp grpc conn to %s: %w", u.Host, err)
 	}
 
-	// traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
-	traceExporter, err := stdouttrace.New()
+	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+	// traceExporter, err := stdouttrace.New()
 	if err != nil {
 		return nil, fmt.Errorf("setup trace exporter: %w", err)
 	}

@@ -171,17 +171,17 @@ func run(s S, o *O) error {
 	}
 
 	// Init
-	init, err := newInit(natsURL, *o.Logger)
-	if err != nil {
-		return fmt.Errorf("setup init clients: %w", err)
-	}
-
 	var otelClient *otelclient
 	if otlpURL != "" {
-		otelClient, err = newOtelClient(otlpURL, init.GRPCDialOpt, *o.Logger)
+		otelClient, err = newOtelClient(otlpURL, *o.Logger)
 		if err != nil {
 			return fmt.Errorf("setup otel: %w", err)
 		}
+	}
+
+	init, err := newInit(natsURL, *o.Logger)
+	if err != nil {
+		return fmt.Errorf("setup init clients: %w", err)
 	}
 
 	err = s.Init(init)
