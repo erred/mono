@@ -13,7 +13,7 @@ import (
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
@@ -61,7 +61,8 @@ func newOtelClient(otlpURL string, grpcOpts []grpc.DialOption, log zerolog.Logge
 		return nil, fmt.Errorf("setup otlp grpc conn to %s: %w", u.Host, err)
 	}
 
-	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+	// traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+	traceExporter, err := stdouttrace.New()
 	if err != nil {
 		return nil, fmt.Errorf("setup trace exporter: %w", err)
 	}
