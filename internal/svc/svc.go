@@ -161,7 +161,7 @@ func run(s S, o *O) error {
 	}
 	var natsURL, otlpURL string
 	register.Flags.StringVar(&natsURL, "nats.url", "", "NATS address, ex nats://localhost:4222")
-	register.Flags.StringVar(&otlpURL, "otlp.url", "", "OTLP address, ex grpc://localhost:4318")
+	register.Flags.StringVar(&otlpURL, "otlp.url", "", "OTLP address, ex grpc://localhost:4317")
 
 	err = flagwrap.Parse(register.Flags, o.Args[1:])
 	if errors.Is(err, flag.ErrHelp) {
