@@ -55,8 +55,8 @@ func (s *Server) Init(init *httpsvc.Init) error {
 	s.log = init.Log
 	init.Flags.Int64Var(&s.appID, "gh.app-id", 0, "github app id")
 	var appKeyFile, hookSecretFile string
-	init.Flags.StringVar(&appKeyFile, "gh.app-key-file", "", "file with github aoo key")
-	init.Flags.StringVar(&hookSecretFile, "gh.webhook-secret-file", "", "file with shared webhook secret")
+	init.Flags.StringVar(&appKeyFile, "gh.app-key-file", "/etc/mono/ghdefaults/github.pem", "file with github aoo key")
+	init.Flags.StringVar(&hookSecretFile, "gh.webhook-secret-file", "/etc/mono/ghdefaults/WEBHOOK_SECRET", "file with shared webhook secret")
 	init.FlagsAfter = func() error {
 		var err error
 		s.appKey, err = os.ReadFile(appKeyFile)

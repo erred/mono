@@ -39,7 +39,7 @@ type Server struct {
 
 func (s *Server) Init(init *httpsvc.Init) error {
 	s.log = init.Log
-	init.Flags.StringVar(&s.dir, "paste.dir", "/var/lib/paste", "directory to store pastes")
+	init.Flags.StringVar(&s.dir, "paste.dir", "/var/lib/mono/paste", "directory to store pastes")
 
 	s.mux = http.NewServeMux()
 	webstatic.Register(s.mux)

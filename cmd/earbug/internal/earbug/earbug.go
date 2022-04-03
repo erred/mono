@@ -39,8 +39,8 @@ type Server struct {
 func (s *Server) Init(init *httpsvc.Init) error {
 	s.log = init.Log
 
-	init.Flags.StringVar(&s.fname, "earbug.data", "/var/lib/earbug/earbug.pb", "path to data file")
-	init.Flags.DurationVar(&s.pollInterval, "earbug.poll.interval", 5*time.Minute, "polling interval")
+	init.Flags.StringVar(&s.fname, "earbug.data", "/var/lib/mono/earbug/earbug.pb", "path to data file")
+	init.Flags.DurationVar(&s.pollInterval, "earbug.poll-interval", 5*time.Minute, "polling interval")
 	var host, spotifyID, spotifySecret string
 	init.Flags.StringVar(&host, "earbug.host", "earbug.liao.dev", "host for auth callback")
 	init.Flags.StringVar(&spotifyID, "spotify.id", "", "spotify client id")
