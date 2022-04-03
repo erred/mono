@@ -12,19 +12,23 @@ import (
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	earbugv1 "go.seankhliao.com/mono/apis/earbug/v1"
-	"go.seankhliao.com/mono/internal/httpsvc"
+	"go.seankhliao.com/mono/internal/svc"
 	"golang.org/x/oauth2"
 )
 
 var (
-	_           httpsvc.HTTPSvc = &Server{}
-	earbugState                 = "earbug_state"
+	_           svc.SHTTP = &Server{}
+	earbugState           = "earbug_state"
 )
 
 type Server struct {
 	log zerolog.Logger
 
 	mux *http.ServeMux
+
+	host          string
+	spotifyID     string
+	spotifySecret string
 
 	fname string
 	Store *earbugv1.Store
@@ -36,44 +40,43 @@ type Server struct {
 	client *spotify.Client
 }
 
-func (s *Server) Init(init *httpsvc.Init) error {
-	s.log = init.Log
+func (s *Server) Register(r svc.Register) error {
+	r.Flags.StringVar(&s.fname, "earbug.data", "/var/lib/mono/earbug/earbug.pb", "path to data file")
+	r.Flags.DurationVar(&s.pollInterval, "earbug.poll-interval", 5*time.Minute, "polling interval")
+	r.Flags.StringVar(&s.host, "earbug.host", "earbug.liao.dev", "host for auth callback")
+	r.Flags.StringVar(&s.spotifyID, "spotify.id", "", "spotify client id")
+	r.Flags.StringVar(&s.spotifySecret, "spotify.secret", "", "spotify cluent secret")
+	return nil
+}
 
-	init.Flags.StringVar(&s.fname, "earbug.data", "/var/lib/mono/earbug/earbug.pb", "path to data file")
-	init.Flags.DurationVar(&s.pollInterval, "earbug.poll-interval", 5*time.Minute, "polling interval")
-	var host, spotifyID, spotifySecret string
-	init.Flags.StringVar(&host, "earbug.host", "earbug.liao.dev", "host for auth callback")
-	init.Flags.StringVar(&spotifyID, "spotify.id", "", "spotify client id")
-	init.Flags.StringVar(&spotifySecret, "spotify.secret", "", "spotify cluent secret")
+func (s *Server) Init(init svc.Init) error {
+	s.log = init.Logger
 
-	init.FlagsAfter = func() error {
-		s.auth = spotifyauth.New(
-			spotifyauth.WithRedirectURL("https://"+host+"/auth/callback"),
-			spotifyauth.WithScopes(
-				spotifyauth.ScopeUserReadRecentlyPlayed,
-			),
-			spotifyauth.WithClientID(spotifyID),
-			spotifyauth.WithClientSecret(spotifySecret),
-		)
+	s.auth = spotifyauth.New(
+		spotifyauth.WithRedirectURL("https://"+s.host+"/auth/callback"),
+		spotifyauth.WithScopes(
+			spotifyauth.ScopeUserReadRecentlyPlayed,
+		),
+		spotifyauth.WithClientID(s.spotifyID),
+		spotifyauth.WithClientSecret(s.spotifySecret),
+	)
 
-		err := s.initStore()
-		if err != nil {
-			return fmt.Errorf("init store: %w", err)
-		}
+	err := s.initStore()
+	if err != nil {
+		return fmt.Errorf("init store: %w", err)
+	}
 
-		var token oauth2.Token
-		err = json.Unmarshal(s.Store.Token, &token)
-		if err != nil {
-			return fmt.Errorf("unmarshal stored token: %w", err)
-		}
+	var token oauth2.Token
+	err = json.Unmarshal(s.Store.Token, &token)
+	if err != nil {
+		return fmt.Errorf("unmarshal stored token: %w", err)
+	}
 
-		s.setClient(&token)
+	s.setClient(&token)
 
-		err = s.start()
-		if err != nil {
-			return fmt.Errorf("start background: %w", err)
-		}
-		return nil
+	err = s.start()
+	if err != nil {
+		return fmt.Errorf("start background: %w", err)
 	}
 
 	s.mux = http.NewServeMux()

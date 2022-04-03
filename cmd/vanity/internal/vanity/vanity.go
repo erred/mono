@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"go.seankhliao.com/mono/internal/httpsvc"
+	"go.seankhliao.com/mono/internal/svc"
 	"go.seankhliao.com/mono/internal/web/render"
 	"go.seankhliao.com/mono/internal/webstatic"
 )
@@ -23,7 +23,7 @@ var (
 	repoRaw []byte
 	repoTpl = template.Must(template.New("").Parse(string(repoRaw)))
 
-	_ httpsvc.HTTPSvc = &Server{}
+	_ svc.SHTTP = &Server{}
 )
 
 type Server struct {
@@ -35,8 +35,12 @@ type Server struct {
 	index []byte
 }
 
-func (s *Server) Init(init *httpsvc.Init) error {
-	s.log = init.Log
+func (s *Server) Register(r svc.Register) error {
+	return nil
+}
+
+func (s *Server) Init(init svc.Init) error {
+	s.log = init.Logger
 	s.ts = time.Now()
 
 	s.mux = http.NewServeMux()

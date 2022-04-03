@@ -5,11 +5,11 @@ import (
 
 	"github.com/rs/zerolog"
 	"go.seankhliao.com/mono/cmd/blog/internal"
-	"go.seankhliao.com/mono/internal/httpsvc"
+	"go.seankhliao.com/mono/internal/svc"
 	"go.seankhliao.com/mono/internal/webstatic"
 )
 
-var _ httpsvc.HTTPSvc = &Server{}
+var _ svc.SHTTP = &Server{}
 
 type Server struct {
 	log zerolog.Logger
@@ -21,10 +21,14 @@ type Server struct {
 	mux *http.ServeMux
 }
 
-func (s *Server) Init(init *httpsvc.Init) error {
-	s.log = init.Log
-	init.Flags.StringVar(&s.host, "blog.host", "seankhliao.com", "canonical host for blog")
-	init.Flags.StringVar(&s.gtm, "blog.gtm", "GTM-TLVN7D6", "GTM id for analytics")
+func (s *Server) Register(r svc.Register) error {
+	r.Flags.StringVar(&s.host, "blog.host", "seankhliao.com", "canonical host for blog")
+	r.Flags.StringVar(&s.gtm, "blog.gtm", "GTM-TLVN7D6", "GTM id for analytics")
+	return nil
+}
+
+func (s *Server) Init(init svc.Init) error {
+	s.log = init.Logger
 	s.mux = http.NewServeMux()
 
 	s.registerRedirects(s.mux)

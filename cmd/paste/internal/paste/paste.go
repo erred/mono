@@ -15,13 +15,13 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"go.seankhliao.com/mono/internal/httpsvc"
+	"go.seankhliao.com/mono/internal/svc"
 	"go.seankhliao.com/mono/internal/web/render"
 	"go.seankhliao.com/mono/internal/webstatic"
 )
 
 var (
-	_ httpsvc.HTTPSvc = &Server{}
+	_ svc.SHTTP = &Server{}
 
 	//go:embed index.md
 	indexRaw []byte
@@ -37,9 +37,13 @@ type Server struct {
 	mux *http.ServeMux
 }
 
-func (s *Server) Init(init *httpsvc.Init) error {
-	s.log = init.Log
-	init.Flags.StringVar(&s.dir, "paste.dir", "/var/lib/mono/paste", "directory to store pastes")
+func (s *Server) Register(r svc.Register) error {
+	r.Flags.StringVar(&s.dir, "paste.dir", "/var/lib/mono/paste", "directory to store pastes")
+	return nil
+}
+
+func (s *Server) Init(init svc.Init) error {
+	s.log = init.Logger
 
 	s.mux = http.NewServeMux()
 	webstatic.Register(s.mux)

@@ -11,7 +11,7 @@ import (
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v41/github"
 	"github.com/rs/zerolog"
-	"go.seankhliao.com/mono/internal/httpsvc"
+	"go.seankhliao.com/mono/internal/svc"
 	"golang.org/x/oauth2"
 )
 
@@ -41,36 +41,39 @@ var defaultConfig = map[string]github.Repository{
 	},
 }
 
-var _ httpsvc.HTTPSvc = &Server{}
+var _ svc.SHTTP = &Server{}
 
 type Server struct {
 	log zerolog.Logger
+
+	appKeyFile     string
+	hookSecretFile string
 
 	appID      int64
 	appKey     []byte
 	hookSecret []byte
 }
 
-func (s *Server) Init(init *httpsvc.Init) error {
-	s.log = init.Log
-	init.Flags.Int64Var(&s.appID, "gh.app-id", 0, "github app id")
-	var appKeyFile, hookSecretFile string
-	init.Flags.StringVar(&appKeyFile, "gh.app-key-file", "/etc/mono/ghdefaults/github.pem", "file with github aoo key")
-	init.Flags.StringVar(&hookSecretFile, "gh.webhook-secret-file", "/etc/mono/ghdefaults/WEBHOOK_SECRET", "file with shared webhook secret")
-	init.FlagsAfter = func() error {
-		var err error
-		s.appKey, err = os.ReadFile(appKeyFile)
-		if err != nil {
-			return fmt.Errorf("read app key file %s: %w", appKeyFile, err)
-		}
-		s.appKey = bytes.TrimSpace(s.appKey)
-		s.hookSecret, err = os.ReadFile(hookSecretFile)
-		if err != nil {
-			return fmt.Errorf("read shared webhook file %s: %w", hookSecretFile, err)
-		}
-		s.hookSecret = bytes.TrimSpace(s.hookSecret)
-		return nil
+func (s *Server) Register(r svc.Register) error {
+	r.Flags.Int64Var(&s.appID, "gh.app-id", 0, "github app id")
+	r.Flags.StringVar(&s.appKeyFile, "gh.app-key-file", "/etc/mono/ghdefaults/github.pem", "file with github aoo key")
+	r.Flags.StringVar(&s.hookSecretFile, "gh.webhook-secret-file", "/etc/mono/ghdefaults/WEBHOOK_SECRET", "file with shared webhook secret")
+	return nil
+}
+
+func (s *Server) Init(init svc.Init) error {
+	s.log = init.Logger
+	var err error
+	s.appKey, err = os.ReadFile(s.appKeyFile)
+	if err != nil {
+		return fmt.Errorf("read app key file %s: %w", s.appKeyFile, err)
 	}
+	s.appKey = bytes.TrimSpace(s.appKey)
+	s.hookSecret, err = os.ReadFile(s.hookSecretFile)
+	if err != nil {
+		return fmt.Errorf("read shared webhook file %s: %w", s.hookSecretFile, err)
+	}
+	s.hookSecret = bytes.TrimSpace(s.hookSecret)
 
 	return nil
 }

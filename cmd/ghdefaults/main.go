@@ -2,9 +2,9 @@ package main
 
 import (
 	"go.seankhliao.com/mono/cmd/ghdefaults/internal/ghdefaults"
-	"go.seankhliao.com/mono/internal/httpsvc"
+	"go.seankhliao.com/mono/internal/svc"
 )
 
 func main() {
-	httpsvc.Run(&ghdefaults.Server{})
+	svc.Run(&ghdefaults.Server{}, nil)
 }

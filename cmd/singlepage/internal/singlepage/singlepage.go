@@ -9,45 +9,46 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"go.seankhliao.com/mono/internal/httpsvc"
+	"go.seankhliao.com/mono/internal/svc"
 	"go.seankhliao.com/mono/internal/web/render"
 	"go.seankhliao.com/mono/internal/webstatic"
 )
 
-var _ httpsvc.HTTPSvc = &Server{}
+var _ svc.SHTTP = &Server{}
 
 type Server struct {
 	log zerolog.Logger
 
+	src string
 	mux *http.ServeMux
 }
 
-func (s *Server) Init(init *httpsvc.Init) error {
-	s.log = init.Log
+func (s *Server) Register(r svc.Register) error {
+	r.Flags.StringVar(&s.src, "singlepage.source", "index.md", "source file in markdown")
+	return nil
+}
+
+func (s *Server) Init(init svc.Init) error {
+	s.log = init.Logger
 	s.mux = http.NewServeMux()
 	webstatic.Register(s.mux)
 
-	var src string
-	init.Flags.StringVar(&src, "singlepage.source", "index.md", "source file in markdown")
-	init.FlagsAfter = func() error {
-		ts := time.Now()
-		raw, err := os.ReadFile(src)
-		if err != nil {
-			return fmt.Errorf("read src %s: %w", src, err)
-		}
-		rendered, err := render.CompactBytes("", "", "", raw)
-		if err != nil {
-			return fmt.Errorf("prerender page: %w", err)
-		}
-		s.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/" {
-				http.Redirect(w, r, "/", http.StatusFound)
-				return
-			}
-			http.ServeContent(w, r, "index.html", ts, bytes.NewReader(rendered))
-		})
-		return nil
+	ts := time.Now()
+	raw, err := os.ReadFile(s.src)
+	if err != nil {
+		return fmt.Errorf("read src %s: %w", s.src, err)
 	}
+	rendered, err := render.CompactBytes("", "", "", raw)
+	if err != nil {
+		return fmt.Errorf("prerender page: %w", err)
+	}
+	s.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+		http.ServeContent(w, r, "index.html", ts, bytes.NewReader(rendered))
+	})
 
 	return nil
 }
