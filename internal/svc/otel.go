@@ -43,7 +43,6 @@ func newOtelClient(otlpURL string, log zerolog.Logger) (*otelclient, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse otlp endpoint: %w", err)
 	}
-
 	_, short, version := serviceName()
 
 	res, err := resource.New(ctx,
@@ -57,6 +56,7 @@ func newOtelClient(otlpURL string, log zerolog.Logger) (*otelclient, error) {
 		return nil, fmt.Errorf("create otel resource: %w", err)
 	}
 
+	log.Debug().Str("otlp_endpoint", u.Host).Msg("connecting to otlp")
 	conn, err := grpc.DialContext(ctx, u.Host, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithUserAgent(userAgent()), grpc.WithBlock())
 	if err != nil {
 		return nil, fmt.Errorf("setup otlp grpc conn to %s: %w", u.Host, err)
@@ -66,6 +66,11 @@ func newOtelClient(otlpURL string, log zerolog.Logger) (*otelclient, error) {
 	// traceExporter, err := stdouttrace.New()
 	if err != nil {
 		return nil, fmt.Errorf("setup trace exporter: %w", err)
+	}
+
+	err = traceExporter.Start(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("start trace exporter: %w", err)
 	}
 
 	tracerProvider := sdktrace.NewTracerProvider(
