@@ -19,11 +19,10 @@ require (
 	go.opentelemetry.io/contrib/propagators/b3 v1.6.0
 	go.opentelemetry.io/otel v1.6.1
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.28.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.6.1
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.6.1
 	go.opentelemetry.io/otel/metric v0.28.0
 	go.opentelemetry.io/otel/sdk v1.6.1
 	go.opentelemetry.io/otel/sdk/metric v0.28.0
-	go.opentelemetry.io/otel/trace v1.6.1
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
 	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
@@ -83,7 +82,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.6.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.28.1-0.20220401210057-b7a5c1a4e520 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.6.1 // indirect
+	go.opentelemetry.io/otel/trace v1.6.1 // indirect
 	go.opentelemetry.io/proto/otlp v0.15.0 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/text v0.3.7 // indirect
