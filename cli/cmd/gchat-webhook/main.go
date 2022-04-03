@@ -36,7 +36,7 @@ func run() error {
 	}
 
 	if fset.NArg() > 0 {
-		msg = strings.Join(flag.Args(), " ")
+		msg = strings.Join(fset.Args(), " ")
 	}
 	msg = strings.TrimSpace(msg)
 	if msg == "" {
