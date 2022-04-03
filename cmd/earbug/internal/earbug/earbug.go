@@ -81,7 +81,6 @@ func (s *Server) Init(init svc.Init) error {
 
 	s.mux = http.NewServeMux()
 	s.mux.HandleFunc("/auth/callback", s.authCallback)
-	s.Store = &earbugv1.Store{}
 
 	return nil
 }
