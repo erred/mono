@@ -68,11 +68,6 @@ func newOtelClient(otlpURL string, log zerolog.Logger) (*otelclient, error) {
 		return nil, fmt.Errorf("setup trace exporter: %w", err)
 	}
 
-	err = traceExporter.Start(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("start trace exporter: %w", err)
-	}
-
 	tracerProvider := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithResource(res),
