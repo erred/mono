@@ -71,7 +71,7 @@ func newOtelClient(otlpURL string, log zerolog.Logger) (*otelclient, error) {
 	tracerProvider := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithResource(res),
-		sdktrace.WithSpanProcessor(sdktrace.NewBatchSpanProcessor(traceExporter)),
+		sdktrace.WithSyncer(traceExporter),
 	)
 	otel.SetTracerProvider(tracerProvider)
 
