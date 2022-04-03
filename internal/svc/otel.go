@@ -56,7 +56,7 @@ func newOtelClient(otlpURL string, log zerolog.Logger) (*otelclient, error) {
 		return nil, fmt.Errorf("create otel resource: %w", err)
 	}
 
-	conn, err := grpc.DialContext(ctx, "192.168.100.1:4317", grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+	conn, err := grpc.DialContext(ctx, u.Host, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	// conn, err := grpc.DialContext(ctx, u.Host, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithUserAgent(userAgent()), grpc.WithBlock())
 	if err != nil {
 		return nil, fmt.Errorf("setup otlp grpc conn to %s: %w", u.Host, err)
