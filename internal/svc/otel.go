@@ -62,7 +62,8 @@ func newOtelClient(otlpURL string, log zerolog.Logger) (*otelclient, error) {
 		return nil, fmt.Errorf("setup otlp grpc conn to %s: %w", u.Host, err)
 	}
 
-	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithEndpoint(u.Host), otlptracegrpc.WithInsecure())
+	// traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
 	// traceExporter, err := stdouttrace.New()
 	if err != nil {
 		return nil, fmt.Errorf("setup trace exporter: %w", err)
