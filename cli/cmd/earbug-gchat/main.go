@@ -27,7 +27,7 @@ func main() {
 func run() error {
 	var fname string
 	fset := flag.NewFlagSet("", flag.ContinueOnError)
-	fset.StringVar(&fname, "earbug.data", "/var/lib/earbug/earbug.pb", "path to data file")
+	fset.StringVar(&fname, "earbug.data", "/var/lib/mono/earbug/earbug.pb", "path to data file")
 	err := flagwrap.Parse(fset, os.Args[1:])
 	if err != nil {
 		return err
