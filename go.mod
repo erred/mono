@@ -81,10 +81,10 @@ require (
 	github.com/xlab/treeprint v1.1.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.6.1 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.28.1-0.20220401210057-b7a5c1a4e520 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.28.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.6.1 // indirect
 	go.opentelemetry.io/otel/trace v1.6.1 // indirect
-	go.opentelemetry.io/proto/otlp v0.15.0 // indirect
+	go.opentelemetry.io/proto/otlp v0.12.1 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

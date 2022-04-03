@@ -71,7 +71,7 @@ func AccessLog(h http.Handler, o AccessLogOut) http.Handler {
 			if err != nil {
 				o.Log.Err(err).Msg("marshal access log to json")
 			}
-			o.Log.Trace().RawJSON("accesslog", b).Bool("sampled", span.SpanContext().IsSampled()).Send()
+			o.Log.Trace().RawJSON("accesslog", b).Send()
 		}
 	})
 }
