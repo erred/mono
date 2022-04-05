@@ -218,7 +218,7 @@ func serviceName() (long, short, version string) {
 	if !ok {
 		panic("no build info")
 	}
-	long = bi.Main.Path
+	long = bi.Path
 	short = path.Base(long)
 	version = bi.Main.Version
 	return
