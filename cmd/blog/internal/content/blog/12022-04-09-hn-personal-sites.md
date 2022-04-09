@@ -137,6 +137,9 @@ while Apache included OSes for Ubuntu, Debian, FreeBSD, and CentOS.
 65 didn't include any `Server` header, these seem more likely to be custom written ones
 (not counting the ones behind a CDN)
 
+*Content-Type*, *Date*
+These seem to be universal. Everyone includes them.
+
 *X-Achievement*
 
 www.maxlaumeister.com is apparently a site with achievements for finding various things,
