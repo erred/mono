@@ -195,15 +195,15 @@ func CheckHttp(client *http.Client, c *healthcheckerv1.HttpCheckConfig) error {
 	if err != nil {
 		return fmt.Errorf("do request: %w", err)
 	}
-	if res.StatusCode != 200 {
-		return fmt.Errorf("unexpected status: %s", res.Status)
-	}
 	defer res.Body.Close()
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		return fmt.Errorf("read response: %w", err)
 	}
-	s := string(b)
+        s := string(b)
+	if res.StatusCode != 200 {
+		return fmt.Errorf("unexpected status: %s\nbody: %s", res.Status, limitstring(s))
+	}
 	if c.MatchExact != "" {
 		if !strings.Contains(s, c.MatchExact) {
 			return fmt.Errorf("missing exact match for %q\nbody: %s", c.MatchExact, limitString(s))
