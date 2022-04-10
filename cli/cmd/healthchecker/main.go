@@ -202,7 +202,7 @@ func CheckHttp(client *http.Client, c *healthcheckerv1.HttpCheckConfig) error {
 	}
         s := string(b)
 	if res.StatusCode != 200 {
-		return fmt.Errorf("unexpected status: %s\nbody: %s", res.Status, limitstring(s))
+		return fmt.Errorf("unexpected status: %s\nbody: %s", res.Status, limitString(s))
 	}
 	if c.MatchExact != "" {
 		if !strings.Contains(s, c.MatchExact) {
