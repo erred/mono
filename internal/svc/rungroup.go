@@ -152,8 +152,9 @@ type httpsvr struct {
 func newHttpsvr(log zerolog.Logger) *httpsvr {
 	svr := &http.Server{
 		ReadHeaderTimeout: 5 * time.Second,
-		IdleTimeout:       120 * time.Second,
-		WriteTimeout:      5 * time.Second,
+		// kills connections between lb and us
+		// IdleTimeout:       120 * time.Second,
+		WriteTimeout: 5 * time.Second,
 	}
 	return &httpsvr{
 		svr: svr,

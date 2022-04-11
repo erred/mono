@@ -12,6 +12,7 @@ require (
 	github.com/tdewolff/minify/v2 v2.10.0
 	github.com/yuin/goldmark v1.4.11
 	github.com/zmb3/spotify/v2 v2.0.1
+	go.etcd.io/bbolt v1.3.5
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.31.0
 	go.opentelemetry.io/contrib/instrumentation/host v0.31.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.31.0
