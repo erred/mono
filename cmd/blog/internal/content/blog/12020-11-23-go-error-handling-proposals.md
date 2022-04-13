@@ -3,7 +3,7 @@ description: overview of error handling proposals in go
 title: go error handling proposals
 ---
 
-_note:_ updated 12021-06-12
+_note:_ updated 12022-04-13
 
 ### _error_ handling
 
@@ -53,6 +53,8 @@ _note:_ almost all the ones that claim to use "plain functions" as error handler
 - [`_check = func(err error) (T, error) { return _, wrap(err)}`<br>`x, ?err := foo()`](https://gist.github.com/8lall0/cb43e1fa4aae42bc709b138bda02284e): not fully formed idea on return
 - [`handler := func(err error) (T, error) { return^2 _, wrap(err) }`<br>`x, handler(err) := foo()`](https://github.com/golang/go/issues/32473): note nonlocal return
 - [`handler := func(err error, s string) error { return _, fmt.Errorf("%s: %w", s err) }`<br>`x, handler("msg") := foo()`](https://github.com/golang/go/issues/43644): also has currying
+- [`x, err := foo()`<br>`on err return handler()`](https://github.com/golang/go/issues/48855): err is magically passed to handler?
+- [`x, !err := foo() throw handler1`<br>`catch handler1 { return wrap(err) }`](https://github.com/golang/go/issues/48896)
 
 ##### _wrapping_
 
@@ -78,12 +80,15 @@ some rely on `wrap` being smart and passing through `nil` (so not `fmt.Errorf`),
 - [`x := foo() or err: return _, wrap(err)`](https://github.com/golang/go/issues/33029)
 - [`x := foo() ?err return _, wrap(err)`](https://github.com/golang/go/issues/33074)
 - [`x := check wrap() foo()`](https://gist.github.com/jozef-slezak/93a7d9d3d18d3fce3f8c3990c031f8d0), [also](https://gist.github.com/morikuni/bbe4b2b0384507b42e6a79d4eca5fc61)
+- [`x := check foo() with wrap(err)`](https://github.com/golang/go/issues/49091)
 - [`x := foo() ? wrap()`](https://gist.github.com/gregwebs/02479eeef8082cd199d9e6461cd1dab3)
 - [`x := foo() or wrap()`](https://github.com/golang/go/issues/36338)
 - [`x := foo() || wrap(err)`](https://github.com/golang/go/issues/21161)
 - [`x := foo() on_error err fail wrap(err)`](https://medium.com/@peter.gtz/thinking-about-new-ways-of-error-handling-in-go-2-e56d116952f1)
 - [`x := foo() onerr return _, wrap(err)`](https://github.com/golang/go/issues/32848)
+- [`x := foo() // error: err => wrap(err)`](https://github.com/golang/go/issues/47934) error handling in comments
 - [`x := try(foo(), wrap)`](https://github.com/golang/go/issues/32853)
+- [`x := try foo() or return _err`](https://github.com/golang/go/issues/52175)
 - [`x := collect(&err, foo(), wrap)`](https://github.com/golang/go/issues/32880)
 - [`try x, err := foo() { return _, wrap(err) }`](https://github.com/golang/go/issues/39890)
 
@@ -94,11 +99,12 @@ can use `defer` for wrapping
 - [`x := try(foo())`](https://go.googlesource.com/proposal/+/master/design/32437-try-builtin.md)
 - [`x := must(foo())`](https://github.com/golang/go/issues/32219): panic instead of return
 - [`x := foo!()`](https://github.com/golang/go/issues/21155)
-- [`x := foo()?`](https://gist.github.com/yaxinlx/1e013fec0e3c2469f97074dbf5d2e2c0), [also](https://github.com/golang/go/issues/39451)
+- [`x := foo()?`](https://gist.github.com/yaxinlx/1e013fec0e3c2469f97074dbf5d2e2c0), [also](https://github.com/golang/go/issues/39451), [also](https://github.com/golang/go/issues/51146)
 - [`x := #foo()`](https://github.com/golang/go/issues/18721)
 - [`x := guard foo()`](https://github.com/golang/go/issues/31442)
 - [`x := must foo()`](https://gist.github.com/VictoriaRaymond/d70663a6ec6cdc59816b8806dccf7826)
 - [`x, # := foo()`](https://github.com/golang/go/issues/22122): panic instead of return
+- [`x, ~ := foo()`](https://github.com/golang/go/issues/50207): wrap with stacktraces
 - [`x, ? := foo()`](https://github.com/golang/go/issues/42214), [also](https://github.com/golang/go/issues/32601)
 - [`x, ! := foo()`](https://gist.github.com/lldld/bf93ca94c24f172e95baf8c123427ace), [also](https://github.com/golang/go/issues/33150), [panic](https://github.com/golang/go/issues/35644)
 - [`x, !! := foo()`](https://github.com/golang/go/issues/32884)
@@ -110,6 +116,7 @@ can use `defer` for wrapping
 - [`tryfunc func(...){ x := foo() }`](https://github.com/golang/go/issues/32964)
 - [`x, err := foo()`<br>`check(err)`](https://github.com/golang/go/issues/33233): builtin `if err != nil { return ..., err }` macro
 - [`x, err := foo()`<br>`catch(err)`](https://github.com/golang/go/issues/32811): builtin `if err != nil { return ..., err }` macro
+- [`x := foo() -> throw err`](https://github.com/golang/go/issues/51415)
 
 ##### _try..catch_
 
@@ -141,3 +148,4 @@ can use `defer` for wrapping
 - [result type](https://github.com/golang/go/issues/19991): box of `value|err` allows passthrough
 - [`if x, err := foo().bar().baz(); err != nil { return _, wrap(err) }`](https://github.com/golang/go/issues/44928): chaining method calls with return type `(T, error)`
 - [`func foo() (return, string)`](https://github.com/golang/go/issues/42811): return is a type of bool that does... something
+- [`ErrorOr[T]`](https://github.com/golang/go/issues/51931): new convention instead of `return T, err`
