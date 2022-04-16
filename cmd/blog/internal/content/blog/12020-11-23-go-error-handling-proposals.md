@@ -149,3 +149,4 @@ can use `defer` for wrapping
 - [`if x, err := foo().bar().baz(); err != nil { return _, wrap(err) }`](https://github.com/golang/go/issues/44928): chaining method calls with return type `(T, error)`
 - [`func foo() (return, string)`](https://github.com/golang/go/issues/42811): return is a type of bool that does... something
 - [`ErrorOr[T]`](https://github.com/golang/go/issues/51931): new convention instead of `return T, err`
+- [`x := foo()`<br>`if x@error != nil { ... }`](https://gist.github.com/Space-Tide/e96284861434b46c6c730f9c73024373)
