@@ -68,7 +68,7 @@ func (r *Renderer) renderImage(w util.BufWriter, source []byte, node ast.Node, e
 	dst := string(n.Destination)
 	if strings.HasPrefix(dst, "/") {
 		ext := path.Ext(dst)
-		for _, e := range []string{".jpg", ".png", ".webp"} {
+		for _, e := range []string{".png", ".webp"} {
 			w.WriteString(fmt.Sprintf("<source srcset=%q>\n", strings.TrimSuffix(dst, ext)+e))
 		}
 	}
