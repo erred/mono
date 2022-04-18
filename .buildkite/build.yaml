@@ -35,8 +35,8 @@ steps:
   - wait
   - group: deploy to medea
     steps:
-    - label: copy to system
-      command: sudo cp ~/staging-bin/* /usr/local/bin
+    - label: replace existing binaries
+      command: sudo mv ~/staging-bin/* /usr/local/bin
     - label: restart deployment
       command: sudo systemctl restart {{matrix}}
       matrix:
