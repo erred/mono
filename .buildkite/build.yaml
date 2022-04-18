@@ -1,0 +1,51 @@
+env:
+  CGO_ENABLED: "0"
+  GOFLAGS: "-trimpath"
+steps:
+  - group: Go Latest
+    steps:
+      - label: Install latest Go release
+        key: latestgo
+        commands:
+          - go run ./cli/cmd/latestgo > .latestgo
+          - go install golang.org/dl/$(cat .latestgo)@latest
+          - ~/go/bin/$(cat .latestgo) download
+      - label: go vet
+        command: ~/go/bin/$(cat .latestgo) vet ./...
+        depends_on: ["latestgo"]
+      - label: go test
+        command: ~/go/bin/$(cat .latestgo) test ./...
+        depends_on: ["latestgo"]
+      - label: go build
+        command: ~/go/bin/$(cat .latestgo) build -o /dev/null ./...
+        depends_on: ["latestgo"]
+  - group: Go Tip
+    steps:
+      - label: Install tip go
+        key: tipgo
+        commands:
+          - go install golang.org/dl/gotip@latest
+          - ~/go/bin/gotip download
+      - label: go vet
+        command: ~/go/bin/gotip vet ./...
+        depends_on: ["tipgo"]
+      - label: go test
+        command: ~/go/bin/gotip test ./...
+        depends_on: ["tipgo"]
+      - label: go build
+        commands:
+          - mkdir -p bin
+          - go build -ldflags='-s -w' -o bin/ ./...
+  - wait
+  - label: copy to system
+    command: sudo cp bin/* /usr/local/bin
+  - label: restart deployments
+    command: sudo systemctl restart {{matrix}}
+    matrix:
+      - blog
+      - earbug
+      - ghdefaults
+      - singlepage@liaodev
+      - singlepage@medea
+      - singlepage@stylesheet
+      - vanity
