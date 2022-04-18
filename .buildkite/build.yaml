@@ -10,7 +10,7 @@ steps:
           - go run ./cli/cmd/latestgo > .latestgo
           - go install golang.org/dl/$(cat .latestgo)@latest
           - ~/go/bin/$(cat .latestgo) download
-          - ln -s ~/go/bin/$(cat .latestgo) ~/go/bin/go
+          - ln -sf ~/go/bin/$(cat .latestgo) ~/go/bin/go
       - label: go vet
         depends_on: ["latestgo"]
         command: ~/go/bin/go vet ./...
