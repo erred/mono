@@ -1,0 +1,13 @@
+steps:
+  - label: install latest go
+    depends_on: ~
+    commands:
+      - go run ./cli/cmd/latestgo > .latestgo
+      - go install golang.org/dl/$(cat .latestgo)@latest
+      - ~/go/bin/$(cat .latestgo) download
+      - ln -sf ~/go/bin/$(cat .latestgo) ~/go/bin/go
+  - label: install tip go
+    depends_on: ~
+    commands:
+      - go install golang.org/dl/gotip@latest
+      - ~/go/bin/gotip download

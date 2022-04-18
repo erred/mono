@@ -4,43 +4,31 @@ env:
 steps:
   - group: go latest
     steps:
-      - label: install latest go
-        key: latestgo
-        commands:
-          - go run ./cli/cmd/latestgo > .latestgo
-          - go install golang.org/dl/$(cat .latestgo)@latest
-          - ~/go/bin/$(cat .latestgo) download
-          - ln -sf ~/go/bin/$(cat .latestgo) ~/go/bin/go
       - label: go vet
-        depends_on: ["latestgo"]
+        depends_on: ~
         command: ~/go/bin/go vet ./...
       - label: go test
-        depends_on: ["latestgo"]
+        depends_on: ~
         command: ~/go/bin/go test ./...
       - label: go build
-        depends_on: ["latestgo"]
-        command: ~/go/bin/go build -ldflags='-s -w' -o /dev/null ./...
+        depends_on: ~
+        commands:
+          - ~/go/bin/go version
+          - ~/go/bin/go build -ldflags='-s -w' -o /dev/null ./...
   - group: go tip
     steps:
-      - label: install tip go
-        key: tipgo
-        commands:
-          - go install golang.org/dl/gotip@latest
-          - ~/go/bin/gotip download
       - label: go vet
-        depends_on: ["tipgo"]
+        depends_on: ~
         command: ~/go/bin/gotip vet ./...
       - label: go test
-        depends_on: ["tipgo"]
+        depends_on: ~
         command: ~/go/bin/gotip test ./...
       - label: go build
-        depends_on: ["tipgo"]
+        depends_on: ~
         commands:
           - mkdir -p bin
+          - ~/go/bin/gotip version
           - ~/go/bin/gotip build -ldflags='-s -w' -o bin/ ./...
-      - wait
-      - label: upload
-        commands:
           - rm -rf ~/staging-bin
           - mkdir -p ~/staging-bin
           - cp bin/* ~/staging-bin
