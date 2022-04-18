@@ -2,9 +2,9 @@ env:
   CGO_ENABLED: "0"
   GOFLAGS: "-trimpath"
 steps:
-  - group: Go Latest
+  - group: go latest
     steps:
-      - label: Install latest Go release
+      - label: install latest go
         key: latestgo
         commands:
           - go run ./cli/cmd/latestgo > .latestgo
@@ -20,9 +20,9 @@ steps:
       - label: go build
         depends_on: ["latestgo"]
         command: ~/go/bin/go build -ldflags='-s -w' -o /dev/null ./...
-  - group: Go Tip
+  - group: go tip
     steps:
-      - label: Install tip go
+      - label: install tip go
         key: tipgo
         commands:
           - go install golang.org/dl/gotip@latest
@@ -38,16 +38,24 @@ steps:
         commands:
           - mkdir -p bin
           - ~/go/bin/gotip build -ldflags='-s -w' -o bin/ ./...
+      - wait
+      - label: upload
+        commands:
+          - rm -rf ~/staging-bin
+          - mkdir -p ~/staging-bin
+          - cp bin/* ~/staging-bin
   - wait
-  - label: copy to system
-    command: sudo cp bin/* /usr/local/bin
-  - label: restart deployments
-    command: sudo systemctl restart {{matrix}}
-    matrix:
-      - blog
-      - earbug
-      - ghdefaults
-      - singlepage@liaodev
-      - singlepage@medea
-      - singlepage@stylesheet
-      - vanity
+  - group: deploy to medea
+    steps:
+    - label: copy to system
+      command: sudo cp ~/staging-bin/* /usr/local/bin
+    - label: restart deployment
+      command: sudo systemctl restart {{matrix}}
+      matrix:
+        - blog
+        - earbug
+        - ghdefaults
+        - singlepage@liaodev
+        - singlepage@medea
+        - singlepage@stylesheet
+        - vanity
