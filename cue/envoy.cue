@@ -197,5 +197,6 @@ _local_cluster_ports: {
   liaodev: 28006
   earbug: 28007
   paste: 28008
+  vault: 29001
   otelcol_zipkin: 9411
 }
