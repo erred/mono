@@ -40,10 +40,15 @@ steps:
     - label: restart deployment
       command: sudo systemctl restart {{matrix}}
       matrix:
-        - blog
+        - blog@a
+        - blog@b
         - earbug
         - ghdefaults
-        - singlepage@liaodev
-        - singlepage@medea
-        - singlepage@stylesheet
-        - vanity
+        - singlepage@liaodev-a
+        - singlepage@liaodev-b
+        - singlepage@medea-a
+        - singlepage@medea-b
+        - singlepage@stylesheet-a
+        - singlepage@stylesheet-b
+        - vanity@a
+        - vanity@b

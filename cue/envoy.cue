@@ -162,16 +162,16 @@ static_resources: {
       }]
     }]
   }]
-  clusters: [for nme,port in _local_cluster_ports {
-    name: nme
+  clusters: [for _name,_ports in _local_cluster_ports {
+    name: _name
     connect_timeout: "0.25s"
     type: "STATIC"
     lb_policy: "ROUND_ROBIN"
     load_assignment: endpoints: [{
-      lb_endpoints: [{
+      lb_endpoints: [for _port in _ports {
           endpoint: address: socket_address: {
-            address: "127.0.0.1"
-            port_value: port
+            address: "192.168.100.1"
+            port_value: _port
           }
       }]
     }]
@@ -189,14 +189,13 @@ _virtual_host_dev: {
 }
 
 _local_cluster_ports: {
-  blog: 28001
-  vanity: 28002
-  ghdefaults: 28003
-  medea: 28004
-  stylesheet: 28005
-  liaodev: 28006
-  earbug: 28007
-  paste: 28008
-  vault: 29001
-  otelcol_zipkin: 9411
+  blog: [28001, 28101]
+  vanity: [28002, 28102]
+  ghdefaults: [28003, 28103]
+  medea: [28004, 28104]
+  stylesheet: [28005, 28105]
+  liaodev: [28006, 28106]
+  earbug: [28007]
+  paste: [28008]
+  otelcol_zipkin: [9411]
 }
