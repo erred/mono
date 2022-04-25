@@ -182,7 +182,7 @@ func (s *httpsvr) sethandler(handler http.Handler) {
 }
 
 func (s *httpsvr) start() error {
-	addr := s.host + ":" + s.port
+	addr := net.JoinHostPort(s.host, s.port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		return fmt.Errorf("listen on %s: %w", addr, err)
