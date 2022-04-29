@@ -164,7 +164,7 @@ static_resources: {
 	}]
 	clusters: [ for _name, _ports in _local_cluster_ports {
 		name:            _name
-		connect_timeout: "0.25s"
+		connect_timeout: "0.5s"
 		type:            "STATIC"
 		lb_policy:       "ROUND_ROBIN"
 		load_assignment: endpoints: [ for _port in _ports {
