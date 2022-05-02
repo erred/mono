@@ -23,33 +23,26 @@ title: newtab | seankhliao
 
 ### _quick_ links
 
-[github.com](https://github.com)
-_/_
+_github:_
 [seankhliao](https://github.com/seankhliao)
 _/ {_
 [config](https://github.com/seankhliao/config)
 [mono](https://github.com/seankhliao/mono)
 _}_
 
+_compute:_
 [gcp](https://console.cloud.google.com)
-_:_
+_/ {_
 [build](https://console.cloud.google.com/cloud-build/builds?project=com-seankhliao)
 [run](https://console.cloud.google.com/run?project=com-seankhliao)
+_}_
+[hetzner](https://accounts.hetzner.com/login)
 
 _google:_
 [analytics](https://analytics.google.com)
-[datastudio](https://datastudio.google.com/s/hPBEtNjX6EI)
+[datastudio](https://datastudio.google.com/reporting/5a9726a1-3811-4859-a14d-2e12c3973c28/page/0TlrC)
 [domains](https://domains.google.com)
 [search](https://search.google.com/search-console/)
-
-_mono:_
-[authn](https://authn.seankhliao.com)
-[cgit](https://cgit.seankhliao.com/cgit/)
-[earbug](https://earbug.seankhliao.com)
-[jaeger](https://jaeger.seankhliao.com)
-[medea](https://medea.seankhliao.com)
-[paste](https://paste.seankhliao.com)
-[prometheus](https://prometheus.seankhliao.com)
 
 ### _to_ read
 
@@ -63,7 +56,3 @@ _blogs:_
 _comics:_
 [your throne](https://www.webtoons.com/en/fantasy/your-throne/list?title_no=2009)
 [ghostblade](https://tapas.io/series/GhostBlade/info)
-
-_mail:_
-[arch-dev](https://lists.archlinux.org/pipermail/arch-dev-public/)
-[groups](https://groups.google.com/my-groups)
