@@ -37,14 +37,15 @@ steps:
     steps:
     - label: replace existing binaries
       command: sudo mv ~/staging-bin/* /usr/local/bin
+    - wait
     - label: restart deployment
       command: sudo systemctl restart {{matrix}}
       matrix:
         - blog@a
         - blog@b
         - earbug
-        - ghdefaults-a
-        - ghdefaults-b
+        - ghdefaults@a
+        - ghdefaults@b
         - singlepage@liaodev-a
         - singlepage@liaodev-b
         - singlepage@medea-a
