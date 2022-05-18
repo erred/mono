@@ -108,6 +108,7 @@ can use `defer` for wrapping
 - [`x := must foo()`](https://gist.github.com/VictoriaRaymond/d70663a6ec6cdc59816b8806dccf7826)
 - [`x, # := foo()`](https://go.dev/issue/22122): panic instead of return
 - [`x, ~ := foo()`](https://go.dev/issue/50207): wrap with stacktraces
+- [`x, - := foo()`](https://go.dev/issue/52415)
 - [`x, ? := foo()`](https://go.dev/issue/42214), [also](https://go.dev/issue/32601)
 - [`x, ! := foo()`](https://gist.github.com/lldld/bf93ca94c24f172e95baf8c123427ace), [also](https://go.dev/issue/33150), [panic](https://go.dev/issue/35644)
 - [`x, !! := foo()`](https://go.dev/issue/32884)
